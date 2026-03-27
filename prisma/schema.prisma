@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Profile {
+  id        String   @id
+  fullName  String?
+  plan      String   @default("free")
+  createdAt DateTime @default(now())
+}
+
+model SearchCache {
+  id        Int      @id @default(autoincrement())
+  query     String
+  results   Json
+  createdAt DateTime @default(now())
+}
+
+model Asset {
+  id        Int      @id @default(autoincrement())
+  adobeId   String   @unique
+  title     String
+  creator   String
+  category  String   @default("")
+  type      String   @default("Photo")
+  downloads Int      @default(0)
+  trend     String   @default("+0%")
+  revenue   String   @default("$0.00")
+  status    String   @default("Premium")
+  createdAt DateTime @default(now())
+}
