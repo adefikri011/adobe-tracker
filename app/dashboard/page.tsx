@@ -120,17 +120,15 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
                 { id: "qris" as PaymentMethod, icon: "📱", label: "QRIS", sub: "GoPay, OVO, Dana, ShopeePay" },
               ].map((m) => (
                 <button key={m.id} onClick={() => setMethod(m.id)}
-                  className={`w-full flex items-center gap-4 p-4 rounded-xl border transition text-left ${
-                    method === m.id ? "border-orange-500 bg-orange-500/10" : "border-white/10 bg-white/5 hover:border-white/20"
-                  }`}>
+                  className={`w-full flex items-center gap-4 p-4 rounded-xl border transition text-left ${method === m.id ? "border-orange-500 bg-orange-500/10" : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}>
                   <span className="text-2xl">{m.icon}</span>
                   <div className="flex-1">
                     <div className="text-sm font-medium">{m.label}</div>
                     <div className="text-xs text-white/40">{m.sub}</div>
                   </div>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition ${
-                    method === m.id ? "border-orange-500" : "border-white/20"
-                  }`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition ${method === m.id ? "border-orange-500" : "border-white/20"
+                    }`}>
                     {method === m.id && <div className="w-2 h-2 rounded-full bg-orange-500" />}
                   </div>
                 </button>
@@ -235,11 +233,10 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
                 <div className="bg-white rounded-2xl p-6 inline-block mx-auto">
                   <div className="grid grid-cols-7 gap-0.5">
                     {Array.from({ length: 49 }).map((_, i) => (
-                      <div key={i} className={`w-5 h-5 rounded-sm ${
-                        [0,1,2,3,4,5,6,7,13,14,20,21,27,28,34,35,41,42,43,44,45,46,47,48,
-                         8,15,22,29,36,10,17,24,31,38,11,18,25,32,39].includes(i)
+                      <div key={i} className={`w-5 h-5 rounded-sm ${[0, 1, 2, 3, 4, 5, 6, 7, 13, 14, 20, 21, 27, 28, 34, 35, 41, 42, 43, 44, 45, 46, 47, 48,
+                          8, 15, 22, 29, 36, 10, 17, 24, 31, 38, 11, 18, 25, 32, 39].includes(i)
                           ? "bg-gray-900" : "bg-white"
-                      }`} />
+                        }`} />
                     ))}
                   </div>
                 </div>
@@ -278,9 +275,8 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
                 { label: "Finalizing your account", done: progress >= 100 },
               ].map((s) => (
                 <div key={s.label} className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs transition-all duration-500 ${
-                    s.done ? "bg-green-500 text-white" : "bg-white/10 text-white/20"
-                  }`}>
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs transition-all duration-500 ${s.done ? "bg-green-500 text-white" : "bg-white/10 text-white/20"
+                    }`}>
                     {s.done ? "✓" : "○"}
                   </div>
                   <span className={`text-sm transition-all duration-500 ${s.done ? "text-white" : "text-white/30"}`}>
@@ -421,36 +417,74 @@ export default function DashboardPage() {
       <main className="min-h-screen bg-[#0a0a0a] text-white">
 
         {/* NAVBAR */}
-        <nav className="flex items-center justify-between px-8 py-4 border-b border-white/10 sticky top-0 bg-[#0a0a0a]/95 backdrop-blur z-40">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-sm font-bold">T</div>
-            <span className="font-semibold text-lg">TrackStock</span>
+        <nav className="flex items-center justify-between px-8 sticky top-0 z-40"
+          style={{
+            height: '60px',
+            background: 'rgba(10,10,10,0.97)',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+          }}>
+
+          {/* Logo */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white"
+              style={{
+                background: '#f97316',
+                boxShadow: '0 0 14px rgba(249,115,22,0.45)',
+              }}>T</div>
+            <span className="font-semibold text-[15px] text-white" style={{ letterSpacing: '-0.01em' }}>TrackStock</span>
           </div>
-          <div className="flex items-center gap-3">
+
+          {/* Right */}
+          <div className="flex items-center gap-2.5">
+
+            {/* Free Plan Badge */}
             {!isPro && !planLoading && (
-              <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 px-3 py-1.5 rounded-lg">
-                <span className="text-orange-400 text-xs font-medium">Free Plan</span>
-                <span className="text-white/30 text-xs">·</span>
-                <span className="text-white/40 text-xs">5 results/search</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold"
+                style={{
+                  background: 'rgba(249,115,22,0.1)',
+                  border: '1px solid rgba(249,115,22,0.25)',
+                  color: '#fb923c',
+                  letterSpacing: '0.03em',
+                }}>
+                Free Plan
               </div>
             )}
+
+            {/* Pro Plan Badge */}
             {isPro && !planLoading && (
-              <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/30 px-3 py-1.5 rounded-lg">
-                <span className="text-green-400 text-xs font-medium">⚡ Pro Plan</span>
+              <div className="flex items-center gap-1.5 px-3 py-[5px] rounded-full"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1))',
+                  border: '1px solid rgba(16,185,129,0.3)',
+                }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                  <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="#34d399" stroke="#34d399" strokeWidth="1" strokeLinejoin="round" />
+                </svg>
+                <span className="text-[11px] font-semibold" style={{ color: '#34d399', letterSpacing: '0.03em' }}>PRO PLAN</span>
               </div>
             )}
+
+            {/* Upgrade Button */}
             {!isPro && (
               <button onClick={() => setShowPayment(true)} disabled={planLoading}
-                className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 transition px-4 py-1.5 rounded-lg text-sm font-medium">
+                className="flex items-center gap-1.5 text-[13px] font-semibold px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-40 text-white"
+                style={{
+                  background: 'linear-gradient(135deg, #f97316, #ea580c)',
+                  boxShadow: '0 0 18px rgba(249,115,22,0.3)',
+                }}>
                 Upgrade Pro
               </button>
             )}
-            {isPro && (
-              <button disabled className="bg-green-500/20 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-lg text-sm font-medium cursor-default">
-                ✓ Pro
-              </button>
-            )}
-            <button onClick={handleSignOut} className="text-white/40 hover:text-white transition text-sm">
+
+            <div className="w-px h-[18px] mx-1" style={{ background: 'rgba(255,255,255,0.1)' }} />
+
+            <button onClick={handleSignOut}
+              className="text-[12px] px-2 py-1.5 transition-colors duration-150"
+              style={{ color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.35)')}>
               Sign Out
             </button>
           </div>
