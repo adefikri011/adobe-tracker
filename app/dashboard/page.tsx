@@ -53,7 +53,6 @@ function getTimeAgo(dateStr: string): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-// ─── PAYMENT MODAL ───────────────────────────────────────────────
 type PaymentStep = "select" | "form" | "processing" | "success";
 type PaymentMethod = "card" | "bank" | "qris";
 
@@ -65,6 +64,15 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [progress, setProgress] = useState(0);
+  // ✅ FIX 1: qrisId pakai useEffect
+  const [qrisId, setQrisId] = useState("------");
+  // ✅ FIX 2: invoiceId pakai useEffect, bukan Date.now() di render
+  const [invoiceId, setInvoiceId] = useState("------");
+
+  useEffect(() => {
+    setQrisId(Math.random().toString(36).slice(2, 8).toUpperCase());
+    setInvoiceId(Date.now().toString().slice(-6));
+  }, []);
 
   const formatCard = (v: string) =>
     v.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
@@ -88,27 +96,23 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
 
   const handleSuccess = () => { onSuccess(); onClose(); };
 
-  // Generate stable QRIS ID
-  const [qrisId] = useState(() => Math.random().toString(36).slice(2, 8).toUpperCase());
-
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-[#111] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
 
-        {/* SELECT METHOD */}
         {step === "select" && (
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-bold">Upgrade to Pro</h2>
+                <h2 className="text-lg sm:text-xl font-bold">Upgrade to Pro</h2>
                 <p className="text-white/40 text-sm mt-0.5">Unlock unlimited access</p>
               </div>
-              <button onClick={onClose} className="text-white/30 hover:text-white transition text-xl leading-none">✕</button>
+              <button onClick={onClose} className="text-white/30 hover:text-white transition text-xl leading-none w-8 h-8 flex items-center justify-center">✕</button>
             </div>
             <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4 mb-6 flex items-center justify-between">
               <div>
                 <div className="font-semibold text-sm">TrackStock Pro</div>
-                <div className="text-white/40 text-xs mt-0.5">Monthly subscription · Unlimited results</div>
+                <div className="text-white/40 text-xs mt-0.5">Monthly · Unlimited results</div>
               </div>
               <div className="text-orange-400 font-bold text-xl">$9<span className="text-sm font-normal text-white/40">/mo</span></div>
             </div>
@@ -120,15 +124,13 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
                 { id: "qris" as PaymentMethod, icon: "📱", label: "QRIS", sub: "GoPay, OVO, Dana, ShopeePay" },
               ].map((m) => (
                 <button key={m.id} onClick={() => setMethod(m.id)}
-                  className={`w-full flex items-center gap-4 p-4 rounded-xl border transition text-left ${method === m.id ? "border-orange-500 bg-orange-500/10" : "border-white/10 bg-white/5 hover:border-white/20"
-                    }`}>
-                  <span className="text-2xl">{m.icon}</span>
-                  <div className="flex-1">
+                  className={`w-full flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-xl border transition text-left ${method === m.id ? "border-orange-500 bg-orange-500/10" : "border-white/10 bg-white/5 hover:border-white/20"}`}>
+                  <span className="text-xl sm:text-2xl">{m.icon}</span>
+                  <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium">{m.label}</div>
-                    <div className="text-xs text-white/40">{m.sub}</div>
+                    <div className="text-xs text-white/40 truncate">{m.sub}</div>
                   </div>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition ${method === m.id ? "border-orange-500" : "border-white/20"
-                    }`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition ${method === m.id ? "border-orange-500" : "border-white/20"}`}>
                     {method === m.id && <div className="w-2 h-2 rounded-full bg-orange-500" />}
                   </div>
                 </button>
@@ -142,12 +144,11 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
           </div>
         )}
 
-        {/* FORM */}
         {step === "form" && (
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             <div className="flex items-center gap-3 mb-6">
               <button onClick={() => setStep("select")} className="text-white/40 hover:text-white transition text-sm">← Back</button>
-              <h2 className="text-xl font-bold">
+              <h2 className="text-lg sm:text-xl font-bold">
                 {method === "card" && "Card Details"}
                 {method === "bank" && "Bank Transfer"}
                 {method === "qris" && "Scan QRIS"}
@@ -156,17 +157,17 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
 
             {method === "card" && (
               <div className="space-y-4">
-                <div className="bg-gradient-to-br from-orange-500/30 to-orange-800/30 border border-orange-500/20 rounded-2xl p-5 mb-2">
-                  <div className="flex justify-between items-start mb-6">
+                <div className="bg-gradient-to-br from-orange-500/30 to-orange-800/30 border border-orange-500/20 rounded-2xl p-4 sm:p-5 mb-2">
+                  <div className="flex justify-between items-start mb-4 sm:mb-6">
                     <div className="text-white/40 text-xs">TrackStock Pro</div>
-                    <div className="text-white font-bold text-lg">VISA</div>
+                    <div className="text-white font-bold text-base sm:text-lg">VISA</div>
                   </div>
-                  <div className="font-mono text-lg tracking-widest text-white/80 mb-4">
+                  <div className="font-mono text-base sm:text-lg tracking-widest text-white/80 mb-3 sm:mb-4 break-all">
                     {cardNumber || "•••• •••• •••• ••••"}
                   </div>
                   <div className="flex justify-between text-xs text-white/40">
-                    <span>{cardName || "YOUR NAME"}</span>
-                    <span>{expiry || "MM/YY"}</span>
+                    <span className="truncate mr-2">{cardName || "YOUR NAME"}</span>
+                    <span className="flex-shrink-0">{expiry || "MM/YY"}</span>
                   </div>
                 </div>
                 <div>
@@ -183,7 +184,7 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-white/40 mb-1.5 block">Expiry Date</label>
+                    <label className="text-xs text-white/40 mb-1.5 block">Expiry</label>
                     <input value={expiry} onChange={(e) => setExpiry(formatExpiry(e.target.value))}
                       placeholder="MM/YY"
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-orange-500/50 transition" />
@@ -200,43 +201,37 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
 
             {method === "bank" && (
               <div className="space-y-4">
-                <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-5">
                   <p className="text-white/40 text-xs mb-4 uppercase tracking-wider">Transfer to</p>
                   {[
                     { bank: "BCA", account: "1234567890", name: "PT TrackStock Indonesia" },
                     { bank: "Mandiri", account: "0987654321", name: "PT TrackStock Indonesia" },
                   ].map((b) => (
-                    <div key={b.bank} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
-                      <div>
+                    <div key={b.bank} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0 gap-2">
+                      <div className="min-w-0">
                         <div className="font-semibold text-sm">{b.bank}</div>
-                        <div className="text-white/40 text-xs">{b.name}</div>
+                        <div className="text-white/40 text-xs truncate">{b.name}</div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex-shrink-0">
                         <div className="font-mono text-sm text-orange-400">{b.account}</div>
-                        <button
-                          onClick={() => navigator.clipboard.writeText(b.account)}
-                          className="text-xs text-white/30 hover:text-white transition">
-                          Copy
-                        </button>
+                        <button onClick={() => navigator.clipboard.writeText(b.account)}
+                          className="text-xs text-white/30 hover:text-white transition">Copy</button>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 text-xs text-orange-300">
-                  💡 Transfer exactly <span className="font-bold">$9.00 (Rp 147.000)</span> — your account will be activated automatically within 5 minutes.
+                  💡 Transfer exactly <span className="font-bold">$9.00 (Rp 147.000)</span> — activated within 5 minutes.
                 </div>
               </div>
             )}
 
             {method === "qris" && (
               <div className="text-center space-y-4">
-                <div className="bg-white rounded-2xl p-6 inline-block mx-auto">
+                <div className="bg-white rounded-2xl p-4 sm:p-6 inline-block mx-auto">
                   <div className="grid grid-cols-7 gap-0.5">
                     {Array.from({ length: 49 }).map((_, i) => (
-                      <div key={i} className={`w-5 h-5 rounded-sm ${[0, 1, 2, 3, 4, 5, 6, 7, 13, 14, 20, 21, 27, 28, 34, 35, 41, 42, 43, 44, 45, 46, 47, 48,
-                          8, 15, 22, 29, 36, 10, 17, 24, 31, 38, 11, 18, 25, 32, 39].includes(i)
-                          ? "bg-gray-900" : "bg-white"
-                        }`} />
+                      <div key={i} className={`w-4 h-4 sm:w-5 sm:h-5 rounded-sm ${[0,1,2,3,4,5,6,7,13,14,20,21,27,28,34,35,41,42,43,44,45,46,47,48,8,15,22,29,36,10,17,24,31,38,11,18,25,32,39].includes(i) ? "bg-gray-900" : "bg-white"}`} />
                     ))}
                   </div>
                 </div>
@@ -258,9 +253,8 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
           </div>
         )}
 
-        {/* PROCESSING */}
         {step === "processing" && (
-          <div className="p-8 text-center">
+          <div className="p-6 sm:p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-6 relative">
               <div className="w-16 h-16 border-4 border-white/10 rounded-full" />
               <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin absolute inset-0" />
@@ -275,13 +269,10 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
                 { label: "Finalizing your account", done: progress >= 100 },
               ].map((s) => (
                 <div key={s.label} className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs transition-all duration-500 ${s.done ? "bg-green-500 text-white" : "bg-white/10 text-white/20"
-                    }`}>
+                  <div className={`w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-xs transition-all duration-500 ${s.done ? "bg-green-500 text-white" : "bg-white/10 text-white/20"}`}>
                     {s.done ? "✓" : "○"}
                   </div>
-                  <span className={`text-sm transition-all duration-500 ${s.done ? "text-white" : "text-white/30"}`}>
-                    {s.label}
-                  </span>
+                  <span className={`text-sm transition-all duration-500 ${s.done ? "text-white" : "text-white/30"}`}>{s.label}</span>
                 </div>
               ))}
             </div>
@@ -293,31 +284,31 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
           </div>
         )}
 
-        {/* SUCCESS */}
         {step === "success" && (
-          <div className="p-8 text-center">
+          <div className="p-6 sm:p-8 text-center">
             <div className="w-20 h-20 mx-auto mb-6 bg-green-500/20 border-2 border-green-500/40 rounded-full flex items-center justify-center">
               <span className="text-4xl">✓</span>
             </div>
             <h2 className="text-2xl font-bold mb-2">Payment Successful!</h2>
             <p className="text-white/40 text-sm mb-6">Welcome to TrackStock Pro 🎉</p>
-            <div className="bg-white/5 border border-white/10 rounded-xl p-5 text-left mb-6 space-y-3">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-5 text-left mb-6 space-y-3">
+              {/* ✅ FIX 2: pakai invoiceId dari state, bukan Date.now() langsung */}
               {[
                 { label: "Plan", value: "TrackStock Pro" },
                 { label: "Amount", value: "$9.00 / month" },
                 { label: "Status", value: "✓ Active", green: true },
-                { label: "Invoice", value: `#INV-${Date.now().toString().slice(-6)}` },
+                { label: "Invoice", value: `#INV-${invoiceId}` },
               ].map((r) => (
-                <div key={r.label} className="flex justify-between text-sm">
-                  <span className="text-white/40">{r.label}</span>
-                  <span className={r.green ? "text-green-400 font-semibold" : "text-white font-medium"}>{r.value}</span>
+                <div key={r.label} className="flex justify-between text-sm gap-2">
+                  <span className="text-white/40 flex-shrink-0">{r.label}</span>
+                  <span className={`${r.green ? "text-green-400 font-semibold" : "text-white font-medium"} text-right`}>{r.value}</span>
                 </div>
               ))}
             </div>
             <div className="space-y-2 text-left mb-6">
               {["Unlimited search results", "Advanced analytics & charts", "Export data CSV/Excel", "Priority support"].map((f) => (
                 <div key={f} className="flex items-center gap-2 text-sm text-white/70">
-                  <span className="text-green-400 text-xs">✓</span>{f}
+                  <span className="text-green-400 text-xs flex-shrink-0">✓</span>{f}
                 </div>
               ))}
             </div>
@@ -377,7 +368,6 @@ export default function DashboardPage() {
     router.push("/");
   };
 
-  // ── Export CSV ──
   const handleExportCSV = () => {
     const exportData = isPro ? results : results.slice(0, 5);
     const headers = ["Title", "Creator", "Category", "Type", "Downloads", "Trend", "Revenue"];
@@ -397,7 +387,6 @@ export default function DashboardPage() {
 
   const visibleResults = isPro ? results : results.slice(0, 5);
   const lockedResults = isPro ? [] : results.slice(5);
-
   const totalDownloads = results.reduce((s, a) => s + a.downloads, 0);
   const avgDownloads = results.length ? Math.round(totalDownloads / results.length) : 0;
   const typeBreakdown = results.reduce((acc, a) => {
@@ -416,8 +405,8 @@ export default function DashboardPage() {
 
       <main className="min-h-screen bg-[#0a0a0a] text-white">
 
-        {/* NAVBAR */}
-        <nav className="flex items-center justify-between px-8 sticky top-0 z-40"
+        {/* NAVBAR — ✅ FIX 3: hapus semua hidden sm:inline / sm:hidden pada konten berbeda */}
+        <nav className="flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40"
           style={{
             height: '60px',
             background: 'rgba(10,10,10,0.97)',
@@ -426,91 +415,76 @@ export default function DashboardPage() {
             WebkitBackdropFilter: 'blur(20px)',
           }}>
 
-          {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white"
-              style={{
-                background: '#f97316',
-                boxShadow: '0 0 14px rgba(249,115,22,0.45)',
-              }}>T</div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+              style={{ background: '#f97316', boxShadow: '0 0 14px rgba(249,115,22,0.45)' }}>T</div>
             <span className="font-semibold text-[15px] text-white" style={{ letterSpacing: '-0.01em' }}>TrackStock</span>
           </div>
 
-          {/* Right */}
-          <div className="flex items-center gap-2.5">
-
-            {/* Free Plan Badge */}
+          <div className="flex items-center gap-2">
             {!isPro && !planLoading && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold"
-                style={{
-                  background: 'rgba(249,115,22,0.1)',
-                  border: '1px solid rgba(249,115,22,0.25)',
-                  color: '#fb923c',
-                  letterSpacing: '0.03em',
-                }}>
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold"
+                style={{ background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.25)', color: '#fb923c', letterSpacing: '0.03em' }}>
                 Free Plan
               </div>
             )}
 
-            {/* Pro Plan Badge */}
             {isPro && !planLoading && (
-              <div className="flex items-center gap-1.5 px-3 py-[5px] rounded-full"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1))',
-                  border: '1px solid rgba(16,185,129,0.3)',
-                }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+              <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-[5px] rounded-full"
+                style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1))', border: '1px solid rgba(16,185,129,0.3)' }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
                   <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="#34d399" stroke="#34d399" strokeWidth="1" strokeLinejoin="round" />
                 </svg>
+                {/* ✅ Satu teks saja, tidak ada span ganda */}
                 <span className="text-[11px] font-semibold" style={{ color: '#34d399', letterSpacing: '0.03em' }}>PRO PLAN</span>
               </div>
             )}
 
-            {/* Upgrade Button */}
             {!isPro && (
               <button onClick={() => setShowPayment(true)} disabled={planLoading}
-                className="flex items-center gap-1.5 text-[13px] font-semibold px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-40 text-white"
-                style={{
-                  background: 'linear-gradient(135deg, #f97316, #ea580c)',
-                  boxShadow: '0 0 18px rgba(249,115,22,0.3)',
-                }}>
+                className="font-semibold rounded-lg transition-all duration-200 disabled:opacity-40 text-white text-[12px] sm:text-[13px] px-3 sm:px-4 py-1.5 sm:py-2"
+                style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', boxShadow: '0 0 18px rgba(249,115,22,0.3)' }}>
+                {/* ✅ Satu teks saja */}
                 Upgrade Pro
               </button>
             )}
 
-            <div className="w-px h-[18px] mx-1" style={{ background: 'rgba(255,255,255,0.1)' }} />
+            <div className="w-px h-[18px] mx-0.5 sm:mx-1" style={{ background: 'rgba(255,255,255,0.1)' }} />
 
             <button onClick={handleSignOut}
               className="text-[12px] px-2 py-1.5 transition-colors duration-150"
               style={{ color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer' }}
               onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
               onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.35)')}>
+              {/* ✅ Satu teks saja */}
               Sign Out
             </button>
           </div>
         </nav>
 
-        <div className="max-w-6xl mx-auto px-6 py-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
           {/* SEARCH */}
-          <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold mb-2">Adobe Stock Analytics</h1>
-            <p className="text-white/40 text-sm mb-8">Search any keyword to discover top-performing assets</p>
-            <div className="flex gap-3 max-w-2xl mx-auto">
+          <div className="text-center mb-8 sm:mb-10">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Adobe Stock Analytics</h1>
+            <p className="text-white/40 text-sm mb-6 sm:mb-8">Search any keyword to discover top-performing assets</p>
+            <div className="flex gap-2 sm:gap-3 max-w-2xl mx-auto">
               <input type="text" value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                placeholder="Try: 'nature', 'business', 'abstract'..."
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-5 py-3.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-orange-500/50 transition"
+                placeholder="Try: 'nature', 'business'..."
+                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 sm:px-5 py-3 sm:py-3.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-orange-500/50 transition min-w-0"
               />
+              {/* ✅ FIX 4: hapus span hidden sm:inline di dalam button */}
               <button onClick={handleSearch} disabled={loading}
-                className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 transition px-8 py-3.5 rounded-xl font-semibold text-sm flex items-center gap-2">
+                className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 transition px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl font-semibold text-sm flex items-center gap-2 flex-shrink-0">
                 {loading
                   ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Searching...</>
                   : "Search"}
               </button>
             </div>
-            <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
+
+            <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
               {["All Types", "Photo", "Vector", "Video"].map((f) => (
                 <button key={f} className="text-xs px-3 py-1.5 rounded-lg border border-white/10 text-white/40 hover:border-orange-500/40 hover:text-orange-400 transition">{f}</button>
               ))}
@@ -521,28 +495,27 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* OVERVIEW — sebelum search */}
           {!searched && (
             <>
-              <div className="grid grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
                 {[
                   { label: "Total Assets Indexed", value: "2.4M+", sub: "Updated daily" },
                   { label: "Avg Downloads/Day", value: "48K", sub: "Across all categories" },
                   { label: "Top Category", value: "Nature", sub: "Most downloaded" },
                   { label: "Trending Now", value: "AI Art", sub: "+142% this week" },
                 ].map((s) => (
-                  <div key={s.label} className="bg-white/5 border border-white/10 rounded-2xl p-5">
-                    <div className="text-white/40 text-xs mb-2">{s.label}</div>
-                    <div className="text-2xl font-bold text-orange-500">{s.value}</div>
+                  <div key={s.label} className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5">
+                    <div className="text-white/40 text-xs mb-2 leading-tight">{s.label}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-orange-500">{s.value}</div>
                     <div className="text-white/30 text-xs mt-1">{s.sub}</div>
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6">
                   <h3 className="font-semibold mb-1">Download Trend</h3>
-                  <p className="text-white/30 text-xs mb-6">Last 7 days</p>
-                  <ResponsiveContainer width="100%" height={200}>
+                  <p className="text-white/30 text-xs mb-4 sm:mb-6">Last 7 days</p>
+                  <ResponsiveContainer width="100%" height={180}>
                     <LineChart data={CHART_DATA}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                       <XAxis dataKey="day" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 11 }} />
@@ -552,14 +525,14 @@ export default function DashboardPage() {
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6">
                   <h3 className="font-semibold mb-1">Top Categories</h3>
-                  <p className="text-white/30 text-xs mb-6">By total downloads</p>
-                  <ResponsiveContainer width="100%" height={200}>
+                  <p className="text-white/30 text-xs mb-4 sm:mb-6">By total downloads</p>
+                  <ResponsiveContainer width="100%" height={180}>
                     <BarChart data={CATEGORY_DATA} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                       <XAxis type="number" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 11 }} />
-                      <YAxis dataKey="name" type="category" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 11 }} width={70} />
+                      <YAxis dataKey="name" type="category" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 11 }} width={65} />
                       <Tooltip contentStyle={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8 }} />
                       <Bar dataKey="value" fill="#f97316" radius={[0, 4, 4, 0]} />
                     </BarChart>
@@ -569,59 +542,56 @@ export default function DashboardPage() {
             </>
           )}
 
-          {/* HASIL SEARCH */}
           {searched && (
             <div>
-              {/* STAT CARDS */}
-              <div className="grid grid-cols-4 gap-4 mb-8">
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5">
                   <div className="text-white/40 text-xs mb-2">Assets Found</div>
                   <div className="text-2xl font-bold text-orange-500">{results.length}</div>
-                  <div className="text-white/30 text-xs mt-1">for "{query}"</div>
+                  <div className="text-white/30 text-xs mt-1 truncate">for "{query}"</div>
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5">
                   <div className="text-white/40 text-xs mb-2">Total Downloads</div>
                   <div className="text-2xl font-bold text-orange-500">{totalDownloads.toLocaleString()}</div>
                   <div className="text-white/30 text-xs mt-1">across all results</div>
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5">
                   <div className="text-white/40 text-xs mb-2">Avg Downloads</div>
                   <div className="text-2xl font-bold text-orange-500">{avgDownloads.toLocaleString()}</div>
                   <div className="text-white/30 text-xs mt-1">per asset</div>
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5">
                   <div className="text-white/40 text-xs mb-2">Fastest Growing</div>
                   <div className="text-lg font-bold text-green-400">{trendingAsset?.trend ?? "—"}</div>
                   <div className="text-white/30 text-xs mt-1 truncate">{trendingAsset?.title ?? "—"}</div>
                 </div>
               </div>
 
-              {/* CHARTS */}
-              <div className="grid grid-cols-3 gap-6 mb-8">
-                <div className="col-span-2 bg-white/5 border border-white/10 rounded-2xl p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div className="sm:col-span-2 bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6">
                   <h3 className="font-semibold mb-1">Downloads by Asset</h3>
                   <p className="text-white/30 text-xs mb-4">Top results for "{query}"</p>
-                  <ResponsiveContainer width="100%" height={180}>
+                  <ResponsiveContainer width="100%" height={160}>
                     <BarChart data={results.slice(0, 8).map((a) => ({
                       name: a.title.split(" ").slice(0, 2).join(" "),
                       downloads: a.downloads,
                     }))}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                      <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 10 }} />
-                      <YAxis stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 10 }} />
+                      <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 9 }} />
+                      <YAxis stroke="rgba(255,255,255,0.2)" tick={{ fontSize: 9 }} />
                       <Tooltip contentStyle={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8 }} />
                       <Bar dataKey="downloads" fill="#f97316" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6">
                   <h3 className="font-semibold mb-1">Type Breakdown</h3>
                   <p className="text-white/30 text-xs mb-4">Photo / Vector / Video</p>
                   {pieData.length > 0 ? (
                     <>
-                      <ResponsiveContainer width="100%" height={130}>
+                      <ResponsiveContainer width="100%" height={120}>
                         <PieChart>
-                          <Pie data={pieData} cx="50%" cy="50%" innerRadius={35} outerRadius={60} dataKey="value" paddingAngle={3}>
+                          <Pie data={pieData} cx="50%" cy="50%" innerRadius={30} outerRadius={55} dataKey="value" paddingAngle={3}>
                             {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                           </Pie>
                           <Tooltip contentStyle={{ background: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8 }} />
@@ -631,7 +601,7 @@ export default function DashboardPage() {
                         {pieData.map((d, i) => (
                           <div key={d.name} className="flex items-center justify-between text-xs">
                             <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
                               <span className="text-white/60">{d.name}</span>
                             </div>
                             <span className="text-white/40">{d.value}</span>
@@ -643,11 +613,10 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* RESULT HEADER + EXPORT */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                 <div>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <h2 className="font-semibold">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="font-semibold text-sm sm:text-base">
                       Results for <span className="text-orange-500">"{query}"</span>
                     </h2>
                     {fromCache ? (
@@ -656,67 +625,91 @@ export default function DashboardPage() {
                       </span>
                     ) : (
                       <span className="text-xs bg-blue-500/10 border border-blue-500/30 text-blue-400 px-2 py-1 rounded-lg">
-                        🔄 Live Data — saved to cache
+                        🔄 Live Data
                       </span>
                     )}
                   </div>
-                  <p className="text-white/30 text-xs mt-0.5">
-                    {results.length} assets found · Sorted by downloads
-                  </p>
+                  <p className="text-white/30 text-xs mt-0.5">{results.length} assets · Sorted by downloads</p>
                 </div>
-
-                {/* RIGHT SIDE: export + upgrade hint */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
                   <button onClick={handleExportCSV}
-                    className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition px-4 py-2 rounded-lg text-xs font-medium text-white/60 hover:text-white">
+                    className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition px-3 sm:px-4 py-2 rounded-lg text-xs font-medium text-white/60 hover:text-white">
                     ⬇ Export CSV
                     {!isPro && <span className="text-white/25">(5 rows)</span>}
                   </button>
                   {!isPro && (
-                    <div className="bg-orange-500/10 border border-orange-500/30 px-4 py-2 rounded-lg text-xs text-orange-400">
-                      Showing 5 of {results.length} ·{" "}
-                      <span onClick={() => setShowPayment(true)} className="underline cursor-pointer">
-                        Upgrade for full access
-                      </span>
+                    <div className="bg-orange-500/10 border border-orange-500/30 px-3 py-2 rounded-lg text-xs text-orange-400">
+                      5 of {results.length} shown ·{" "}
+                      <span onClick={() => setShowPayment(true)} className="underline cursor-pointer">Upgrade</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* TABLE HEADER */}
-              <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs text-white/30 uppercase tracking-wider mb-2">
-                <div className="col-span-5">Asset</div>
-                <div className="col-span-2 text-center">Type</div>
-                <div className="col-span-2 text-center">Downloads</div>
-                <div className="col-span-1 text-center">Trend</div>
-                <div className="col-span-2 text-right">Revenue Est.</div>
+              {/* TABLE desktop */}
+              <div className="hidden sm:block">
+                <div className="grid grid-cols-12 gap-4 px-4 py-2 text-xs text-white/30 uppercase tracking-wider mb-2">
+                  <div className="col-span-5">Asset</div>
+                  <div className="col-span-2 text-center">Type</div>
+                  <div className="col-span-2 text-center">Downloads</div>
+                  <div className="col-span-1 text-center">Trend</div>
+                  <div className="col-span-2 text-right">Revenue Est.</div>
+                </div>
+                <div className="space-y-2">
+                  {visibleResults.map((item) => (
+                    <div key={item.adobeId} className="grid grid-cols-12 gap-4 items-center bg-white/5 hover:bg-white/[0.08] border border-white/10 hover:border-orange-500/20 transition rounded-xl px-4 py-4">
+                      <div className="col-span-5 flex items-center gap-3 min-w-0">
+                        <span className="text-2xl flex-shrink-0">{PREVIEW[item.category] ?? PREVIEW.Default}</span>
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium truncate">{item.title}</div>
+                          <div className="text-xs text-white/30 truncate">{item.category} · by {item.creator}</div>
+                        </div>
+                      </div>
+                      <div className="col-span-2 text-center">
+                        <span className="text-xs bg-white/10 px-2 py-1 rounded-md text-white/60">{item.type}</span>
+                      </div>
+                      <div className="col-span-2 text-center font-semibold text-sm">{item.downloads.toLocaleString()}</div>
+                      <div className="col-span-1 text-center text-xs text-green-400 font-medium">{item.trend}</div>
+                      <div className="col-span-2 text-right text-sm text-orange-400 font-semibold">{item.revenue}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* VISIBLE ROWS */}
-              <div className="space-y-2">
+              {/* CARDS mobile */}
+              <div className="sm:hidden space-y-3">
                 {visibleResults.map((item) => (
-                  <div key={item.adobeId} className="grid grid-cols-12 gap-4 items-center bg-white/5 hover:bg-white/8 border border-white/10 hover:border-orange-500/20 transition rounded-xl px-4 py-4">
-                    <div className="col-span-5 flex items-center gap-3">
-                      <span className="text-2xl">{PREVIEW[item.category] ?? PREVIEW.Default}</span>
+                  <div key={item.adobeId} className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div className="flex items-start gap-3 mb-3">
+                      <span className="text-2xl flex-shrink-0">{PREVIEW[item.category] ?? PREVIEW.Default}</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium leading-snug">{item.title}</div>
+                        <div className="text-xs text-white/30 mt-0.5">{item.category} · by {item.creator}</div>
+                      </div>
+                      <span className="text-xs bg-white/10 px-2 py-1 rounded-md text-white/60 flex-shrink-0">{item.type}</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/5">
                       <div>
-                        <div className="text-sm font-medium">{item.title}</div>
-                        <div className="text-xs text-white/30">{item.category} · by {item.creator}</div>
+                        <div className="text-[10px] text-white/30 mb-0.5">Downloads</div>
+                        <div className="text-sm font-semibold">{item.downloads.toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-white/30 mb-0.5">Trend</div>
+                        <div className="text-sm font-semibold text-green-400">{item.trend}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] text-white/30 mb-0.5">Revenue</div>
+                        <div className="text-sm font-semibold text-orange-400">{item.revenue}</div>
                       </div>
                     </div>
-                    <div className="col-span-2 text-center">
-                      <span className="text-xs bg-white/10 px-2 py-1 rounded-md text-white/60">{item.type}</span>
-                    </div>
-                    <div className="col-span-2 text-center font-semibold text-sm">{item.downloads.toLocaleString()}</div>
-                    <div className="col-span-1 text-center text-xs text-green-400 font-medium">{item.trend}</div>
-                    <div className="col-span-2 text-right text-sm text-orange-400 font-semibold">{item.revenue}</div>
                   </div>
                 ))}
               </div>
 
-              {/* LOCKED ROWS */}
+              {/* LOCKED */}
               {!isPro && lockedResults.length > 0 && (
                 <div className="relative mt-2">
-                  <div className="space-y-2 opacity-30 blur-sm pointer-events-none select-none">
+                  <div className="hidden sm:block space-y-2 opacity-30 blur-sm pointer-events-none select-none">
                     {lockedResults.map((item) => (
                       <div key={item.adobeId} className="grid grid-cols-12 gap-4 items-center bg-white/5 border border-white/10 rounded-xl px-4 py-4">
                         <div className="col-span-5 flex items-center gap-3">
@@ -733,13 +726,26 @@ export default function DashboardPage() {
                       </div>
                     ))}
                   </div>
+                  <div className="sm:hidden space-y-3 opacity-30 blur-sm pointer-events-none select-none">
+                    {lockedResults.slice(0, 3).map((item) => (
+                      <div key={item.adobeId} className="bg-white/5 border border-white/10 rounded-xl p-4">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{PREVIEW[item.category] ?? PREVIEW.Default}</span>
+                          <div>
+                            <div className="text-sm font-medium">{item.title}</div>
+                            <div className="text-xs text-white/30">{item.category}</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="bg-[#0a0a0a]/90 border border-orange-500/30 rounded-2xl p-8 text-center">
+                    <div className="bg-[#0a0a0a]/90 border border-orange-500/30 rounded-2xl p-6 sm:p-8 text-center mx-4">
                       <div className="text-3xl mb-3">🔒</div>
-                      <h3 className="font-bold mb-1">Unlock Full Results</h3>
-                      <p className="text-white/40 text-sm mb-4">{lockedResults.length} more assets hidden</p>
+                      <h3 className="font-bold mb-1 text-sm sm:text-base">Unlock Full Results</h3>
+                      <p className="text-white/40 text-xs sm:text-sm mb-4">{lockedResults.length} more assets hidden</p>
                       <button onClick={() => setShowPayment(true)}
-                        className="bg-orange-500 hover:bg-orange-600 transition px-6 py-2.5 rounded-xl text-sm font-semibold">
+                        className="bg-orange-500 hover:bg-orange-600 transition px-5 sm:px-6 py-2.5 rounded-xl text-sm font-semibold">
                         Upgrade to Pro — $9/mo
                       </button>
                     </div>
