@@ -10,11 +10,20 @@ export async function GET(req: NextRequest) {
   if (!query) return NextResponse.json({ results: [] });
 
   try {
-    // 1. Cek Cache
     const cached = await prisma.searchCache.findFirst({
-      where: { query: query.toLowerCase() },
+      where: {
+        query: query.toLowerCase(),
+        createdAt: {
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // 24 jam
+        }
+      },
     });
-    if (cached) return NextResponse.json({ results: cached.results, fromCache: true });
+
+    if (cached) return NextResponse.json({
+      results: cached.results,
+      fromCache: true,
+      cachedAt: cached.createdAt  // ← kirim waktu cache ke frontend
+    });
 
     // 2. Tembak Adobe
     const adobeUrl = `https://stock.adobe.com/id/search?k=${encodeURIComponent(query)}`;
@@ -65,6 +74,10 @@ export async function GET(req: NextRequest) {
         note: "Fallback active"
       });
     }
+
+    await prisma.searchCache.deleteMany({
+      where: { query: query.toLowerCase() }
+    });
 
     await prisma.searchCache.create({
       data: { query: query.toLowerCase(), results: results as any },
