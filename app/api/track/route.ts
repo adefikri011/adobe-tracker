@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+// @ts-ignore
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
