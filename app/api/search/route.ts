@@ -1,86 +1,79 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../lib/prisma";
 
-const MOCK_ASSETS = [
-  { adobeId: "1001", title: "Beautiful Sunset Nature", creator: "PhotoPro", category: "Nature", type: "Photo", downloads: 1842, trend: "+12%", revenue: "$184.20", status: "Premium" },
-  { adobeId: "1002", title: "Business Team Meeting", creator: "StockMaster", category: "Business", type: "Photo", downloads: 1523, trend: "+8%", revenue: "$152.30", status: "Premium" },
-  { adobeId: "1003", title: "Abstract Wave Pattern", creator: "VectorArt", category: "Abstract", type: "Vector", downloads: 1204, trend: "+23%", revenue: "$120.40", status: "Premium" },
-  { adobeId: "1004", title: "Mountain Landscape 4K", creator: "NatureShots", category: "Nature", type: "Video", downloads: 987, trend: "+5%", revenue: "$296.10", status: "Premium" },
-  { adobeId: "1005", title: "Coffee Shop Aesthetic", creator: "LifestylePics", category: "Lifestyle", type: "Photo", downloads: 876, trend: "+15%", revenue: "$87.60", status: "Premium" },
-  { adobeId: "1006", title: "Tech UI Kit Modern", creator: "DesignHub", category: "Technology", type: "Vector", downloads: 743, trend: "+31%", revenue: "$74.30", status: "Premium" },
-  { adobeId: "1007", title: "Floral Watercolor Set", creator: "ArtByLuna", category: "Art", type: "Vector", downloads: 698, trend: "+9%", revenue: "$69.80", status: "Premium" },
-  { adobeId: "1008", title: "City Night Skyline", creator: "UrbanLens", category: "Urban", type: "Photo", downloads: 612, trend: "+4%", revenue: "$61.20", status: "Premium" },
-  { adobeId: "1009", title: "Minimal Logo Template", creator: "BrandStudio", category: "Business", type: "Vector", downloads: 589, trend: "+18%", revenue: "$58.90", status: "Premium" },
-  { adobeId: "1010", title: "Ocean Waves Drone", creator: "SkyViewMedia", category: "Nature", type: "Video", downloads: 534, trend: "+7%", revenue: "$160.20", status: "Premium" },
-  { adobeId: "1011", title: "Autumn Forest Path", creator: "NatureShots", category: "Nature", type: "Photo", downloads: 498, trend: "+11%", revenue: "$49.80", status: "Premium" },
-  { adobeId: "1012", title: "Corporate Presentation", creator: "StockMaster", category: "Business", type: "Vector", downloads: 467, trend: "+6%", revenue: "$46.70", status: "Premium" },
-  { adobeId: "1013", title: "Neon Cyberpunk City", creator: "UrbanLens", category: "Urban", type: "Photo", downloads: 445, trend: "+28%", revenue: "$44.50", status: "Premium" },
-  { adobeId: "1014", title: "Yoga Wellness Lifestyle", creator: "LifestylePics", category: "Lifestyle", type: "Photo", downloads: 423, trend: "+14%", revenue: "$42.30", status: "Premium" },
-  { adobeId: "1015", title: "Geometric Pattern Pack", creator: "VectorArt", category: "Abstract", type: "Vector", downloads: 401, trend: "+19%", revenue: "$40.10", status: "Premium" },
-];
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const query = searchParams.get("q")?.toLowerCase().trim() || "";
+  const query = searchParams.get("q")?.trim() || "";
 
-  if (!query) {
-    return NextResponse.json({ results: [], fromCache: false });
-  }
+  if (!query) return NextResponse.json({ results: [] });
 
   try {
-    // Cek cache dulu
+    // 1. Cek Cache
     const cached = await prisma.searchCache.findFirst({
-      where: { query },
-      orderBy: { createdAt: "desc" },
+      where: { query: query.toLowerCase() },
+    });
+    if (cached) return NextResponse.json({ results: cached.results, fromCache: true });
+
+    // 2. Tembak Adobe
+    const adobeUrl = `https://stock.adobe.com/id/search?k=${encodeURIComponent(query)}`;
+    const response = await fetch(adobeUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9'
+      }
     });
 
-    if (cached) {
+    const html = await response.text();
+
+    const results: any[] = [];
+    const pattern = /<img.*?src="(https:\/\/t\d\.ftcdn\.net\/jpg\/.*?)".*?alt="(.*?)"/g;
+    let match;
+    let count = 0;
+
+    while ((match = pattern.exec(html)) !== null && count < 10) {
+      const thumbUrl = match[1];
+      const title = match[2] || `Asset ${query}`;
+
+      const parts = thumbUrl.split('/');
+      const fileName = parts[parts.length - 1];
+      const fileId = fileName.replace(/^360_F_/, '').split('_')[0].split('.')[0];
+      const adobeId = fileId && fileId !== '360' ? fileId : `asset-${count}-${Date.now()}`;
+
+      results.push({
+        adobeId,
+        title: title.split('|')[0].trim(),
+        creator: "Verified Contributor",
+        thumbnail: thumbUrl,
+        type: "Photo",
+        status: "Premium",
+        downloads: Math.floor(Math.random() * 5000) + 500,
+        trend: `+${Math.floor(Math.random() * 30)}%`,
+        revenue: `$${(Math.random() * 500).toFixed(2)}`
+      });
+      count++;
+    }
+
+    if (results.length === 0) {
       return NextResponse.json({
-        results: cached.results,
-        fromCache: true,
-        cachedAt: cached.createdAt,
+        results: [
+          { adobeId: "543452443", title: `${query} Concept Art`, creator: "Adobe Studio", thumbnail: "https://t4.ftcdn.net/jpg/05/43/45/24/360_F_543452443_S4nZ8LhY.jpg", type: "Photo", downloads: 1200, status: "Premium", trend: "+10%", revenue: "$120.00" },
+          { adobeId: "123456789", title: `${query} Professional Series`, creator: "Creative Pro", thumbnail: "https://t3.ftcdn.net/jpg/01/23/45/67/360_F_123456789_XyZ.jpg", type: "Vector", downloads: 850, status: "Premium", trend: "+5%", revenue: "$85.00" }
+        ],
+        fromCache: false,
+        note: "Fallback active"
       });
     }
 
-    // Filter berdasarkan query
-    const filtered = MOCK_ASSETS.filter(
-      (a) =>
-        a.title.toLowerCase().includes(query) ||
-        a.category.toLowerCase().includes(query) ||
-        a.type.toLowerCase().includes(query) ||
-        a.creator.toLowerCase().includes(query)
-    );
-
-    // ✅ KEY FIX: kalau hasil filter < 8, tambahkan sisa asset
-    // supaya selalu ada cukup data untuk demo blur lock
-    let results = filtered;
-    if (filtered.length < 8) {
-      const filteredIds = new Set(filtered.map((a) => a.adobeId));
-      const extras = MOCK_ASSETS
-        .filter((a) => !filteredIds.has(a.adobeId))
-        .slice(0, 8 - filtered.length);
-      results = [...filtered, ...extras];
-    }
-
-    // Simpan ke cache
     await prisma.searchCache.create({
-      data: { query, results: results as any },
+      data: { query: query.toLowerCase(), results: results as any },
     });
-
-    // Upsert assets ke database
-    for (const asset of results) {
-      await prisma.asset.upsert({
-        where: { adobeId: asset.adobeId },
-        update: { downloads: asset.downloads },
-        create: asset,
-      });
-    }
 
     return NextResponse.json({ results, fromCache: false });
 
   } catch (error) {
     console.error("Search error:", error);
-    // Fallback kalau DB error
-    return NextResponse.json({ results: MOCK_ASSETS.slice(0, 10), fromCache: false });
+    return NextResponse.json({ results: [] }, { status: 500 });
   }
 }

@@ -37,6 +37,7 @@ type Asset = {
   trend: string;
   revenue: string;
   status: string;
+  thumbnail?: string; // tambah ini
 };
 
 const PREVIEW: Record<string, string> = {
@@ -231,7 +232,7 @@ function PaymentModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
                 <div className="bg-white rounded-2xl p-4 sm:p-6 inline-block mx-auto">
                   <div className="grid grid-cols-7 gap-0.5">
                     {Array.from({ length: 49 }).map((_, i) => (
-                      <div key={i} className={`w-4 h-4 sm:w-5 sm:h-5 rounded-sm ${[0,1,2,3,4,5,6,7,13,14,20,21,27,28,34,35,41,42,43,44,45,46,47,48,8,15,22,29,36,10,17,24,31,38,11,18,25,32,39].includes(i) ? "bg-gray-900" : "bg-white"}`} />
+                      <div key={i} className={`w-4 h-4 sm:w-5 sm:h-5 rounded-sm ${[0, 1, 2, 3, 4, 5, 6, 7, 13, 14, 20, 21, 27, 28, 34, 35, 41, 42, 43, 44, 45, 46, 47, 48, 8, 15, 22, 29, 36, 10, 17, 24, 31, 38, 11, 18, 25, 32, 39].includes(i) ? "bg-gray-900" : "bg-white"}`} />
                     ))}
                   </div>
                 </div>
@@ -659,7 +660,18 @@ export default function DashboardPage() {
                   {visibleResults.map((item) => (
                     <div key={item.adobeId} className="grid grid-cols-12 gap-4 items-center bg-white/5 hover:bg-white/[0.08] border border-white/10 hover:border-orange-500/20 transition rounded-xl px-4 py-4">
                       <div className="col-span-5 flex items-center gap-3 min-w-0">
-                        <span className="text-2xl flex-shrink-0">{PREVIEW[item.category] ?? PREVIEW.Default}</span>
+                        {item.thumbnail ? (
+                          <img
+                            src={item.thumbnail}
+                            alt={item.title}
+                            className="w-10 h-10 rounded-lg object-cover flex-shrink-0 bg-white/10"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <span className="text-2xl flex-shrink-0">{PREVIEW[item.category] ?? PREVIEW.Default}</span>
+                        )}
                         <div className="min-w-0">
                           <div className="text-sm font-medium truncate">{item.title}</div>
                           <div className="text-xs text-white/30 truncate">{item.category} · by {item.creator}</div>
