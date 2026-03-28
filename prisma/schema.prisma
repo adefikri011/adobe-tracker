@@ -34,3 +34,10 @@ model Asset {
   status    String   @default("Premium")
   createdAt DateTime @default(now())
 }
+
+model UserSession {
+  id              String   @id 
+  lastSessionId   String?  @unique
+  suspendedUntil  DateTime?
+  updatedAt       DateTime @updatedAt
+}

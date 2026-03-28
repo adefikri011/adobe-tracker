@@ -56,3 +56,8 @@ export type SearchCache = Prisma.SearchCacheModel
  * 
  */
 export type Asset = Prisma.AssetModel
+/**
+ * Model UserSession
+ * 
+ */
+export type UserSession = Prisma.UserSessionModel
