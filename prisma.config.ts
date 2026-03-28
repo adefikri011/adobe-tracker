@@ -9,14 +9,14 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
   },
+  // datasource: {
+  //   url: process.env.DATABASE_URL,
+  //   // Kita tambahkan 'as any' biar TypeScript nggak komplain, 
+  //   // tapi Prisma tetep bisa baca variabelnya saat build.
+  //   directUrl: process.env.DIRECT_URL,
+  // } as any,
   datasource: {
-    url: process.env.DATABASE_URL,
-    // Kita tambahkan 'as any' biar TypeScript nggak komplain, 
-    // tapi Prisma tetep bisa baca variabelnya saat build.
-    directUrl: process.env.DIRECT_URL,
-  } as any,
+    url: process.env["DIRECT_URL"],
+  },
 });
 
-// datasource: {
-//     url: process.env["DATABASE_URL"],
-//   },

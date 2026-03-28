@@ -781,7 +781,7 @@ export type AssetScalarFieldEnum = (typeof AssetScalarFieldEnum)[keyof typeof As
 
 export const UserSessionScalarFieldEnum = {
   id: 'id',
-  lastSessionId: 'lastSessionId',
+  activeSessionId: 'activeSessionId',
   suspendedUntil: 'suspendedUntil',
   updatedAt: 'updatedAt'
 } as const

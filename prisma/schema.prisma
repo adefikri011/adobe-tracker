@@ -37,7 +37,7 @@ model Asset {
 
 model UserSession {
   id              String   @id 
-  lastSessionId   String?  @unique
-  suspendedUntil  DateTime?
+  activeSessionId String?  @unique 
+  suspendedUntil  DateTime? 
   updatedAt       DateTime @updatedAt
 }

@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "../lib/supabase/client";
 
 import { Navbar } from "./_components/Navbar";
 import { SearchBar } from "./_components/SearchBar";
@@ -12,10 +11,10 @@ import { ResultsSection } from "./_components/ResultsSection";
 import { PaymentModal } from "./_components/PaymentModal";
 import { Asset } from "./_components/ResultCard";
 
+const SUSPEND_TEST_MINUTES = 5;
+
 export default function DashboardPage() {
   const router = useRouter();
-  const supabase = createClient();
-
   const [query, setQuery] = useState("");
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,6 +35,64 @@ export default function DashboardPage() {
       .catch(() => setPlanLoading(false));
   }, []);
 
+  useEffect(() => {
+    let isRedirecting = false;
+
+    const checkSessionStatus = async () => {
+      if (isRedirecting) return;
+
+      try {
+        const res = await fetch("/api/auth/session-status", {
+          method: "GET",
+          cache: "no-store",
+          credentials: "include",
+        });
+
+        if (res.status === 401) {
+          isRedirecting = true;
+          window.location.href = `/login?error=device_conflict&minutes=${SUSPEND_TEST_MINUTES}`;
+          return;
+        }
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        if (data.status === "suspended") {
+          isRedirecting = true;
+          const minutes = Number(data.minutesLeft ?? 1);
+          const until = data.suspendedUntil ? `&until=${encodeURIComponent(data.suspendedUntil)}` : "";
+          window.location.href = `/login?error=suspended&minutes=${minutes}${until}`;
+          return;
+        }
+
+        if (data.status === "session_revoked") {
+          isRedirecting = true;
+          window.location.href = `/login?error=device_conflict&minutes=${SUSPEND_TEST_MINUTES}`;
+        }
+      } catch (error) {
+        console.error("Session polling failed:", error);
+      }
+    };
+
+    const handleVisibilityOrFocus = () => {
+      if (!document.hidden) {
+        checkSessionStatus();
+      }
+    };
+
+    checkSessionStatus();
+    const intervalId = window.setInterval(checkSessionStatus, 3000);
+    window.addEventListener("focus", handleVisibilityOrFocus);
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+    };
+  }, [router]);
+
   const handleUpgradeSuccess = async () => {
     await fetch("/api/user/upgrade", { method: "POST" });
     setIsPro(true);
@@ -55,11 +112,6 @@ export default function DashboardPage() {
       console.error("Search failed");
     }
     setLoading(false);
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
   };
 
   const handleExportCSV = () => {
@@ -93,7 +145,6 @@ export default function DashboardPage() {
           isPro={isPro}
           planLoading={planLoading}
           onUpgradeClick={() => setShowPayment(true)}
-          onSignOut={handleSignOut}
         />
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">

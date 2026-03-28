@@ -1,13 +1,48 @@
 "use client";
 
+import { createClient } from "@/lib/supabase/client"; 
+
 interface NavbarProps {
   isPro: boolean;
   planLoading: boolean;
   onUpgradeClick: () => void;
-  onSignOut: () => void;
+  onSignOut?: () => void;
 }
 
 export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: NavbarProps) {
+  const supabase = createClient();
+
+  // --- LOGIC LOGOUT FIX (API + SUPABASE) ---
+  const handleInternalSignOut = async () => {
+    try {
+      // 1. Panggil API Route logout kita untuk membersihkan Prisma
+      // Kita pakai await supaya database terupdate dulu sebelum cookie dihapus
+      const logoutRes = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!logoutRes.ok) {
+        throw new Error("Logout API failed");
+      }
+
+      // 2. Bersihkan session di sisi browser (Supabase Cookies)
+      await supabase.auth.signOut();
+
+      // 3. Jalankan callback dari parent jika ada
+      if (onSignOut) onSignOut();
+
+      // 4. Redirect ke landing page
+      window.location.href = "/";
+      
+    } catch (err) {
+      console.error("Logout failed:", err);
+      // Fallback: jika API error, tetap paksa logout dari supabase & redirect
+      await supabase.auth.signOut();
+      window.location.href = "/";
+    }
+  };
+
   return (
     <nav
       className="flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40"
@@ -19,7 +54,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
         WebkitBackdropFilter: "blur(20px)",
       }}
     >
-      {/* Logo */}
+      {/* Logo - Tetap Sama */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <div
           className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
@@ -84,11 +119,17 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
 
         <div className="w-px h-[18px] mx-0.5 sm:mx-1" style={{ background: "rgba(255,255,255,0.1)" }} />
 
-        {/* Sign out */}
+        {/* Sign out - Button UI Tetap Sama Sesuai Design Kamu */}
         <button
-          onClick={onSignOut}
+          onClick={handleInternalSignOut}
           className="text-[12px] px-2 py-1.5 transition-colors duration-150"
-          style={{ color: "rgba(255,255,255,0.35)", background: "none", border: "none", cursor: "pointer" }}
+          style={{ 
+            color: "rgba(255,255,255,0.35)", 
+            background: "none", 
+            border: "none", 
+            cursor: "pointer",
+            outline: "none" 
+          }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
           onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")}
         >
