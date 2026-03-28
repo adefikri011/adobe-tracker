@@ -11,7 +11,7 @@ export default function CTASection() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
-      className="mx-6 mb-20 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-10 py-16 text-center max-w-4xl lg:mx-auto relative overflow-hidden"
+      className="mx-4 sm:mx-5 md:mx-6 mb-16 sm:mb-18 md:mb-20 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-5 sm:px-8 md:px-10 py-12 sm:py-14 md:py-16 text-center max-w-4xl lg:mx-auto relative overflow-hidden"
     >
       {/* Continuous Storytelling Background */}
       <div className="absolute inset-0 -z-10 opacity-30">
@@ -27,16 +27,16 @@ export default function CTASection() {
         transition={{ duration: 0.6, delay: 0.1 }}
         className="relative z-10"
       >
-        <p className="text-orange-400 text-xs font-bold uppercase tracking-widest mb-4">Ready to start?</p>
-        <h2 className="text-4xl md:text-5xl font-black text-white mb-5 tracking-tight">
+        <p className="text-orange-400 text-[9px] sm:text-[10px] md:text-xs font-bold uppercase tracking-widest mb-3 sm:mb-4">Ready to start?</p>
+        <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-white mb-4 sm:mb-5 tracking-tight leading-[1.1]">
           Grow your Adobe Stock<br />business today.
         </h2>
-        <p className="text-gray-400 mb-10 font-light max-w-sm mx-auto leading-relaxed">
+        <p className="text-gray-400 mb-6 sm:mb-8 md:mb-10 font-light max-w-sm mx-auto leading-relaxed text-xs sm:text-sm md:text-base">
           Join thousands of contributors already using TrackStock to maximize their earnings.
         </p>
         <Link
           href="/register"
-          className="inline-block bg-orange-500 hover:bg-orange-400 transition-colors px-10 py-4 rounded-xl font-bold text-white text-sm shadow-lg shadow-orange-500/30 hover:-translate-y-1 transform duration-200"
+          className="inline-block bg-orange-500 hover:bg-orange-400 transition-colors px-6 sm:px-8 md:px-10 py-2.5 sm:py-3 md:py-4 rounded-lg sm:rounded-xl font-bold text-white text-xs sm:text-sm md:text-base shadow-lg shadow-orange-500/30 hover:-translate-y-1 transform duration-200"
         >
           Get Started Free →
         </Link>

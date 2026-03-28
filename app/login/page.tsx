@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Mail, Lock, Sparkles, RefreshCw } from "lucide-react";
 import GoogleIcon from "../components/icons/GoogleIcon";
+import TrackStockLogo from "@/icons/brand";
+
 
 // --- Animasi Variants ---
 const fadeUp = {
@@ -72,7 +74,7 @@ export default function LoginPage() {
           method: "GET",
           credentials: "include",
         });
-        
+
         if (res.ok) {
           const data = await res.json();
           if (data.status === "suspended") {
@@ -183,7 +185,7 @@ export default function LoginPage() {
 
     setLoading(true);
     setError("");
-    
+
     try {
       // 1. Verifikasi captcha
       const captchaResponse = await fetch("/api/captcha/verify", {
@@ -241,7 +243,7 @@ export default function LoginPage() {
   const handleSocialLogin = async (provider: "google") => {
     setLoading(true);
     setError("");
-    
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -262,16 +264,21 @@ export default function LoginPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-orange-200/30 rounded-full blur-[120px] -z-10 animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-orange-100/20 rounded-full blur-[100px] -z-10 opacity-80" />
 
-      <motion.div initial="hidden" animate="show" className="w-full max-w-md relative z-10">
+      <motion.div initial="hidden" animate="show" className="w-full max-w-md relative z-10" suppressHydrationWarning>
         {/* Header - Margin dikurangi biar rapi */}
-        <motion.div variants={fadeUp} custom={0} className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center justify-center gap-2 mb-5 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-orange-500/30 group-hover:scale-105 transition-transform">
-              T
+        <motion.div variants={fadeUp} custom={0} className="text-center mb-2.5" suppressHydrationWarning>
+          <Link href="/" className="inline-flex items-center gap-3 mb-4 group">
+            <TrackStockLogo />
+            <div className="flex flex-col text-left">
+              <span className="font-[950] text-xl tracking-tighter text-slate-900 leading-none">
+                Track<span className="text-orange-500">Stock</span>
+              </span>
+              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mt-1">
+                Analytics Pro
+              </span>
             </div>
-            <span className="font-bold text-2xl text-slate-900 tracking-tight">TrackStock</span>
           </Link>
-          <h1 className="text-3xl md:text-4xl font-[900] tracking-tight text-slate-900 mb-1">
+          <h1 className="text-3xl md:text-4xl font-[900] tracking-tight text-slate-900 mb-0.5">
             Welcome back
           </h1>
           <p className="text-slate-500 font-medium text-sm">Sign in to track your performance</p>
@@ -279,7 +286,7 @@ export default function LoginPage() {
 
         {/* Card - Padding dikurangi agar lebih compact */}
         <motion.div variants={fadeUp} custom={1} className="bg-white/80 backdrop-blur-xl border border-white/60 shadow-2xl shadow-orange-500/5 rounded-[2rem] p-6 md:p-8">
-          
+
           {error && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
               <span className="font-bold">Error:</span> {error}
@@ -287,7 +294,7 @@ export default function LoginPage() {
           )}
 
           {/* Social Button - Margin dikurangi */}
-          <div className="mb-4">
+          <div className="mb-3">
             <button
               onClick={() => handleSocialLogin("google")}
               disabled={loading}
@@ -299,14 +306,14 @@ export default function LoginPage() {
           </div>
 
           {/* Divider - Margin disesuaikan */}
-          <div className="relative flex py-2 items-center mb-4">
+          <div className="relative flex py-2 items-center mb-3">
             <div className="flex-grow border-t border-slate-100"></div>
             <span className="flex-shrink-0 mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Or use email</span>
             <div className="flex-grow border-t border-slate-100"></div>
           </div>
 
           {/* Inputs - Space dikurangi */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <motion.div variants={fadeUp} custom={2}>
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block ml-1">Email Address</label>
               <div className="relative group">
@@ -348,8 +355,8 @@ export default function LoginPage() {
                 <div className="bg-white rounded-lg overflow-hidden border border-slate-200 shadow-sm grow flex justify-center items-center p-1 min-h-[42px]">
                   <img src={captchaUrl} alt="captcha" className="h-full max-h-10 w-auto" onError={(e) => { e.currentTarget.src = `/api/captcha?t=${Date.now()}`; }} />
                 </div>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={refreshCaptcha}
                   className="p-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors text-slate-500 shadow-sm shrink-0"
                   title="Refresh Captcha"
@@ -368,7 +375,7 @@ export default function LoginPage() {
           </div>
 
           {/* Submit - Margin dikurangi */}
-          <motion.div variants={fadeUp} custom={5} className="mt-5">
+          <motion.div variants={fadeUp} custom={5} className="mt-6">
             <button
               onClick={handleLogin}
               disabled={loading}
@@ -381,7 +388,7 @@ export default function LoginPage() {
           </motion.div>
 
           {/* Footer */}
-          <motion.p variants={fadeUp} custom={6} className="text-center text-slate-500 text-xs mt-5 font-medium">
+          <motion.p variants={fadeUp} custom={6} className="text-center text-slate-500 text-xs mt-4 font-medium">
             Don't have an account?{" "}
             <Link href="/register" className="text-orange-500 hover:text-orange-600 font-bold transition-colors inline-flex items-center gap-1 group">
               Sign up free <Sparkles className="w-3 h-3 group-hover:rotate-12 transition-transform" />
@@ -394,16 +401,16 @@ export default function LoginPage() {
       <AnimatePresence>
         {showSuspendModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
             />
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              exit={{ scale: 0.9, opacity: 0 }} 
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
               className="relative bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl border border-orange-100"
             >
               <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -420,8 +427,8 @@ export default function LoginPage() {
                   </p>
                 </div>
               )}
-              <button 
-                onClick={() => setShowSuspendModal(false)} 
+              <button
+                onClick={() => setShowSuspendModal(false)}
                 className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3.5 rounded-xl font-black shadow-lg shadow-orange-500/30 hover:shadow-orange-500/40 transition-all active:scale-95"
               >
                 Understood

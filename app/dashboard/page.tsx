@@ -140,7 +140,7 @@ export default function DashboardPage() {
         />
       )}
 
-      <main className="min-h-screen bg-[#0a0a0a] text-white">
+      <main className="min-h-screen bg-white text-gray-900">
         <Navbar
           isPro={isPro}
           planLoading={planLoading}

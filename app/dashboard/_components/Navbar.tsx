@@ -1,6 +1,7 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client"; 
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/dist/client/link";
 
 interface NavbarProps {
   isPro: boolean;
@@ -8,6 +9,41 @@ interface NavbarProps {
   onUpgradeClick: () => void;
   onSignOut?: () => void;
 }
+
+const TrackStockLogo = () => (
+  <svg
+    viewBox="0 0 40 40"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-10 h-10 drop-shadow-sm"
+  >
+    {/* Background Card dengan Gradient Halus */}
+    <rect width="40" height="40" rx="12" fill="url(#logo-gradient)" />
+
+    {/* Abstrak 'T' yang terbentuk dari Chart Bar */}
+    <path
+      d="M12 22C12 20.8954 12.8954 20 14 20H18V28C18 29.1046 17.1046 30 16 30H14C12.8954 30 12 29.1046 12 28V22Z"
+      fill="white"
+    />
+    <path
+      d="M22 16C22 14.8954 22.8954 14 24 14H26C27.1046 14 28 14.8954 28 16V28C28 29.1046 27.1046 30 26 30H24C22.8954 30 22 29.1046 22 28V16Z"
+      fill="white"
+      fillOpacity="0.6"
+    />
+    <path
+      d="M10 12C10 10.8954 10.8954 10 12 10H28C29.1046 10 30 10.8954 30 12V14C30 15.1046 29.1046 16 28 16H12C10.8954 16 10 15.1046 10 14V12Z"
+      fill="white"
+    />
+
+    {/* Definitions untuk Gradient */}
+    <defs>
+      <linearGradient id="logo-gradient" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#FB923C" />
+        <stop offset="1" stopColor="#EA580C" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
 
 export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: NavbarProps) {
   const supabase = createClient();
@@ -34,7 +70,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
 
       // 4. Redirect ke landing page
       window.location.href = "/";
-      
+
     } catch (err) {
       console.error("Logout failed:", err);
       // Fallback: jika API error, tetap paksa logout dari supabase & redirect
@@ -48,38 +84,48 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
       className="flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40"
       style={{
         height: "60px",
-        background: "rgba(10,10,10,0.97)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        background: "rgba(255,255,255,0.97)",
+        borderBottom: "1px solid rgba(0,0,0,0.08)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
       }}
     >
-      {/* Logo - Tetap Sama */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-          style={{ background: "#f97316", boxShadow: "0 0 14px rgba(249,115,22,0.45)" }}
-        >
-          T
+      <Link href="/" className="flex items-center gap-3 z-[110] group">
+        <div className="relative">
+          {/* Glow effect di belakang logo saat hover */}
+          <div className="absolute inset-0 bg-orange-500/20 blur-lg rounded-2xl group-hover:bg-orange-500/40 transition-all duration-500" />
+
+          <TrackStockLogo />
         </div>
-        <span className="font-semibold text-[15px] text-white" style={{ letterSpacing: "-0.01em" }}>
-          TrackStock
-        </span>
-      </div>
+
+        <div className="flex flex-col">
+          <span className="font-[950] text-xl md:text-2xl tracking-tighter text-slate-900 leading-none">
+            Track<span className="text-orange-500">Stock</span>
+          </span>
+          <span className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mt-1">
+            Analytics Pro
+          </span>
+        </div>
+      </Link>
 
       {/* Right side */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+
         {/* Free badge */}
         {!isPro && !planLoading && (
           <div
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold"
+            className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl text-[12px] font-bold"
             style={{
-              background: "rgba(249,115,22,0.1)",
-              border: "1px solid rgba(249,115,22,0.25)",
-              color: "#fb923c",
-              letterSpacing: "0.03em",
+              background: "rgba(249,115,22,0.08)",
+              border: "1.5px solid rgba(249,115,22,0.2)",
+              color: "#ea580c",
+              letterSpacing: "0.02em",
             }}
           >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="#ea580c" strokeWidth="2" />
+              <path d="M12 8v4M12 16h.01" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" />
+            </svg>
             Free Plan
           </div>
         )}
@@ -87,16 +133,25 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
         {/* Pro badge */}
         {isPro && !planLoading && (
           <div
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-[5px] rounded-full"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl"
             style={{
-              background: "linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1))",
-              border: "1px solid rgba(16,185,129,0.3)",
+              background: "linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.07))",
+              border: "1.5px solid rgba(16,185,129,0.3)",
             }}
           >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-              <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="#34d399" stroke="#34d399" strokeWidth="1" strokeLinejoin="round" />
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <polygon
+                points="13,2 3,14 12,14 11,22 21,10 12,10"
+                fill="#10b981"
+                stroke="#10b981"
+                strokeWidth="1"
+                strokeLinejoin="round"
+              />
             </svg>
-            <span className="text-[11px] font-semibold" style={{ color: "#34d399", letterSpacing: "0.03em" }}>
+            <span
+              className="text-[12px] font-bold"
+              style={{ color: "#10b981", letterSpacing: "0.04em" }}
+            >
               PRO PLAN
             </span>
           </div>
@@ -107,31 +162,49 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
           <button
             onClick={onUpgradeClick}
             disabled={planLoading}
-            className="font-semibold rounded-lg transition-all duration-200 disabled:opacity-40 text-white text-[12px] sm:text-[13px] px-3 sm:px-4 py-1.5 sm:py-2"
+            className="font-bold rounded-xl transition-all duration-200 disabled:opacity-40 text-white text-[13px] px-4 py-2 flex items-center gap-2"
             style={{
               background: "linear-gradient(135deg, #f97316, #ea580c)",
-              boxShadow: "0 0 18px rgba(249,115,22,0.3)",
+              boxShadow: "0 4px 18px rgba(249,115,22,0.35)",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 24px rgba(249,115,22,0.5)";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 18px rgba(249,115,22,0.35)";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
             }}
           >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="white" strokeWidth="0" />
+            </svg>
             Upgrade Pro
           </button>
         )}
 
-        <div className="w-px h-[18px] mx-0.5 sm:mx-1" style={{ background: "rgba(255,255,255,0.1)" }} />
+        {/* Divider */}
+        <div className="w-px h-5" style={{ background: "rgba(0,0,0,0.1)" }} />
 
-        {/* Sign out - Button UI Tetap Sama Sesuai Design Kamu */}
+        {/* Sign out */}
         <button
           onClick={handleInternalSignOut}
-          className="text-[12px] px-2 py-1.5 transition-colors duration-150"
-          style={{ 
-            color: "rgba(255,255,255,0.35)", 
-            background: "none", 
-            border: "none", 
+          className="text-[12px] font-semibold px-3 py-2 rounded-xl transition-all duration-150"
+          style={{
+            color: "rgba(0,0,0,0.35)",
+            background: "none",
+            border: "none",
             cursor: "pointer",
-            outline: "none" 
+            outline: "none",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.35)")}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.color = "rgba(0,0,0,0.7)";
+            (e.currentTarget as HTMLElement).style.background = "rgba(0,0,0,0.04)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.color = "rgba(0,0,0,0.35)";
+            (e.currentTarget as HTMLElement).style.background = "none";
+          }}
         >
           Sign Out
         </button>

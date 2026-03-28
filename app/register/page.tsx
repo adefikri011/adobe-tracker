@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRight, Mail, Lock, User, Sparkles, RefreshCw } from "lucide-react";
 import GoogleIcon from "../components/icons/GoogleIcon";
+import TrackStockLogo from "@/icons/brand";
+
 
 // --- Animasi Variants ---
 const fadeUp = {
@@ -70,12 +72,12 @@ export default function RegisterPage() {
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { 
+        options: {
           data: { full_name: name },
           emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         },
       });
-      
+
       if (signUpError) {
         setError(signUpError.message);
         refreshCaptcha();
@@ -114,102 +116,108 @@ export default function RegisterPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-orange-200/30 rounded-full blur-[120px] -z-10 animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-orange-100/20 rounded-full blur-[100px] -z-10 opacity-80" />
 
-      <motion.div initial="hidden" animate="show" className="w-full max-w-md relative z-10">
-        {/* Header */}
-        <motion.div variants={fadeUp} custom={0} className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center justify-center gap-2 mb-6 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-orange-500/30 group-hover:scale-105 transition-transform">
-              T
+      <motion.div initial="hidden" animate="show" className="w-full max-w-md relative z-10" suppressHydrationWarning>
+        {/* Header - Margin dikurangi */}
+        <motion.div variants={fadeUp} custom={0} className="text-center mb-1" suppressHydrationWarning>
+          <Link href="/" className="inline-flex items-center gap-3 mb-4 group">
+            <TrackStockLogo />
+            <div className="flex flex-col text-left">
+              <span className="font-[950] text-xl tracking-tighter text-slate-900 leading-none">
+                Track<span className="text-orange-500">Stock</span>
+              </span>
+              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mt-1">
+                Analytics Pro
+              </span>
             </div>
-            <span className="font-bold text-2xl text-slate-900 tracking-tight">TrackStock</span>
           </Link>
-          <h1 className="text-3xl md:text-4xl font-[900] tracking-tight text-slate-900 mb-2">
+          <h1 className="text-3xl md:text-4xl font-[900] tracking-tight text-slate-900 mb-0.5">
             Create account
           </h1>
-          <p className="text-slate-500 font-medium">Start tracking your performance</p>
+          <p className="text-slate-500 font-medium text-sm">Start tracking your performance</p>
         </motion.div>
 
-        {/* Card */}
-        <motion.div variants={fadeUp} custom={1} className="bg-white/80 backdrop-blur-xl border border-white/60 shadow-2xl shadow-orange-500/5 rounded-[2rem] p-8 md:p-10">
+        {/* Card - Padding dikurangi agar compact */}
+        <motion.div variants={fadeUp} custom={1} className="bg-white/80 backdrop-blur-xl border border-white/60 shadow-2xl shadow-orange-500/5 rounded-[2rem] p-5 md:p-6">
           {error && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
               <span className="font-bold">Error:</span> {error}
             </motion.div>
           )}
 
-          {/* Social Register */}
-          <div className="mb-6">
+          {/* Social Register - Margin dikurangi */}
+          <div className="mb-3">
             <button
               onClick={() => handleSocialLogin("google")}
               disabled={loading}
-              className="flex items-center justify-center gap-3 w-full bg-white border border-slate-200 hover:border-orange-300 hover:text-orange-600 text-slate-700 py-3.5 rounded-xl font-bold text-sm transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+              className="flex items-center justify-center gap-3 w-full bg-white border border-slate-200 hover:border-orange-300 hover:text-orange-600 text-slate-700 py-3 rounded-xl font-bold text-sm transition-all shadow-sm hover:shadow-md disabled:opacity-50"
             >
               <GoogleIcon size={20} />
               Sign up with Google
             </button>
           </div>
 
-          <div className="relative flex py-2 items-center mb-6">
+          {/* Divider - Margin dikurangi */}
+          <div className="relative flex py-2 items-center mb-3">
             <div className="flex-grow border-t border-slate-100"></div>
-            <span className="flex-shrink-0 mx-4 text-slate-400 text-xs font-bold uppercase tracking-wider">Or use email</span>
+            <span className="flex-shrink-0 mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Or use email</span>
             <div className="flex-grow border-t border-slate-100"></div>
           </div>
 
-          {/* Form Inputs */}
-          <div className="space-y-4">
+          {/* Form Inputs - Space dikurangi */}
+          <div className="space-y-2.5">
             <motion.div variants={fadeUp} custom={2}>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block ml-1">Full Name</label>
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block ml-1">Full Name</label>
               <div className="relative group">
-                <User className="absolute left-3 top-3.5 text-slate-400 w-5 h-5 group-focus-within:text-orange-500 transition-colors" />
+                <User className="absolute left-3 top-3 text-slate-400 w-4 h-4 group-focus-within:text-orange-500 transition-colors" />
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all"
                 />
               </div>
             </motion.div>
 
             <motion.div variants={fadeUp} custom={3}>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block ml-1">Email Address</label>
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block ml-1">Email Address</label>
               <div className="relative group">
-                <Mail className="absolute left-3 top-3.5 text-slate-400 w-5 h-5 group-focus-within:text-orange-500 transition-colors" />
+                <Mail className="absolute left-3 top-3 text-slate-400 w-4 h-4 group-focus-within:text-orange-500 transition-colors" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@company.com"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all"
                 />
               </div>
             </motion.div>
 
             <motion.div variants={fadeUp} custom={4}>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block ml-1">Password</label>
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block ml-1">Password</label>
               <div className="relative group">
-                <Lock className="absolute left-3 top-3.5 text-slate-400 w-5 h-5 group-focus-within:text-orange-500 transition-colors" />
+                <Lock className="absolute left-3 top-3 text-slate-400 w-4 h-4 group-focus-within:text-orange-500 transition-colors" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min. 8 characters"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3.5 text-sm focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all"
                 />
               </div>
             </motion.div>
 
-            {/* Captcha Section */}
-            <motion.div variants={fadeUp} custom={5} className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 mt-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block ml-1">Human Verification</label>
-              <div className="flex gap-2 mb-3 items-center">
-                <div className="bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm grow flex justify-center items-center p-1 min-h-[50px]">
-                  <img src={captchaUrl} alt="captcha" className="h-full max-h-12 w-auto" />
+            {/* Captcha Section - Layout lebih rapat */}
+            <motion.div variants={fadeUp} custom={5} className="bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block ml-1">Security Check</label>
+              <div className="flex gap-2 mb-2 items-center">
+                <div className="bg-white rounded-lg overflow-hidden border border-slate-200 shadow-sm grow flex justify-center items-center p-1 min-h-[42px]">
+                  <img src={captchaUrl} alt="captcha" className="h-full max-h-10 w-auto" />
                 </div>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={refreshCaptcha}
-                  className="p-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-500 shadow-sm"
+                  className="p-2 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors text-slate-500 shadow-sm shrink-0"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </button>
@@ -218,24 +226,25 @@ export default function RegisterPage() {
                 type="text"
                 value={captchaInput}
                 onChange={(e) => setCaptchaInput(e.target.value)}
-                placeholder="Type the characters above"
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 transition-all"
+                placeholder="Type the code above"
+                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all"
               />
             </motion.div>
           </div>
 
-          {/* Submit */}
-          <motion.div variants={fadeUp} custom={6} className="mt-8">
+          {/* Submit - Margin dikurangi */}
+          <motion.div variants={fadeUp} custom={6} className="mt-6">
             <button
               onClick={handleRegister}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white disabled:opacity-70 py-4 rounded-2xl font-black text-lg shadow-xl shadow-orange-500/20 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 transition-all"
+              className="group relative w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-70 transition-all py-3.5 rounded-xl font-black text-base shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
             >
-              {loading ? "Processing..." : <>Create Account <ArrowRight className="w-5 h-5" /></>}
+              {loading ? "Processing..." : <>Create Account <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" /></>}
             </button>
           </motion.div>
 
-          <motion.p variants={fadeUp} custom={7} className="text-center text-slate-500 text-sm mt-6 font-medium">
+          {/* Footer */}
+          <motion.p variants={fadeUp} custom={7} className="text-center text-slate-500 text-xs mt-4 font-medium">
             Already have an account?{" "}
             <Link href="/login" className="text-orange-500 hover:text-orange-600 font-bold inline-flex items-center gap-1 group transition-colors">
               Sign in <Sparkles className="w-3 h-3 group-hover:rotate-12 transition-transform" />

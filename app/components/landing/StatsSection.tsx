@@ -29,7 +29,7 @@ export default function StatsSection() {
   ];
 
   return (
-    <section className="relative py-20 md:py-28 overflow-hidden bg-slate-50">
+    <section className="relative py-16 md:py-24 overflow-hidden bg-slate-50">
       {/* Continuous Storytelling Background */}
       <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
       <div className="absolute inset-0 -z-20 bg-gradient-to-b from-white via-orange-50/30 to-white" />
@@ -38,7 +38,7 @@ export default function StatsSection() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-orange-200/20 rounded-full blur-[100px] -z-10" />
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-orange-100/10 rounded-full blur-[120px] -z-10" />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-5 md:px-6">
         
         {/* Main Card Container */}
         <motion.div 
@@ -46,7 +46,7 @@ export default function StatsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="relative bg-white/80 backdrop-blur-xl border border-white/50 shadow-2xl shadow-orange-500/5 rounded-[2rem] p-6 md:p-10 lg:p-12 overflow-hidden group"
+          className="relative bg-white/80 backdrop-blur-xl border border-white/50 shadow-2xl shadow-orange-500/5 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 lg:p-12 overflow-hidden group"
         >
           
           {/* DECORATION: Abstract Graph Line Background */}
@@ -79,12 +79,12 @@ export default function StatsSection() {
               <div 
                 key={i}
                 className={`
-                  relative flex-1 flex flex-col items-center justify-center text-center px-4 py-6 md:py-0
+                  relative flex-1 flex flex-col items-center justify-center text-center px-3 sm:px-4 py-6 sm:py-8 md:py-0
                   ${i !== stats.length - 1 ? "border-b md:border-b-0 md:border-r border-slate-100/80" : ""}
                 `}
               >
                 {/* DECORATION: Background Icon (Faded) */}
-                <stat.icon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 text-orange-50 -z-0 opacity-50" />
+                <stat.icon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 sm:w-28 md:w-32 h-24 sm:h-28 md:h-32 text-orange-50 -z-0 opacity-50" />
 
                 {/* Value / Angka Utama */}
                 <motion.div 
@@ -94,7 +94,7 @@ export default function StatsSection() {
                   transition={{ delay: 0.2 + (i * 0.1), type: "spring", stiffness: 100 }}
                   className="relative z-10 flex flex-col items-center"
                 >
-                  <h3 className="text-4xl md:text-5xl lg:text-6xl font-[950] text-slate-900 tracking-tighter mb-2 flex items-start">
+                  <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-[950] text-slate-900 tracking-tighter mb-2 flex items-start">
                     {stat.value}
                   </h3>
                   
@@ -110,17 +110,17 @@ export default function StatsSection() {
                   )}
 
                   <div className="flex flex-col items-center gap-1">
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-[10px] md:text-xs font-black text-orange-500 uppercase tracking-[0.2em]">
+                    <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-1.5">
+                      <p className="text-[9px] sm:text-[10px] md:text-xs font-black text-orange-500 uppercase tracking-[0.2em]">
                         {stat.label}
                       </p>
                       {/* Trend Arrow */}
-                      <span className="flex items-center text-[9px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">
+                      <span className="flex items-center text-[8px] sm:text-[9px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-md border border-emerald-100">
                         <ArrowUpRight className="w-3 h-3 mr-0.5" />
                         {stat.trend}
                       </span>
                     </div>
-                    <p className="text-[10px] md:text-xs font-bold text-slate-400 italic flex items-center gap-1">
+                    <p className="text-[8px] sm:text-[9px] md:text-xs font-bold text-slate-400 italic flex items-center gap-1">
                       <Zap className="w-3 h-3 text-orange-400 opacity-50" />
                       {stat.desc}
                     </p>

@@ -87,7 +87,7 @@ function StarRating({ count }: { count: number }) {
 
 export default function CustomerReview() {
   return (
-    <section id="reviews" className="relative py-20 md:py-28 px-6 bg-slate-50/50 overflow-hidden">
+    <section id="reviews" className="relative py-16 md:py-24 px-4 sm:px-5 md:px-6 bg-slate-50/50 overflow-hidden">
       {/* Background Decoration - Dot Pattern (Berbeda dengan bagian fitur) */}
       <div className="absolute inset-0 -z-20 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
       <div className="absolute top-[-5%] right-[-10%] w-[400px] h-[400px] bg-orange-200/20 rounded-full blur-[120px] -z-10 opacity-60" />
@@ -101,27 +101,27 @@ export default function CustomerReview() {
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
           variants={stagger}
-          className="text-center mb-16"
+          className="text-center mb-12 sm:mb-14 md:mb-16"
         >
           <motion.p
             variants={fadeUp}
-            className="text-orange-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-4"
+            className="text-orange-500 text-[9px] sm:text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-3 sm:mb-4"
           >
             Social Proof
           </motion.p>
           <motion.h2
             variants={fadeUp}
-            className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 mb-6"
+            className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-slate-900 mb-4 sm:mb-6 leading-[1.1]"
           >
             Loved by Creators <br className="md:hidden"/> Worldwide
           </motion.h2>
           <motion.div
             variants={fadeUp}
-            className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border border-orange-100 px-5 py-2.5 rounded-full shadow-sm"
+            className="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-3 bg-white/60 backdrop-blur-sm border border-orange-100 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-sm"
           >
             <StarRating count={5} />
-            <span className="text-slate-900 font-bold text-sm">4.9/5</span>
-            <span className="text-slate-400 text-xs border-l border-slate-300 pl-3">
+            <span className="text-slate-900 font-bold text-xs sm:text-sm">4.9/5</span>
+            <span className="text-slate-400 text-[10px] sm:text-xs border-t sm:border-t-0 sm:border-l border-slate-300 pt-2 sm:pt-0 sm:pl-3">
               from 2,300+ verified users
             </span>
           </motion.div>
@@ -133,7 +133,7 @@ export default function CustomerReview() {
           whileInView="show"
           viewport={{ once: true, margin: "-50px" }}
           variants={stagger}
-          className="grid md:grid-cols-3 gap-5 md:gap-6"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6"
         >
           {reviews.map((r, i) => {
             // Variant Backgrounds untuk menghilangkan kesan "kotak sama"
@@ -149,32 +149,32 @@ export default function CustomerReview() {
                 variants={fadeUp}
                 custom={i}
                 whileHover={{ scale: 1.02 }}
-                className={`relative p-7 md:p-8 rounded-[2.5rem] flex flex-col justify-between h-full transition-all duration-300 ${cardStyle}`}
+                className={`relative p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl flex flex-col justify-between h-full transition-all duration-300 ${cardStyle}`}
               >
                 {/* Decorative Quote Icon */}
-                <Quote className="absolute top-6 left-6 w-10 h-10 text-orange-200 -z-0 transform -rotate-6" />
+                <Quote className="absolute top-4 sm:top-5 md:top-6 left-4 sm:left-5 md:left-6 w-8 sm:w-9 md:w-10 h-8 sm:h-9 md:h-10 text-orange-200 -z-0 transform -rotate-6" />
                 
                 <div className="relative z-10 flex flex-col h-full">
                   {/* Stars & Header */}
-                  <div className="mb-6">
+                  <div className="mb-4 sm:mb-5 md:mb-6">
                     <StarRating count={r.rating} />
                   </div>
 
                   {/* Review Text */}
-                  <p className="text-slate-700 text-sm md:text-base leading-relaxed font-medium mb-8 flex-1 italic">
+                  <p className="text-slate-700 text-xs sm:text-sm md:text-base leading-relaxed font-medium mb-6 sm:mb-7 md:mb-8 flex-1 italic">
                     "{r.review}"
                   </p>
 
                   {/* Author Section (Minimalist, no box) */}
-                  <div className="mt-auto pt-6 border-t border-slate-200/50 flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold">
+                  <div className="mt-auto pt-4 sm:pt-5 md:pt-6 border-t border-slate-200/50 flex items-center gap-3 sm:gap-4">
+                    <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] sm:text-xs font-bold flex-shrink-0">
                       {r.avatar}
                     </div>
-                    <div>
-                      <div className="text-slate-900 font-black text-sm leading-tight">
+                    <div className="min-w-0">
+                      <div className="text-slate-900 font-black text-xs sm:text-sm leading-tight">
                         {r.name}
                       </div>
-                      <div className="text-slate-500 text-[11px] mt-0.5 font-medium">
+                      <div className="text-slate-500 text-[9px] sm:text-[10px] md:text-[11px] mt-0.5 font-medium truncate">
                         {r.role}
                       </div>
                     </div>

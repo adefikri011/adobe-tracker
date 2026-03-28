@@ -24,7 +24,6 @@ const PREVIEW: Record<string, string> = {
   Default: "📷",
 };
 
-// Derive a fake "performance score" from downloads (0–100)
 function getPerformanceScore(downloads: number): number {
   return Math.min(100, Math.round((downloads / 100) * 100));
 }
@@ -36,12 +35,11 @@ function getScoreColor(score: number): string {
 }
 
 function getScoreBg(score: number): string {
-  if (score >= 70) return "rgba(34,197,94,0.15)";
-  if (score >= 40) return "rgba(249,115,22,0.15)";
-  return "rgba(239,68,68,0.15)";
+  if (score >= 70) return "rgba(34,197,94,0.08)";
+  if (score >= 40) return "rgba(249,115,22,0.08)";
+  return "rgba(239,68,68,0.08)";
 }
 
-// Fake keywords derived from title words
 function getKeywords(title: string, category: string): string[] {
   const words = title
     .toLowerCase()
@@ -66,11 +64,11 @@ export function ResultCard({ item, index }: ResultCardProps) {
 
   return (
     <div
-      className="group relative bg-[#111] border border-white/[0.08] rounded-2xl overflow-hidden transition-all duration-300 hover:border-orange-500/30 hover:shadow-xl hover:shadow-orange-500/5 hover:-translate-y-0.5"
+      className="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 hover:border-orange-400/50 hover:shadow-xl hover:shadow-orange-500/10 hover:-translate-y-0.5"
       style={{ animationDelay: `${index * 40}ms` }}
     >
       {/* ── Thumbnail ── */}
-      <div className="relative w-full aspect-[4/3] bg-white/5 overflow-hidden">
+      <div className="relative w-full aspect-[4/3] bg-gray-50 overflow-hidden">
         {item.thumbnail ? (
           <img
             src={item.thumbnail}
@@ -83,7 +81,7 @@ export function ResultCard({ item, index }: ResultCardProps) {
           />
         ) : null}
 
-        {/* Emoji fallback — hidden if thumbnail loads */}
+        {/* Emoji fallback */}
         <div
           className="absolute inset-0 flex items-center justify-center text-5xl"
           style={item.thumbnail ? { display: "none" } : {}}
@@ -92,12 +90,18 @@ export function ResultCard({ item, index }: ResultCardProps) {
         </div>
 
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Type badge top-right */}
         <div className="absolute top-2.5 right-2.5">
-          <span className="text-[10px] font-semibold px-2 py-1 rounded-md backdrop-blur-sm"
-            style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.85)" }}>
+          <span
+            className="text-[10px] font-semibold px-2 py-1 rounded-md backdrop-blur-sm"
+            style={{
+              background: "rgba(255,255,255,0.85)",
+              border: "1px solid rgba(0,0,0,0.08)",
+              color: "#475569",
+            }}
+          >
             {item.type}
           </span>
         </div>
@@ -107,9 +111,9 @@ export function ResultCard({ item, index }: ResultCardProps) {
           <span
             className="text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-sm"
             style={{
-              background: trendIsPositive ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)",
-              border: trendIsPositive ? "1px solid rgba(34,197,94,0.4)" : "1px solid rgba(239,68,68,0.4)",
-              color: trendIsPositive ? "#4ade80" : "#f87171",
+              background: trendIsPositive ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)",
+              border: trendIsPositive ? "1px solid rgba(34,197,94,0.35)" : "1px solid rgba(239,68,68,0.35)",
+              color: trendIsPositive ? "#16a34a" : "#dc2626",
             }}
           >
             {item.trend}
@@ -120,23 +124,23 @@ export function ResultCard({ item, index }: ResultCardProps) {
       {/* ── Body ── */}
       <div className="p-4">
         {/* Title */}
-        <h3 className="text-sm font-semibold text-white leading-snug mb-0.5 line-clamp-2 group-hover:text-orange-100 transition-colors">
+        <h3 className="text-sm font-semibold text-gray-800 leading-snug mb-0.5 line-clamp-2 group-hover:text-orange-600 transition-colors">
           {item.title}
         </h3>
-        <p className="text-[11px] text-white/35 mb-3 truncate">by {item.creator}</p>
+        <p className="text-[11px] text-gray-400 mb-3 truncate">by {item.creator}</p>
 
         {/* Downloads + Performance score */}
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div
             className="rounded-xl p-2.5 text-center"
-            style={{ background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)" }}
+            style={{ background: "rgba(249,115,22,0.07)", border: "1px solid rgba(249,115,22,0.18)" }}
           >
-            <div className="text-[10px] text-orange-400/70 mb-0.5 uppercase tracking-wide">Downloads</div>
-            <div className="text-base font-bold text-orange-400">{item.downloads.toLocaleString()}</div>
+            <div className="text-[10px] text-orange-500/70 mb-0.5 uppercase tracking-wide">Downloads</div>
+            <div className="text-base font-bold text-orange-500">{item.downloads.toLocaleString()}</div>
           </div>
           <div
             className="rounded-xl p-2.5 text-center"
-            style={{ background: scoreBg, border: `1px solid ${scoreColor}33` }}
+            style={{ background: scoreBg, border: `1px solid ${scoreColor}28` }}
           >
             <div className="text-[10px] mb-0.5 uppercase tracking-wide" style={{ color: `${scoreColor}99` }}>
               Performance
@@ -150,12 +154,12 @@ export function ResultCard({ item, index }: ResultCardProps) {
 
         {/* Revenue */}
         <div className="flex items-center justify-between mb-3 px-0.5">
-          <span className="text-[11px] text-white/30">Revenue Est.</span>
-          <span className="text-sm font-bold text-orange-400">{item.revenue}</span>
+          <span className="text-[11px] text-gray-400">Revenue Est.</span>
+          <span className="text-sm font-bold text-orange-500">{item.revenue}</span>
         </div>
 
         {/* Divider */}
-        <div className="border-t border-white/[0.06] mb-3" />
+        <div className="border-t border-gray-100 mb-3" />
 
         {/* Keywords */}
         <div className="flex flex-wrap gap-1.5">
@@ -164,9 +168,9 @@ export function ResultCard({ item, index }: ResultCardProps) {
               key={`${kw}-${i}`}
               className="text-[10px] px-2 py-0.5 rounded-md transition-colors cursor-default"
               style={{
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "rgba(255,255,255,0.4)",
+                background: "#f8fafc",
+                border: "1px solid #e2e8f0",
+                color: "#94a3b8",
               }}
             >
               {kw}
@@ -181,14 +185,14 @@ export function ResultCard({ item, index }: ResultCardProps) {
 // ── Locked placeholder card ────────────────────────────────────
 export function LockedCard() {
   return (
-    <div className="relative bg-[#111] border border-white/[0.08] rounded-2xl overflow-hidden opacity-40 blur-[2px] pointer-events-none select-none">
-      <div className="w-full aspect-[4/3] bg-white/5" />
+    <div className="relative bg-white border border-gray-200 rounded-2xl overflow-hidden opacity-40 blur-[2px] pointer-events-none select-none">
+      <div className="w-full aspect-[4/3] bg-gray-100" />
       <div className="p-4 space-y-2">
-        <div className="h-3 bg-white/10 rounded w-3/4" />
-        <div className="h-2 bg-white/5 rounded w-1/2" />
+        <div className="h-3 bg-gray-200 rounded w-3/4" />
+        <div className="h-2 bg-gray-100 rounded w-1/2" />
         <div className="grid grid-cols-2 gap-2 mt-3">
-          <div className="h-12 bg-white/5 rounded-xl" />
-          <div className="h-12 bg-white/5 rounded-xl" />
+          <div className="h-12 bg-gray-100 rounded-xl" />
+          <div className="h-12 bg-gray-100 rounded-xl" />
         </div>
       </div>
     </div>
