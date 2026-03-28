@@ -20,12 +20,54 @@ const fadeUp = {
 };
 
 const features = [
-  { icon: BarChart3, title: "Download Analytics", desc: "Track which assets get the most downloads and when. Understand your best performing content." },
-  { icon: Wallet, title: "Revenue Tracking", desc: "Monitor earnings per asset, category, and time period. Know exactly where your income comes from." },
-  { icon: TrendingUp, title: "Market Trends", desc: "Discover trending keywords and categories. Stay ahead of what buyers are looking for." },
-  { icon: LineChart, title: "Performance Charts", desc: "Interactive charts showing your growth over time. Compare periods and spot opportunities." },
-  { icon: Bell, title: "Smart Alerts", desc: "Get notified when your assets hit milestones or when trends shift in your categories." },
-  { icon: Download, title: "Export Reports", desc: "Download your analytics as CSV or Excel. Share reports with your team easily." },
+  { 
+    icon: BarChart3, 
+    title: "Download Analytics", 
+    desc: "Track which assets get the most downloads and when. Understand your best performing content.",
+    // Brand Orange
+    bgClass: "bg-gradient-to-br from-orange-500 to-orange-600",
+    iconClass: "text-white"
+  },
+  { 
+    icon: Wallet, 
+    title: "Revenue Tracking", 
+    desc: "Monitor earnings per asset, category, and time period. Know exactly where your income comes from.",
+    // Amber (Nuansa Emas/Oranye Muda)
+    bgClass: "bg-gradient-to-br from-amber-400 to-orange-500",
+    iconClass: "text-white"
+  },
+  { 
+    icon: TrendingUp, 
+    title: "Market Trends", 
+    desc: "Discover trending keywords and categories. Stay ahead of what buyers are looking for.",
+    // Dark Slate (Memberikan kontras Tech/Data)
+    bgClass: "bg-slate-900",
+    iconClass: "text-white"
+  },
+  { 
+    icon: LineChart, 
+    title: "Performance Charts", 
+    desc: "Interactive charts showing your growth over time. Compare periods and spot opportunities.",
+    // Orange Red (Nuansa hangat)
+    bgClass: "bg-gradient-to-br from-orange-600 to-red-500",
+    iconClass: "text-white"
+  },
+  { 
+    icon: Bell, 
+    title: "Smart Alerts", 
+    desc: "Get notified when your assets hit milestones or when trends shift in your categories.",
+    // Dark Slate (Agar seimbang dengan elemen tech lainnya)
+    bgClass: "bg-slate-800",
+    iconClass: "text-white"
+  },
+  { 
+    icon: Download, 
+    title: "Export Reports", 
+    desc: "Download your analytics as CSV or Excel. Share reports with your team easily.",
+    // Pure Brand Orange
+    bgClass: "bg-gradient-to-br from-orange-500 to-orange-600",
+    iconClass: "text-white"
+  },
 ];
 
 export default function FeaturesSection() {
@@ -34,22 +76,21 @@ export default function FeaturesSection() {
       
       {/* Continuous Storytelling Background */}
       <div className="absolute inset-0 -z-20 bg-gradient-to-b from-white via-orange-50/10 to-white" />
-      {/* Grid Pattern untuk tekstur modern */}
       <div className="absolute inset-0 -z-20 bg-[linear-gradient(to_right,#f9731610_1px,transparent_1px),linear-gradient(to_bottom,#f9731610_1px,transparent_1px)] bg-[size:40px_40px] opacity-30" />
       
+      {/* Background Glows - Disesuaikan jadi Orange & Slate agar match */}
       <div className="absolute top-[10%] left-[-10%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-orange-200/20 rounded-full blur-[120px] -z-10 opacity-60" />
-      <div className="absolute bottom-[10%] right-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-orange-100/20 rounded-full blur-[120px] -z-10 opacity-60" />
+      <div className="absolute bottom-[10%] right-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-slate-200/40 rounded-full blur-[120px] -z-10 opacity-60" />
 
       <div className="max-w-6xl mx-auto px-6">
-        {/* Header Section - Margin Dikurangi */}
+        {/* Header Section */}
         <motion.div
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-100px" }}
-          className="text-center mb-12 md:mb-16"
-        >
-          <motion.span variants={fadeUp} className="px-4 py-1.5 rounded-full bg-orange-50 text-orange-600 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] mb-6 inline-block border border-orange-100">
-            What you get
+          className="text-center mb-12 md:mb-16">
+          <motion.span variants={fadeUp} className="px-4 py-1.5 rounded-full bg-slate-50 text-slate-600 border border-slate-100 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] mb-6 inline-block">
+            Core Features
           </motion.span>
           <motion.h2 variants={fadeUp} className="text-4xl md:text-6xl font-[950] tracking-tighter text-slate-900 mb-6 leading-[0.95]">
             Everything to grow your <span className="text-orange-500">portfolio</span>
@@ -59,7 +100,7 @@ export default function FeaturesSection() {
           </motion.p>
         </motion.div>
 
-        {/* Features Grid - Gap & Padding Dikurangi agar lebih rapi */}
+        {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {features.map((f, i) => (
             <motion.div
@@ -71,17 +112,14 @@ export default function FeaturesSection() {
               custom={i}
               whileHover={{ y: -5 }}
               className="
-                relative bg-white border border-slate-100 rounded-3xl p-6 md:p-8 
-                transition-all duration-500 hover:shadow-2xl hover:shadow-orange-500/10 hover:border-orange-200 
+                relative bg-white border border-slate-100 rounded-[2rem] p-7 md:p-8 
+                transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/50 hover:border-slate-200 
                 group overflow-hidden flex flex-col items-center text-center md:items-start md:text-left
               "
             >
-              {/* Decorative Glow */}
-              <div className="absolute -top-10 -right-10 w-24 h-24 bg-orange-50/50 rounded-full blur-2xl group-hover:bg-orange-100/60 transition-colors" />
-
-              {/* Icon Container */}
-              <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-orange-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                <f.icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
+              {/* Icon Container - Modern Gradient / Dark Theme */}
+              <div className={`w-14 h-14 ${f.bgClass} rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-black/5 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-300`}>
+                <f.icon className={`w-7 h-7 ${f.iconClass}`} strokeWidth={2.5} />
               </div>
 
               {/* Text Content */}

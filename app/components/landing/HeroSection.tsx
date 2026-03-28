@@ -35,9 +35,9 @@ export default function HeroSection() {
           animate="show"
           className="text-4xl sm:text-5xl md:text-7xl lg:text-[80px] font-[900] leading-[1.1] md:leading-[0.95] tracking-tighter mb-6 md:mb-8"
         >
-          <span className="text-slate-900">Track Your Adobe Stock</span>
+          <span className="text-slate-900">Maximize Your Adobe Stock Royalties with</span>
           <br />
-          <span className="text-orange-500 inline-block">Performance.</span>
+          <span className="text-orange-500 inline-block">Data-Driven Insights.</span>
         </motion.h1>
 
         {/* Sub-headline */}
@@ -48,7 +48,7 @@ export default function HeroSection() {
           animate="show"
           className="text-slate-500 text-lg md:text-xl mb-10 md:mb-12 max-w-2xl mx-auto leading-relaxed font-medium px-4"
         >
-          Understand your earnings like never before. Advanced tracking for serious Adobe Stock contributors who want to sell more.
+          Stop guessing which assets sell. Get advanced tracking, real-time analytics, and portfolio performance tools designed for serious contributors who want to scale their earnings.
         </motion.p>
 
         {/* Buttons */}

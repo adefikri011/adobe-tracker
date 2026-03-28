@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Quote } from "lucide-react";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
+  hidden: { opacity: 0, y: 30 },
   show: (i = 0) => ({
     opacity: 1,
     y: 0,
@@ -24,7 +25,6 @@ const reviews = [
     rating: 5,
     review:
       "TrackStock completely changed how I manage my portfolio. I can finally see which assets are driving revenue and double down on what works. My earnings grew 40% in just 3 months.",
-    color: "bg-violet-100 text-violet-600",
   },
   {
     name: "James Kowalski",
@@ -33,7 +33,6 @@ const reviews = [
     rating: 5,
     review:
       "The market trends feature is a game changer. I used to upload blindly — now I know exactly what buyers are searching for before I even shoot. Incredibly powerful tool.",
-    color: "bg-orange-100 text-orange-600",
   },
   {
     name: "Priya Nair",
@@ -42,7 +41,6 @@ const reviews = [
     rating: 4,
     review:
       "Clean, fast, and easy to navigate. The export reports saved me hours every month. I finally have a clear picture of my performance without digging through spreadsheets.",
-    color: "bg-emerald-100 text-emerald-600",
   },
   {
     name: "Carlos Mendez",
@@ -51,7 +49,6 @@ const reviews = [
     rating: 5,
     review:
       "I've tried other analytics tools but nothing comes close. The smart alerts alone are worth it — I got notified when one of my vectors went viral and could respond in real time.",
-    color: "bg-sky-100 text-sky-600",
   },
   {
     name: "Yuki Tanaka",
@@ -60,7 +57,6 @@ const reviews = [
     rating: 5,
     review:
       "As someone managing over 800 assets, having everything in one dashboard is a lifesaver. The performance charts are beautiful and actually useful — not just pretty graphs.",
-    color: "bg-rose-100 text-rose-600",
   },
   {
     name: "Anika Hoffmann",
@@ -69,17 +65,16 @@ const reviews = [
     rating: 4,
     review:
       "Even as a newer contributor, TrackStock helped me understand what's working early on. The free plan was enough to get started and the upgrade was a no-brainer after my first month.",
-    color: "bg-amber-100 text-amber-600",
   },
 ];
 
 function StarRating({ count }: { count: number }) {
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center gap-1">
       {Array.from({ length: 5 }).map((_, i) => (
         <svg
           key={i}
-          className={`w-3.5 h-3.5 ${i < count ? "text-orange-400" : "text-gray-200"}`}
+          className={`w-4 h-4 ${i < count ? "text-orange-400" : "text-slate-200"}`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -92,96 +87,102 @@ function StarRating({ count }: { count: number }) {
 
 export default function CustomerReview() {
   return (
-    <section id="reviews" className="relative py-16 md:py-24 px-6 bg-white overflow-hidden">
-      {/* Continuous Storytelling Background */}
-      <div className="absolute inset-0 -z-20 bg-gradient-to-b from-orange-50/30 via-white to-white" />
+    <section id="reviews" className="relative py-20 md:py-28 px-6 bg-slate-50/50 overflow-hidden">
+      {/* Background Decoration - Dot Pattern (Berbeda dengan bagian fitur) */}
+      <div className="absolute inset-0 -z-20 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20" />
       <div className="absolute top-[-5%] right-[-10%] w-[400px] h-[400px] bg-orange-200/20 rounded-full blur-[120px] -z-10 opacity-60" />
       <div className="absolute bottom-[-10%] left-[-5%] w-[300px] h-[300px] bg-orange-100/15 rounded-full blur-[100px] -z-10 opacity-50" />
       
       <div className="max-w-6xl mx-auto relative z-10">
 
-        {/* Header - Margin Dikurangi */}
+        {/* Header */}
         <motion.div
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
           variants={stagger}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
           <motion.p
             variants={fadeUp}
-            className="text-orange-500 text-[10px] md:text-xs font-bold uppercase tracking-widest mb-3"
+            className="text-orange-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-4"
           >
-            Trusted by contributors
+            Social Proof
           </motion.p>
           <motion.h2
             variants={fadeUp}
-            className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 mb-4"
-            style={{ fontFamily: "'Sora', sans-serif" }}
+            className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 mb-6"
           >
-            What our users say
+            Loved by Creators <br className="md:hidden"/> Worldwide
           </motion.h2>
-          <motion.p
-            variants={fadeUp}
-            className="text-gray-500 text-base md:text-lg font-medium max-w-md mx-auto"
-          >
-            Thousands of Adobe Stock contributors trust TrackStock to grow their business.
-          </motion.p>
-
-          {/* Aggregate rating */}
           <motion.div
             variants={fadeUp}
-            className="flex items-center justify-center gap-3 mt-5"
+            className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm border border-orange-100 px-5 py-2.5 rounded-full shadow-sm"
           >
             <StarRating count={5} />
-            <span className="text-gray-900 font-bold text-sm">4.9</span>
-            <span className="text-gray-400 text-xs">from 2,300+ reviews</span>
+            <span className="text-slate-900 font-bold text-sm">4.9/5</span>
+            <span className="text-slate-400 text-xs border-l border-slate-300 pl-3">
+              from 2,300+ verified users
+            </span>
           </motion.div>
         </motion.div>
 
-        {/* Cards Grid - Gap Dikurangi */}
+        {/* Cards Grid - "Mosaic Glass" Style */}
         <motion.div
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, margin: "-60px" }}
+          viewport={{ once: true, margin: "-50px" }}
           variants={stagger}
-          className="grid md:grid-cols-3 gap-4 md:gap-6"
+          className="grid md:grid-cols-3 gap-5 md:gap-6"
         >
-          {reviews.map((r, i) => (
-            <motion.div
-              key={r.name}
-              variants={fadeUp}
-              custom={i}
-              whileHover={{ y: -5, boxShadow: "0 20px 40px rgba(0,0,0,0.06)" }}
-              className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 flex flex-col gap-3 cursor-default transition-shadow duration-300"
-            >
-              {/* Star */}
-              <div className="mb-1">
-                <StarRating count={r.rating} />
-              </div>
+          {reviews.map((r, i) => {
+            // Variant Backgrounds untuk menghilangkan kesan "kotak sama"
+            const cardStyle = i % 3 === 0 
+              ? "bg-white/80 backdrop-blur-md shadow-xl shadow-slate-200/50" 
+              : i % 3 === 1 
+              ? "bg-slate-50/90 backdrop-blur-md border border-slate-100/50" 
+              : "bg-orange-50/60 backdrop-blur-md border border-orange-100/50";
 
-              {/* Review text */}
-              <p className="text-gray-600 text-sm leading-relaxed font-medium flex-1">
-                "{r.review}"
-              </p>
+            return (
+              <motion.div
+                key={r.name}
+                variants={fadeUp}
+                custom={i}
+                whileHover={{ scale: 1.02 }}
+                className={`relative p-7 md:p-8 rounded-[2.5rem] flex flex-col justify-between h-full transition-all duration-300 ${cardStyle}`}
+              >
+                {/* Decorative Quote Icon */}
+                <Quote className="absolute top-6 left-6 w-10 h-10 text-orange-200 -z-0 transform -rotate-6" />
+                
+                <div className="relative z-10 flex flex-col h-full">
+                  {/* Stars & Header */}
+                  <div className="mb-6">
+                    <StarRating count={r.rating} />
+                  </div>
 
-              {/* Divider */}
-              <div className="h-px bg-gray-100 my-1" />
+                  {/* Review Text */}
+                  <p className="text-slate-700 text-sm md:text-base leading-relaxed font-medium mb-8 flex-1 italic">
+                    "{r.review}"
+                  </p>
 
-              {/* Author */}
-              <div className="flex items-center gap-3 mt-auto">
-                <div
-                  className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-black ${r.color}`}
-                >
-                  {r.avatar}
+                  {/* Author Section (Minimalist, no box) */}
+                  <div className="mt-auto pt-6 border-t border-slate-200/50 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold">
+                      {r.avatar}
+                    </div>
+                    <div>
+                      <div className="text-slate-900 font-black text-sm leading-tight">
+                        {r.name}
+                      </div>
+                      <div className="text-slate-500 text-[11px] mt-0.5 font-medium">
+                        {r.role}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-gray-900 font-bold text-sm">{r.name}</div>
-                  <div className="text-gray-400 text-[11px]">{r.role}</div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </section>
