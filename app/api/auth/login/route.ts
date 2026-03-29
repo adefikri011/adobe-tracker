@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       (authData.user.email ? authData.user.email.split("@")[0] : null);
 
     // Pastikan Profile ada (create jika baru)
-    await prisma.profile.upsert({
+    const profile = await prisma.profile.upsert({
       where: { id: userId },
       update: {
         email: authData.user.email ?? null,
@@ -41,6 +41,9 @@ export async function POST(req: Request) {
         fullName: loginFullName,
         plan: "free",
         role: "user",
+      },
+      select: {
+        role: true,
       },
     });
 
@@ -109,7 +112,13 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ success: true });
+    const redirectTo = profile.role === "admin" ? "/admin" : "/dashboard";
+
+    return NextResponse.json({
+      success: true,
+      role: profile.role,
+      redirectTo,
+    });
 
   } catch (err) {
     console.error("Login Error:", err);

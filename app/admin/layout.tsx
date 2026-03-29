@@ -20,7 +20,11 @@ export default async function AdminLayout({
 
   const profile = await prisma.profile.findUnique({
     where: { id: user.id },
-    select: { role: true },
+    select: {
+      role: true,
+      fullName: true,
+      email: true,
+    },
   });
 
   if (profile?.role !== "admin") redirect("/dashboard");
@@ -33,7 +37,13 @@ export default async function AdminLayout({
 
         {/* Main area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <AdminHeader />
+          <AdminHeader
+            profile={{
+              fullName: profile?.fullName ?? user.user_metadata?.full_name ?? user.email ?? "Admin",
+              email: profile?.email ?? user.email ?? null,
+              role: profile?.role ?? "admin",
+            }}
+          />
           <main className="flex-1 overflow-y-auto p-6 lg:p-8">
             {children}
           </main>

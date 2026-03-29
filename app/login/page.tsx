@@ -228,8 +228,8 @@ export default function LoginPage() {
         refreshCaptcha();
         setLoading(false);
       } else {
-        // Jika sukses, masuk ke dashboard
-        router.push("/dashboard");
+        const redirectTo = data?.redirectTo === "/admin" ? "/admin" : "/dashboard";
+        router.push(redirectTo);
         router.refresh();
       }
     } catch (err) {
