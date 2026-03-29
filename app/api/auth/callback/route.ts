@@ -8,16 +8,16 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const next = requestUrl.searchParams.get("next") ?? "/dashboard";
-  
+
   // GUNAKAN INI: Ambil origin langsung dari URL yang sedang diakses
-  const origin = requestUrl.origin; 
+  const origin = requestUrl.origin;
 
   if (code) {
     const supabase = await createServerSupabaseClient();
-    
+
     // Tukar kode dengan session
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    
+
     if (error) {
       console.error("Auth Error:", error.message);
       return NextResponse.redirect(`${origin}/login?error=auth_failed`);
@@ -26,6 +26,32 @@ export async function GET(request: Request) {
     if (data?.user && data?.session) {
       const userId = data.user.id;
       const token = data.session.access_token;
+
+           try {
+        const googleFullName =
+          data.user.user_metadata?.full_name ||
+          data.user.user_metadata?.name ||
+          (data.user.email ? data.user.email.split("@")[0] : null);
+
+        await prisma.profile.upsert({
+          where: { id: userId },
+          update: {
+            email: data.user.email ?? null,
+            fullName: googleFullName,
+          },
+          create: {
+            id: userId,
+            email: data.user.email ?? null,
+            fullName: googleFullName,
+            plan: "free",
+            role: "user",
+          },
+        });
+
+        console.log("✅ Profile created/updated successfully");
+      } catch (profileError) {
+        console.error("❌ Profile Error:", profileError);
+      }
 
       // --- 1. CEK STATUS SUSPEND ---
       // (Kode kamu yang ini sudah benar, teruskan saja...)
@@ -63,8 +89,13 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/login?error=database_error`);
       }
 
-      // Redirect ke Dashboard (Gunakan origin yang dinamis)
-      return NextResponse.redirect(`${origin}${next}`);
+      const roleProfile = await prisma.profile.findUnique({
+        where: { id: userId },
+        select: { role: true },
+      });
+
+      const redirectPath = roleProfile?.role === "admin" ? "/admin" : next;
+      return NextResponse.redirect(`${origin}${redirectPath}`);
     }
   }
 

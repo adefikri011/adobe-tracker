@@ -7,10 +7,17 @@ datasource db {
   provider  = "postgresql"
 }
 
+enum UserRole {
+  user
+  admin
+}
+
 model Profile {
   id        String   @id
   fullName  String?
+  email     String?  @unique
   plan      String   @default("free")
+  role  UserRole @default(user) 
   createdAt DateTime @default(now())
 }
 

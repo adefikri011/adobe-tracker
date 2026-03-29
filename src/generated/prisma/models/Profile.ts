@@ -27,21 +27,27 @@ export type AggregateProfile = {
 export type ProfileMinAggregateOutputType = {
   id: string | null
   fullName: string | null
+  email: string | null
   plan: string | null
+  role: $Enums.UserRole | null
   createdAt: Date | null
 }
 
 export type ProfileMaxAggregateOutputType = {
   id: string | null
   fullName: string | null
+  email: string | null
   plan: string | null
+  role: $Enums.UserRole | null
   createdAt: Date | null
 }
 
 export type ProfileCountAggregateOutputType = {
   id: number
   fullName: number
+  email: number
   plan: number
+  role: number
   createdAt: number
   _all: number
 }
@@ -50,21 +56,27 @@ export type ProfileCountAggregateOutputType = {
 export type ProfileMinAggregateInputType = {
   id?: true
   fullName?: true
+  email?: true
   plan?: true
+  role?: true
   createdAt?: true
 }
 
 export type ProfileMaxAggregateInputType = {
   id?: true
   fullName?: true
+  email?: true
   plan?: true
+  role?: true
   createdAt?: true
 }
 
 export type ProfileCountAggregateInputType = {
   id?: true
   fullName?: true
+  email?: true
   plan?: true
+  role?: true
   createdAt?: true
   _all?: true
 }
@@ -144,7 +156,9 @@ export type ProfileGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 export type ProfileGroupByOutputType = {
   id: string
   fullName: string | null
+  email: string | null
   plan: string
+  role: $Enums.UserRole
   createdAt: Date
   _count: ProfileCountAggregateOutputType | null
   _min: ProfileMinAggregateOutputType | null
@@ -172,31 +186,39 @@ export type ProfileWhereInput = {
   NOT?: Prisma.ProfileWhereInput | Prisma.ProfileWhereInput[]
   id?: Prisma.StringFilter<"Profile"> | string
   fullName?: Prisma.StringNullableFilter<"Profile"> | string | null
+  email?: Prisma.StringNullableFilter<"Profile"> | string | null
   plan?: Prisma.StringFilter<"Profile"> | string
+  role?: Prisma.EnumUserRoleFilter<"Profile"> | $Enums.UserRole
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
 }
 
 export type ProfileOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   fullName?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
   plan?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  email?: string
   AND?: Prisma.ProfileWhereInput | Prisma.ProfileWhereInput[]
   OR?: Prisma.ProfileWhereInput[]
   NOT?: Prisma.ProfileWhereInput | Prisma.ProfileWhereInput[]
   fullName?: Prisma.StringNullableFilter<"Profile"> | string | null
   plan?: Prisma.StringFilter<"Profile"> | string
+  role?: Prisma.EnumUserRoleFilter<"Profile"> | $Enums.UserRole
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
-}, "id">
+}, "id" | "email">
 
 export type ProfileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   fullName?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
   plan?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ProfileCountOrderByAggregateInput
   _max?: Prisma.ProfileMaxOrderByAggregateInput
@@ -209,77 +231,99 @@ export type ProfileScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ProfileScalarWhereWithAggregatesInput | Prisma.ProfileScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Profile"> | string
   fullName?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
+  email?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
   plan?: Prisma.StringWithAggregatesFilter<"Profile"> | string
+  role?: Prisma.EnumUserRoleWithAggregatesFilter<"Profile"> | $Enums.UserRole
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Profile"> | Date | string
 }
 
 export type ProfileCreateInput = {
   id: string
   fullName?: string | null
+  email?: string | null
   plan?: string
+  role?: $Enums.UserRole
   createdAt?: Date | string
 }
 
 export type ProfileUncheckedCreateInput = {
   id: string
   fullName?: string | null
+  email?: string | null
   plan?: string
+  role?: $Enums.UserRole
   createdAt?: Date | string
 }
 
 export type ProfileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ProfileUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ProfileCreateManyInput = {
   id: string
   fullName?: string | null
+  email?: string | null
   plan?: string
+  role?: $Enums.UserRole
   createdAt?: Date | string
 }
 
 export type ProfileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ProfileUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ProfileCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   plan?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type ProfileMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   plan?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type ProfileMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  email?: Prisma.SortOrder
   plan?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -291,6 +335,10 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
+export type EnumUserRoleFieldUpdateOperationsInput = {
+  set?: $Enums.UserRole
+}
+
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
@@ -300,32 +348,40 @@ export type DateTimeFieldUpdateOperationsInput = {
 export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   fullName?: boolean
+  email?: boolean
   plan?: boolean
+  role?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["profile"]>
 
 export type ProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   fullName?: boolean
+  email?: boolean
   plan?: boolean
+  role?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["profile"]>
 
 export type ProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   fullName?: boolean
+  email?: boolean
   plan?: boolean
+  role?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["profile"]>
 
 export type ProfileSelectScalar = {
   id?: boolean
   fullName?: boolean
+  email?: boolean
   plan?: boolean
+  role?: boolean
   createdAt?: boolean
 }
 
-export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "plan" | "createdAt", ExtArgs["result"]["profile"]>
+export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "email" | "plan" | "role" | "createdAt", ExtArgs["result"]["profile"]>
 
 export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Profile"
@@ -333,7 +389,9 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     fullName: string | null
+    email: string | null
     plan: string
+    role: $Enums.UserRole
     createdAt: Date
   }, ExtArgs["result"]["profile"]>
   composites: {}
@@ -760,7 +818,9 @@ export interface Prisma__ProfileClient<T, Null = never, ExtArgs extends runtime.
 export interface ProfileFieldRefs {
   readonly id: Prisma.FieldRef<"Profile", 'String'>
   readonly fullName: Prisma.FieldRef<"Profile", 'String'>
+  readonly email: Prisma.FieldRef<"Profile", 'String'>
   readonly plan: Prisma.FieldRef<"Profile", 'String'>
+  readonly role: Prisma.FieldRef<"Profile", 'UserRole'>
   readonly createdAt: Prisma.FieldRef<"Profile", 'DateTime'>
 }
     
