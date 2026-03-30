@@ -30,15 +30,16 @@ import {
   Tag,
   Receipt,
   Landmark,
+  Lock
 } from "lucide-react";
 import { useSidebar } from "@/components/admin/SidebarContext";
 import TrackStockLogo from "../icons/brand";
 
 const SETTINGS_ITEMS = [
-  { label: "General",      href: "/admin/settings/general",  icon: Globe       },
-  { label: "Currency",     href: "/admin/settings/currency", icon: CreditCard  },
-  { label: "Timezone",     href: "/admin/settings/timezone", icon: Clock       },
-  { label: "Device Limit", href: "/admin/settings/device",   icon: Smartphone  },
+  { label: "General", href: "/admin/settings/general", icon: Globe },
+  { label: "Currency", href: "/admin/settings/currency", icon: CreditCard },
+  { label: "Timezone", href: "/admin/settings/timezone", icon: Clock },
+  { label: "Device Limit", href: "/admin/settings/device", icon: Smartphone },
 ];
 
 const navGroups = [
@@ -51,18 +52,18 @@ const navGroups = [
   {
     group: "Analytics",
     items: [
-      { label: "Total Earning", href: "/admin/stats/earning",   icon: TrendingUp },
-      { label: "Downloads",     href: "/admin/stats/downloads", icon: Download   },
-      { label: "Assets",        href: "/admin/stats/assets",    icon: ImageIcon  },
-      { label: "Top Keywords",  href: "/admin/stats/keywords",  icon: BarChart3  },
-      { label: "Activity",      href: "/admin/stats/activity",  icon: Activity   },
+      { label: "Total Earning", href: "/admin/stats/earning", icon: TrendingUp },
+      { label: "Downloads", href: "/admin/stats/downloads", icon: Download },
+      { label: "Assets", href: "/admin/stats/assets", icon: ImageIcon },
+      { label: "Top Keywords", href: "/admin/stats/keywords", icon: BarChart3 },
+      { label: "Activity", href: "/admin/stats/activity", icon: Activity },
+
     ],
   },
   {
     group: "Users",
     items: [
-      { label: "User List", href: "/admin/users",       icon: Users   },
-      { label: "Roles",     href: "/admin/users/roles", icon: UserCog },
+      { label: "User List", href: "/admin/users", icon: Users },
     ],
   },
   {
@@ -80,17 +81,19 @@ const navGroups = [
   {
     group: "Billing",
     items: [
-      { label: "Plans & Pricing", href: "/admin/billing/plans",       icon: CreditCard },
-      { label: "Transactions",    href: "/admin/billing/transactions", icon: Receipt    },
-      { label: "Gateway Config",  href: "/admin/billing/gateway",      icon: Landmark   },
+      { label: "Plans & Pricing", href: "/admin/billing/plans", icon: CreditCard },
+      { label: "Transactions", href: "/admin/billing/transactions", icon: Receipt },
+      { label: "Gateway Config", href: "/admin/billing/gateway", icon: Landmark },
+      { label: "Billing History", href: "/admin/billing/history", icon: Lock },
+
     ],
   },
   {
     group: "System",
     items: [
-      { label: "Notifications", href: "/admin/notifications", icon: Bell        },
-      { label: "Activity Log",  href: "/admin/logs/activity", icon: ScrollText  },
-      { label: "Login Log",     href: "/admin/logs/login",    icon: ShieldCheck },
+      { label: "Notifications", href: "/admin/notifications", icon: Bell },
+      { label: "Activity Log", href: "/admin/logs/activity", icon: ScrollText },
+      { label: "Login Log", href: "/admin/logs/login", icon: ShieldCheck },
     ],
   },
 ];
@@ -195,11 +198,10 @@ export default function AdminSidebar() {
                       )}
                       <Icon
                         size={17}
-                        className={`flex-shrink-0 transition-colors ${
-                          active
+                        className={`flex-shrink-0 transition-colors ${active
                             ? "text-orange-500"
                             : "text-slate-400 group-hover:text-slate-600"
-                        }`}
+                          }`}
                       />
                       <AnimatePresence>
                         {!collapsed && (
@@ -208,9 +210,8 @@ export default function AdminSidebar() {
                             animate={{ opacity: 1, width: "auto" }}
                             exit={{ opacity: 0, width: 0 }}
                             transition={{ duration: 0.2 }}
-                            className={`text-sm font-medium whitespace-nowrap overflow-hidden flex-1 ${
-                              active ? "text-orange-600" : ""
-                            }`}
+                            className={`text-sm font-medium whitespace-nowrap overflow-hidden flex-1 ${active ? "text-orange-600" : ""
+                              }`}
                           >
                             {item.label}
                           </motion.span>
@@ -266,11 +267,10 @@ export default function AdminSidebar() {
             )}
             <Settings
               size={17}
-              className={`flex-shrink-0 ${
-                isSettingsActive
+              className={`flex-shrink-0 ${isSettingsActive
                   ? "text-orange-500"
                   : "text-slate-400 group-hover:text-slate-600"
-              }`}
+                }`}
             />
             <AnimatePresence>
               {!collapsed && (
@@ -278,9 +278,8 @@ export default function AdminSidebar() {
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: "auto" }}
                   exit={{ opacity: 0, width: 0 }}
-                  className={`text-sm font-medium whitespace-nowrap overflow-hidden flex-1 ${
-                    isSettingsActive ? "text-orange-600" : ""
-                  }`}
+                  className={`text-sm font-medium whitespace-nowrap overflow-hidden flex-1 ${isSettingsActive ? "text-orange-600" : ""
+                    }`}
                 >
                   Settings
                 </motion.span>

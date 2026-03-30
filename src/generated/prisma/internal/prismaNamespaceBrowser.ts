@@ -79,6 +79,8 @@ export const ProfileScalarFieldEnum = {
   email: 'email',
   plan: 'plan',
   role: 'role',
+  status: 'status',
+  deviceLimit: 'deviceLimit',
   createdAt: 'createdAt'
 } as const
 
@@ -114,7 +116,7 @@ export type AssetScalarFieldEnum = (typeof AssetScalarFieldEnum)[keyof typeof As
 
 export const UserSessionScalarFieldEnum = {
   id: 'id',
-  activeSessionId: 'activeSessionId',
+  activeSessions: 'activeSessions',
   suspendedUntil: 'suspendedUntil',
   updatedAt: 'updatedAt'
 } as const

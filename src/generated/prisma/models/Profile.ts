@@ -20,8 +20,18 @@ export type ProfileModel = runtime.Types.Result.DefaultSelection<Prisma.$Profile
 
 export type AggregateProfile = {
   _count: ProfileCountAggregateOutputType | null
+  _avg: ProfileAvgAggregateOutputType | null
+  _sum: ProfileSumAggregateOutputType | null
   _min: ProfileMinAggregateOutputType | null
   _max: ProfileMaxAggregateOutputType | null
+}
+
+export type ProfileAvgAggregateOutputType = {
+  deviceLimit: number | null
+}
+
+export type ProfileSumAggregateOutputType = {
+  deviceLimit: number | null
 }
 
 export type ProfileMinAggregateOutputType = {
@@ -30,6 +40,8 @@ export type ProfileMinAggregateOutputType = {
   email: string | null
   plan: string | null
   role: $Enums.UserRole | null
+  status: $Enums.UserStatus | null
+  deviceLimit: number | null
   createdAt: Date | null
 }
 
@@ -39,6 +51,8 @@ export type ProfileMaxAggregateOutputType = {
   email: string | null
   plan: string | null
   role: $Enums.UserRole | null
+  status: $Enums.UserStatus | null
+  deviceLimit: number | null
   createdAt: Date | null
 }
 
@@ -48,10 +62,20 @@ export type ProfileCountAggregateOutputType = {
   email: number
   plan: number
   role: number
+  status: number
+  deviceLimit: number
   createdAt: number
   _all: number
 }
 
+
+export type ProfileAvgAggregateInputType = {
+  deviceLimit?: true
+}
+
+export type ProfileSumAggregateInputType = {
+  deviceLimit?: true
+}
 
 export type ProfileMinAggregateInputType = {
   id?: true
@@ -59,6 +83,8 @@ export type ProfileMinAggregateInputType = {
   email?: true
   plan?: true
   role?: true
+  status?: true
+  deviceLimit?: true
   createdAt?: true
 }
 
@@ -68,6 +94,8 @@ export type ProfileMaxAggregateInputType = {
   email?: true
   plan?: true
   role?: true
+  status?: true
+  deviceLimit?: true
   createdAt?: true
 }
 
@@ -77,6 +105,8 @@ export type ProfileCountAggregateInputType = {
   email?: true
   plan?: true
   role?: true
+  status?: true
+  deviceLimit?: true
   createdAt?: true
   _all?: true
 }
@@ -119,6 +149,18 @@ export type ProfileAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ProfileAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ProfileSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ProfileMinAggregateInputType
@@ -149,6 +191,8 @@ export type ProfileGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: ProfileCountAggregateInputType | true
+  _avg?: ProfileAvgAggregateInputType
+  _sum?: ProfileSumAggregateInputType
   _min?: ProfileMinAggregateInputType
   _max?: ProfileMaxAggregateInputType
 }
@@ -159,8 +203,12 @@ export type ProfileGroupByOutputType = {
   email: string | null
   plan: string
   role: $Enums.UserRole
+  status: $Enums.UserStatus
+  deviceLimit: number
   createdAt: Date
   _count: ProfileCountAggregateOutputType | null
+  _avg: ProfileAvgAggregateOutputType | null
+  _sum: ProfileSumAggregateOutputType | null
   _min: ProfileMinAggregateOutputType | null
   _max: ProfileMaxAggregateOutputType | null
 }
@@ -189,6 +237,8 @@ export type ProfileWhereInput = {
   email?: Prisma.StringNullableFilter<"Profile"> | string | null
   plan?: Prisma.StringFilter<"Profile"> | string
   role?: Prisma.EnumUserRoleFilter<"Profile"> | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFilter<"Profile"> | $Enums.UserStatus
+  deviceLimit?: Prisma.IntFilter<"Profile"> | number
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
 }
 
@@ -198,6 +248,8 @@ export type ProfileOrderByWithRelationInput = {
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   plan?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  deviceLimit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -210,6 +262,8 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   fullName?: Prisma.StringNullableFilter<"Profile"> | string | null
   plan?: Prisma.StringFilter<"Profile"> | string
   role?: Prisma.EnumUserRoleFilter<"Profile"> | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFilter<"Profile"> | $Enums.UserStatus
+  deviceLimit?: Prisma.IntFilter<"Profile"> | number
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
 }, "id" | "email">
 
@@ -219,10 +273,14 @@ export type ProfileOrderByWithAggregationInput = {
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   plan?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  deviceLimit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ProfileCountOrderByAggregateInput
+  _avg?: Prisma.ProfileAvgOrderByAggregateInput
   _max?: Prisma.ProfileMaxOrderByAggregateInput
   _min?: Prisma.ProfileMinOrderByAggregateInput
+  _sum?: Prisma.ProfileSumOrderByAggregateInput
 }
 
 export type ProfileScalarWhereWithAggregatesInput = {
@@ -234,6 +292,8 @@ export type ProfileScalarWhereWithAggregatesInput = {
   email?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
   plan?: Prisma.StringWithAggregatesFilter<"Profile"> | string
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"Profile"> | $Enums.UserRole
+  status?: Prisma.EnumUserStatusWithAggregatesFilter<"Profile"> | $Enums.UserStatus
+  deviceLimit?: Prisma.IntWithAggregatesFilter<"Profile"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Profile"> | Date | string
 }
 
@@ -243,6 +303,8 @@ export type ProfileCreateInput = {
   email?: string | null
   plan?: string
   role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  deviceLimit?: number
   createdAt?: Date | string
 }
 
@@ -252,6 +314,8 @@ export type ProfileUncheckedCreateInput = {
   email?: string | null
   plan?: string
   role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  deviceLimit?: number
   createdAt?: Date | string
 }
 
@@ -261,6 +325,8 @@ export type ProfileUpdateInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -270,6 +336,8 @@ export type ProfileUncheckedUpdateInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -279,6 +347,8 @@ export type ProfileCreateManyInput = {
   email?: string | null
   plan?: string
   role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  deviceLimit?: number
   createdAt?: Date | string
 }
 
@@ -288,6 +358,8 @@ export type ProfileUpdateManyMutationInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -297,6 +369,8 @@ export type ProfileUncheckedUpdateManyInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -306,7 +380,13 @@ export type ProfileCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   plan?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  deviceLimit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type ProfileAvgOrderByAggregateInput = {
+  deviceLimit?: Prisma.SortOrder
 }
 
 export type ProfileMaxOrderByAggregateInput = {
@@ -315,6 +395,8 @@ export type ProfileMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   plan?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  deviceLimit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -324,7 +406,13 @@ export type ProfileMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   plan?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  deviceLimit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type ProfileSumOrderByAggregateInput = {
+  deviceLimit?: Prisma.SortOrder
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -339,6 +427,18 @@ export type EnumUserRoleFieldUpdateOperationsInput = {
   set?: $Enums.UserRole
 }
 
+export type EnumUserStatusFieldUpdateOperationsInput = {
+  set?: $Enums.UserStatus
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
@@ -351,6 +451,8 @@ export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   email?: boolean
   plan?: boolean
   role?: boolean
+  status?: boolean
+  deviceLimit?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["profile"]>
 
@@ -360,6 +462,8 @@ export type ProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   email?: boolean
   plan?: boolean
   role?: boolean
+  status?: boolean
+  deviceLimit?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["profile"]>
 
@@ -369,6 +473,8 @@ export type ProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   email?: boolean
   plan?: boolean
   role?: boolean
+  status?: boolean
+  deviceLimit?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["profile"]>
 
@@ -378,10 +484,12 @@ export type ProfileSelectScalar = {
   email?: boolean
   plan?: boolean
   role?: boolean
+  status?: boolean
+  deviceLimit?: boolean
   createdAt?: boolean
 }
 
-export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "email" | "plan" | "role" | "createdAt", ExtArgs["result"]["profile"]>
+export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "email" | "plan" | "role" | "status" | "deviceLimit" | "createdAt", ExtArgs["result"]["profile"]>
 
 export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Profile"
@@ -392,6 +500,8 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     email: string | null
     plan: string
     role: $Enums.UserRole
+    status: $Enums.UserStatus
+    deviceLimit: number
     createdAt: Date
   }, ExtArgs["result"]["profile"]>
   composites: {}
@@ -821,6 +931,8 @@ export interface ProfileFieldRefs {
   readonly email: Prisma.FieldRef<"Profile", 'String'>
   readonly plan: Prisma.FieldRef<"Profile", 'String'>
   readonly role: Prisma.FieldRef<"Profile", 'UserRole'>
+  readonly status: Prisma.FieldRef<"Profile", 'UserStatus'>
+  readonly deviceLimit: Prisma.FieldRef<"Profile", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Profile", 'DateTime'>
 }
     

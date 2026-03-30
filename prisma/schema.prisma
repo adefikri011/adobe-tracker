@@ -12,13 +12,22 @@ enum UserRole {
   admin
 }
 
+enum UserStatus {
+  active
+  suspended
+}
+
 model Profile {
   id        String   @id
   fullName  String?
   email     String?  @unique
   plan      String   @default("free")
-  role  UserRole @default(user) 
+  role      UserRole @default(user) 
+  status    UserStatus @default(active)
+  deviceLimit Int    @default(1)
   createdAt DateTime @default(now())
+
+  @@map("Profile")
 }
 
 model SearchCache {
@@ -44,7 +53,10 @@ model Asset {
 
 model UserSession {
   id              String   @id 
-  activeSessionId String?  @unique 
+  activeSessions  Json     @default("[]")  // Array of active sessions: [{token, device, createdAt}]
   suspendedUntil  DateTime? 
   updatedAt       DateTime @updatedAt
+
+  @@map("UserSession")
 }
+

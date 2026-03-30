@@ -2,6 +2,45 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
+type SessionEntry = {
+  token: string;
+  createdAt?: string;
+};
+
+function parseSessionEntries(raw: unknown): SessionEntry[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  return raw
+    .filter((entry) => entry && typeof entry === "object")
+    .map((entry) => {
+      const item = entry as Partial<SessionEntry>;
+      return {
+        token: typeof item.token === "string" ? item.token : "",
+        createdAt: typeof item.createdAt === "string" ? item.createdAt : undefined,
+      };
+    })
+    .filter((entry) => entry.token.length > 0);
+}
+
+function keepRecentSessions(sessions: SessionEntry[]) {
+  const cutoffMs = 30 * 24 * 60 * 60 * 1000;
+
+  return sessions.filter((session) => {
+    if (!session.createdAt) {
+      return true;
+    }
+
+    const createdMs = new Date(session.createdAt).getTime();
+    if (Number.isNaN(createdMs)) {
+      return false;
+    }
+
+    return Date.now() - createdMs < cutoffMs;
+  });
+}
+
 export async function GET() {
   const supabase = await createServerSupabaseClient();
 
@@ -39,15 +78,23 @@ export async function GET() {
       });
     }
 
-    if (!sessionRecord?.activeSessionId) {
-      await supabase.auth.signOut();
-
-      return NextResponse.json({
-        status: "session_revoked",
-      });
+    if (sessionRecord?.suspendedUntil && sessionRecord.suspendedUntil <= now) {
+      await Promise.all([
+        prisma.userSession.update({
+          where: { id: user.id },
+          data: { suspendedUntil: null },
+        }),
+        prisma.profile.update({
+          where: { id: user.id },
+          data: { status: "active" },
+        }),
+      ]);
     }
 
-    if (sessionRecord.activeSessionId !== accessToken) {
+    const activeSessions = keepRecentSessions(parseSessionEntries(sessionRecord?.activeSessions));
+    const hasCurrentToken = activeSessions.some((session) => session.token === accessToken);
+
+    if (!hasCurrentToken) {
       await supabase.auth.signOut();
 
       return NextResponse.json({

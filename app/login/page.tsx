@@ -118,8 +118,8 @@ export default function LoginPage() {
     if (errorType === "double_login") {
       const fallbackSeconds = getSecondsFromUntil(until) || (minutes ? parseInt(minutes, 10) * 60 : 300);
       const msg = minutes
-        ? `Akun terdeteksi login dari perangkat kedua. Demi keamanan, akun ini diblokir sementara selama ${minutes} menit.`
-        : "Akun terdeteksi login dari perangkat kedua. Demi keamanan, akun ini diblokir sementara.";
+        ? `Account detected login from a second device. For security, this account is temporarily blocked for ${minutes} minutes.`
+        : "Account detected login from a second device. For security, this account is temporarily blocked.";
       setSuspendMsg(msg);
       setSuspendFlowActive(true);
       setSuspendSecondsLeft(fallbackSeconds);
@@ -130,8 +130,8 @@ export default function LoginPage() {
     if (errorType === "suspended") {
       const fallbackSeconds = getSecondsFromUntil(until) || (minutes ? parseInt(minutes, 10) * 60 : 300);
       const msg = minutes
-        ? `Akun Anda sedang di-suspend. Silakan tunggu ${minutes} menit lagi.`
-        : "Akun Anda sedang di-suspend sementara.";
+        ? `Your account is currently suspended. Please wait ${minutes} more minutes.`
+        : "Your account is currently suspended.";
       setSuspendMsg(msg);
       setSuspendFlowActive(true);
       setSuspendSecondsLeft(fallbackSeconds);
@@ -140,7 +140,7 @@ export default function LoginPage() {
     }
 
     if (errorType === "session_expired") {
-      setError("Sesi Anda sudah tidak aktif. Silakan login kembali.");
+      setError("Your session has expired. Please login again.");
       setSuspendFlowActive(false);
       clearSuspendQuery();
     }
@@ -148,8 +148,8 @@ export default function LoginPage() {
     if (errorType === "device_conflict") {
       const fallbackSeconds = getSecondsFromUntil(until) || (minutes ? parseInt(minutes, 10) * 60 : 300);
       const msg = minutes
-        ? `Sesi Anda di perangkat ini dihentikan karena akun ditemukan aktif di perangkat kedua. Akun diblokir sementara ${minutes} menit.`
-        : "Sesi Anda di perangkat ini dihentikan karena akun ditemukan aktif di perangkat kedua.";
+        ? `Your session on this device has been terminated because the account was found active on another device. Account is temporarily blocked for ${minutes} minutes.`
+        : "Your session on this device has been terminated because the account was found active on another device.";
       setSuspendMsg(msg);
       setSuspendFlowActive(true);
       setSuspendSecondsLeft(fallbackSeconds);
@@ -213,6 +213,17 @@ export default function LoginPage() {
       const data = await loginRes.json();
 
       if (!loginRes.ok) {
+        // Check jika suspended status
+        if (data.error === "SUSPENDED_ACCOUNT") {
+          setSuspendMsg("Your account has been suspended due to unauthorized access attempts. Please contact support for assistance.");
+          setSuspendFlowActive(true);
+          setSuspendSecondsLeft(0);
+          setShowSuspendModal(true);
+          refreshCaptcha();
+          setLoading(false);
+          return;
+        }
+        
         // Cek jika errornya karena Double Login atau Suspend
         if (data.error === "DOUBLE_LOGIN" || data.error === "SUSPENDED") {
           setSuspendMsg(data.message);
@@ -420,7 +431,7 @@ export default function LoginPage() {
               <p className="text-slate-500 font-medium mb-6 leading-relaxed text-sm">{suspendMsg}</p>
               {suspendSecondsLeft > 0 && (
                 <div className="mb-6 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border border-orange-200">
-                  <p className="text-xs text-slate-600 font-semibold mb-2 uppercase tracking-wide">Waktu Blokir Tersisa</p>
+                  <p className="text-xs text-slate-600 font-semibold mb-2 uppercase tracking-wide">Time Remaining</p>
                   <p className="text-4xl font-[900] text-orange-600 font-mono tracking-tight">
                     {String(Math.floor(suspendSecondsLeft / 60)).padStart(2, "0")}:
                     {String(suspendSecondsLeft % 60).padStart(2, "0")}

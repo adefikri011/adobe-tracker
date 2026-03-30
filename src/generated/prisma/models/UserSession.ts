@@ -26,21 +26,19 @@ export type AggregateUserSession = {
 
 export type UserSessionMinAggregateOutputType = {
   id: string | null
-  activeSessionId: string | null
   suspendedUntil: Date | null
   updatedAt: Date | null
 }
 
 export type UserSessionMaxAggregateOutputType = {
   id: string | null
-  activeSessionId: string | null
   suspendedUntil: Date | null
   updatedAt: Date | null
 }
 
 export type UserSessionCountAggregateOutputType = {
   id: number
-  activeSessionId: number
+  activeSessions: number
   suspendedUntil: number
   updatedAt: number
   _all: number
@@ -49,21 +47,19 @@ export type UserSessionCountAggregateOutputType = {
 
 export type UserSessionMinAggregateInputType = {
   id?: true
-  activeSessionId?: true
   suspendedUntil?: true
   updatedAt?: true
 }
 
 export type UserSessionMaxAggregateInputType = {
   id?: true
-  activeSessionId?: true
   suspendedUntil?: true
   updatedAt?: true
 }
 
 export type UserSessionCountAggregateInputType = {
   id?: true
-  activeSessionId?: true
+  activeSessions?: true
   suspendedUntil?: true
   updatedAt?: true
   _all?: true
@@ -143,7 +139,7 @@ export type UserSessionGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 
 export type UserSessionGroupByOutputType = {
   id: string
-  activeSessionId: string | null
+  activeSessions: runtime.JsonValue
   suspendedUntil: Date | null
   updatedAt: Date
   _count: UserSessionCountAggregateOutputType | null
@@ -171,31 +167,31 @@ export type UserSessionWhereInput = {
   OR?: Prisma.UserSessionWhereInput[]
   NOT?: Prisma.UserSessionWhereInput | Prisma.UserSessionWhereInput[]
   id?: Prisma.StringFilter<"UserSession"> | string
-  activeSessionId?: Prisma.StringNullableFilter<"UserSession"> | string | null
+  activeSessions?: Prisma.JsonFilter<"UserSession">
   suspendedUntil?: Prisma.DateTimeNullableFilter<"UserSession"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"UserSession"> | Date | string
 }
 
 export type UserSessionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  activeSessionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  activeSessions?: Prisma.SortOrder
   suspendedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type UserSessionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  activeSessionId?: string
   AND?: Prisma.UserSessionWhereInput | Prisma.UserSessionWhereInput[]
   OR?: Prisma.UserSessionWhereInput[]
   NOT?: Prisma.UserSessionWhereInput | Prisma.UserSessionWhereInput[]
+  activeSessions?: Prisma.JsonFilter<"UserSession">
   suspendedUntil?: Prisma.DateTimeNullableFilter<"UserSession"> | Date | string | null
   updatedAt?: Prisma.DateTimeFilter<"UserSession"> | Date | string
-}, "id" | "activeSessionId">
+}, "id">
 
 export type UserSessionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  activeSessionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  activeSessions?: Prisma.SortOrder
   suspendedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserSessionCountOrderByAggregateInput
@@ -208,77 +204,75 @@ export type UserSessionScalarWhereWithAggregatesInput = {
   OR?: Prisma.UserSessionScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserSessionScalarWhereWithAggregatesInput | Prisma.UserSessionScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"UserSession"> | string
-  activeSessionId?: Prisma.StringNullableWithAggregatesFilter<"UserSession"> | string | null
+  activeSessions?: Prisma.JsonWithAggregatesFilter<"UserSession">
   suspendedUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"UserSession"> | Date | string | null
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"UserSession"> | Date | string
 }
 
 export type UserSessionCreateInput = {
   id: string
-  activeSessionId?: string | null
+  activeSessions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   suspendedUntil?: Date | string | null
   updatedAt?: Date | string
 }
 
 export type UserSessionUncheckedCreateInput = {
   id: string
-  activeSessionId?: string | null
+  activeSessions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   suspendedUntil?: Date | string | null
   updatedAt?: Date | string
 }
 
 export type UserSessionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  activeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activeSessions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserSessionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  activeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activeSessions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserSessionCreateManyInput = {
   id: string
-  activeSessionId?: string | null
+  activeSessions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   suspendedUntil?: Date | string | null
   updatedAt?: Date | string
 }
 
 export type UserSessionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  activeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activeSessions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserSessionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  activeSessionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activeSessions?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   suspendedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type UserSessionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  activeSessionId?: Prisma.SortOrder
+  activeSessions?: Prisma.SortOrder
   suspendedUntil?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type UserSessionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  activeSessionId?: Prisma.SortOrder
   suspendedUntil?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type UserSessionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  activeSessionId?: Prisma.SortOrder
   suspendedUntil?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -291,40 +285,40 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type UserSessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  activeSessionId?: boolean
+  activeSessions?: boolean
   suspendedUntil?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["userSession"]>
 
 export type UserSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  activeSessionId?: boolean
+  activeSessions?: boolean
   suspendedUntil?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["userSession"]>
 
 export type UserSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  activeSessionId?: boolean
+  activeSessions?: boolean
   suspendedUntil?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["userSession"]>
 
 export type UserSessionSelectScalar = {
   id?: boolean
-  activeSessionId?: boolean
+  activeSessions?: boolean
   suspendedUntil?: boolean
   updatedAt?: boolean
 }
 
-export type UserSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "activeSessionId" | "suspendedUntil" | "updatedAt", ExtArgs["result"]["userSession"]>
+export type UserSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "activeSessions" | "suspendedUntil" | "updatedAt", ExtArgs["result"]["userSession"]>
 
 export type $UserSessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "UserSession"
   objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    activeSessionId: string | null
+    activeSessions: runtime.JsonValue
     suspendedUntil: Date | null
     updatedAt: Date
   }, ExtArgs["result"]["userSession"]>
@@ -751,7 +745,7 @@ export interface Prisma__UserSessionClient<T, Null = never, ExtArgs extends runt
  */
 export interface UserSessionFieldRefs {
   readonly id: Prisma.FieldRef<"UserSession", 'String'>
-  readonly activeSessionId: Prisma.FieldRef<"UserSession", 'String'>
+  readonly activeSessions: Prisma.FieldRef<"UserSession", 'Json'>
   readonly suspendedUntil: Prisma.FieldRef<"UserSession", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"UserSession", 'DateTime'>
 }
