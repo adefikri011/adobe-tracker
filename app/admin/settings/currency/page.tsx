@@ -3,16 +3,12 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 
 const currencies = [
-  { code: "USD", name: "US Dollar",       symbol: "$",  flag: "🇺🇸" },
   { code: "IDR", name: "Indonesian Rupiah", symbol: "Rp", flag: "🇮🇩" },
-  { code: "EUR", name: "Euro",             symbol: "€",  flag: "🇪🇺" },
-  { code: "GBP", name: "British Pound",    symbol: "£",  flag: "🇬🇧" },
-  { code: "SGD", name: "Singapore Dollar", symbol: "S$", flag: "🇸🇬" },
-  { code: "MYR", name: "Malaysian Ringgit",symbol: "RM", flag: "🇲🇾" },
+  { code: "USD", name: "US Dollar", symbol: "$", flag: "🇺🇸" },
 ];
 
 export default function CurrencySettingsPage() {
-  const [selected, setSelected] = useState("USD");
+  const [selected, setSelected] = useState("IDR");
   const [usdToIdr, setUsdToIdr] = useState("15800");
   const [saved, setSaved] = useState(false);
 
@@ -31,12 +27,12 @@ export default function CurrencySettingsPage() {
       {/* Currency Selector */}
       <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm mb-5">
         <h3 className="font-semibold text-slate-900 mb-4 text-sm">Select Currency</h3>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {currencies.map((c) => (
             <button
               key={c.code}
               onClick={() => setSelected(c.code)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition text-left ${
+              className={`flex items-center gap-3 px-4 py-4 rounded-xl border transition text-left min-h-[88px] ${
                 selected === c.code
                   ? "border-orange-400 bg-orange-50"
                   : "border-slate-200 hover:border-orange-200 hover:bg-slate-50"

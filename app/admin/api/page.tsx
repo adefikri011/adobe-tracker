@@ -1,138 +1,140 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
 import { 
-  Plug, 
-  Key, 
-  RefreshCw, 
-  ExternalLink, 
-  ShieldCheck,
-  Zap,
-  Clock
+  Plug, RefreshCw, CheckCircle2, AlertCircle, 
+  Database, Zap, Clock, ExternalLink 
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function ApiIntegrationPage() {
   const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState("2 hours ago");
 
-  const handleManualSync = () => {
+  // Fungsi simulasi narik data (Trigger Apify Actor)
+  const handleSync = () => {
     setIsSyncing(true);
-    setTimeout(() => setIsSyncing(false), 2000);
+    // Di sini nanti panggil API Route Next.js kamu yang nembak ke Apify
+    setTimeout(() => {
+      setIsSyncing(false);
+      setLastSync("Just now");
+    }, 5000); 
   };
 
   return (
-    <div className="p-6 md:p-10 bg-[#FBFCFE] min-h-screen">
-      {/* ── Header Section (Clean & Light) ────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+    <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-8">
+      
+      {/* ── Header Area ────────────────────────────────────────── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1e293b] tracking-tight">API Integration</h1>
-          <p className="text-sm text-slate-400 mt-1 font-medium">Hubungkan website dengan Adobe Stock Developers API.</p>
+          <h1 className="text-2xl font-black text-slate-900 italic">API Integration</h1>
+          <p className="text-sm text-slate-400 font-medium">Connect and sync your Adobe Stock data via Apify.</p>
         </div>
-        
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-50 border border-green-100">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[11px] font-bold text-green-600 uppercase tracking-wider">Connected</span>
+        <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-100 rounded-2xl">
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">System Online</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* ── API Form (Sesuaikan dengan Card di Foto) ───────────────── */}
+        {/* ── Left: Main Action Card (Narik Data) ────────────────── */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-[24px] border border-slate-100/50 shadow-sm p-8">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-2.5 bg-orange-50 rounded-xl text-orange-500">
-                <Key size={18} />
-              </div>
-              <h3 className="text-lg font-semibold text-[#1e293b]">Adobe Developer Credentials</h3>
+          <div className="bg-white border border-orange-100 rounded-[40px] p-8 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <Zap size={120} className="text-orange-500" />
             </div>
+            
+            <div className="relative z-10">
+              <h3 className="text-lg font-bold text-slate-800 mb-2">Manual Synchronization</h3>
+              <p className="text-xs text-slate-400 mb-8 leading-relaxed max-w-md">
+                Trigger the robot to fetch the latest sales, earnings, and asset performance from your Adobe Stock account. 
+                <span className="text-orange-500 font-bold"> (Cost: ~Rp800/sync)</span>
+              </p>
 
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">API Key (Client ID)</label>
-                <input 
-                  type="password" 
-                  defaultValue="adobe_stock_live_8392xxxxxxxx"
-                  className="w-full px-5 py-3 bg-[#f8fafc] border border-slate-100 rounded-2xl text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500/50 transition-all font-medium"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">API Secret</label>
-                <input 
-                  type="password" 
-                  placeholder="Masukkan API Secret..." 
-                  className="w-full px-5 py-3 bg-[#f8fafc] border border-slate-100 rounded-2xl text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500/50 transition-all font-medium"
-                />
-              </div>
-            </div>
-
-            <div className="mt-10 flex gap-3">
-              <button className="flex-1 bg-[#ff6b00] text-white font-semibold py-3.5 rounded-2xl shadow-md shadow-orange-100 hover:bg-[#e66000] transition-all active:scale-[0.98] text-sm">
-                Save Configuration
-              </button>
-              <button className="px-6 py-3.5 bg-slate-50 text-slate-400 font-semibold rounded-2xl hover:bg-slate-100 transition-all text-sm border border-slate-100">
-                Reset
-              </button>
-            </div>
-          </div>
-
-          {/* ── Sync Section ─────────────────────────────────────── */}
-          <div className="bg-white rounded-[24px] border border-slate-100/50 shadow-sm p-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-50 text-blue-500 rounded-2xl">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <button 
+                  onClick={handleSync}
+                  disabled={isSyncing}
+                  className={`w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 rounded-3xl font-black text-sm transition-all shadow-xl ${
+                    isSyncing 
+                    ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
+                    : "bg-[#ff6b00] text-white shadow-orange-200 hover:scale-[1.03] active:scale-95"
+                  }`}
+                >
                   <RefreshCw size={20} className={isSyncing ? "animate-spin" : ""} />
-                </div>
-                <div>
-                  <h3 className="text-base font-semibold text-[#1e293b]">Data Synchronization</h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">Terakhir update: 5 menit yang lalu</p>
+                  {isSyncing ? "FETCHING DATA..." : "SYNC NOW"}
+                </button>
+                
+                <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
+                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Last Activity</span>
+                  <span className="text-sm font-bold text-slate-600">{lastSync}</span>
                 </div>
               </div>
-              <button 
-                onClick={handleManualSync}
-                disabled={isSyncing}
-                className="flex items-center justify-center gap-2 px-6 py-3 bg-[#1e293b] text-white rounded-2xl font-semibold text-xs hover:bg-orange-600 transition-all disabled:opacity-50"
-              >
-                {isSyncing ? "Syncing..." : "Refresh Data"}
-                <RefreshCw size={14} className={isSyncing ? "animate-spin" : ""} />
-              </button>
+            </div>
+          </div>
+
+          {/* Setup Table (API Credentials) */}
+          <div className="bg-white border border-slate-100 rounded-[32px] p-8">
+            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-6">API Configuration</h3>
+            <div className="space-y-4">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="space-y-1">
+                   <label className="text-[10px] font-bold text-slate-400 ml-2">Apify Token</label>
+                   <input type="password" value="************************" readOnly className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-mono" />
+                 </div>
+                 <div className="space-y-1">
+                   <label className="text-[10px] font-bold text-slate-400 ml-2">Actor ID (louisdeconinck)</label>
+                   <input type="text" value="louisdeconinck/adobe-stock-scraper" readOnly className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-mono text-slate-400" />
+                 </div>
+               </div>
             </div>
           </div>
         </div>
 
-        {/* ── Sidebar (Clean Sidebar) ────────────────────────────── */}
+        {/* ── Right: Stats & Info ────────────────────────────────── */}
         <div className="space-y-6">
-          <div className="bg-[#1e293b] rounded-[24px] p-8 text-white relative overflow-hidden">
-             <div className="relative z-10">
-               <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/20">
-                 <Zap size={20} fill="currentColor" />
-               </div>
-               <h4 className="text-lg font-semibold mb-2 tracking-tight">Auto-Sync Active</h4>
-               <p className="text-xs text-slate-400 font-medium leading-relaxed mb-6">
-                 Sistem sinkronisasi otomatis berjalan setiap 6 jam untuk memperbarui data aset.
-               </p>
-               <div className="flex items-center gap-2 text-[11px] font-bold bg-white/5 w-fit px-3 py-1.5 rounded-lg border border-white/5">
-                 <Clock size={14} className="text-orange-400" />
-                 Next: 22:00 WIB
-               </div>
-             </div>
-             {/* Subtle Graphic */}
-             <div className="absolute -right-6 -bottom-6 text-white opacity-[0.03]">
-               <ShieldCheck size={180} />
-             </div>
+          <div className="bg-[#1e293b] rounded-[32px] p-8 text-white shadow-xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-white/10 rounded-xl text-orange-400">
+                <Database size={20} />
+              </div>
+              <h4 className="font-bold">Sync Stats</h4>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex justify-between items-end border-b border-white/5 pb-4">
+                <span className="text-[10px] text-slate-400 font-bold uppercase">Total Syncs (Monthly)</span>
+                <span className="text-xl font-black">124</span>
+              </div>
+              <div className="flex justify-between items-end border-b border-white/5 pb-4">
+                <span className="text-[10px] text-slate-400 font-bold uppercase">Estimated Cost</span>
+                <span className="text-xl font-black text-orange-400">$1.24</span>
+              </div>
+            </div>
+
+            <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/10">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock size={14} className="text-orange-400" />
+                <span className="text-[10px] font-bold uppercase">Auto-Sync Schedule</span>
+              </div>
+              <p className="text-xs font-bold text-slate-300">Every 6 Hours (00:00, 06:00, 12:00, 18:00)</p>
+            </div>
           </div>
 
-          <div className="bg-[#fff7ed] rounded-[24px] p-8 border border-orange-100/50">
-             <h4 className="text-sm font-bold text-orange-600 uppercase tracking-widest mb-3">Help Center</h4>
-             <p className="text-xs text-orange-900/60 font-medium leading-relaxed mb-5">
-               Gunakan Client ID dari portal Adobe Developer untuk memulai.
-             </p>
-             <a href="#" className="flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:gap-2 transition-all">
-               Portal Adobe <ExternalLink size={12} />
-             </a>
+          <div className="p-6 bg-blue-50 border border-blue-100 rounded-3xl">
+            <div className="flex gap-3">
+              <AlertCircle size={18} className="text-blue-600 shrink-0" />
+              <div className="space-y-1">
+                <p className="text-[11px] font-bold text-blue-900">How it works?</p>
+                <p className="text-[10px] text-blue-700 leading-relaxed">
+                  Clicking "Sync Now" will trigger the Apify Actor. Data will be saved to your Supabase DB instantly once the process is complete.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
   );
