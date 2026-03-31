@@ -1,4 +1,6 @@
 "use client";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export type Asset = {
   adobeId: string;
@@ -11,43 +13,65 @@ export type Asset = {
   revenue: string;
   status: string;
   thumbnail?: string;
-};
-
-const PREVIEW: Record<string, string> = {
-  Nature: "🌅",
-  Business: "💼",
-  Abstract: "🌊",
-  Technology: "💻",
-  Lifestyle: "☕",
-  Art: "🌸",
-  Urban: "🌃",
-  Default: "📷",
+  uploadDate?: string;
+  contentUrl?: string;
+  artistUrl?: string;
+  keywords?: string[];
 };
 
 function getPerformanceScore(downloads: number): number {
-  return Math.min(100, Math.round((downloads / 100) * 100));
+  return Math.min(100, Math.round((downloads / 500) * 100));
 }
 
-function getScoreColor(score: number): string {
-  if (score >= 70) return "#22c55e";
-  if (score >= 40) return "#f97316";
-  return "#ef4444";
+function getTimeAgoFromDate(dateStr: string): string {
+  try {
+    const parts = dateStr.split("/");
+    if (parts.length !== 3) return "";
+    const date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+    const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+    const years = Math.floor(diff / 31536000);
+    const months = Math.floor(diff / 2592000);
+    const days = Math.floor(diff / 86400);
+    if (years > 0) return `${years}y ago`;
+    if (months > 0) return `${months}mo ago`;
+    if (days > 0) return `${days}d ago`;
+    return "today";
+  } catch {
+    return "";
+  }
 }
 
-function getScoreBg(score: number): string {
-  if (score >= 70) return "rgba(34,197,94,0.08)";
-  if (score >= 40) return "rgba(249,115,22,0.08)";
-  return "rgba(239,68,68,0.08)";
-}
-
-function getKeywords(title: string, category: string): string[] {
-  const words = title
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, "")
-    .split(" ")
-    .filter((w) => w.length > 3)
-    .slice(0, 4);
-  return [category.toLowerCase(), ...words].slice(0, 5);
+function ImageModal({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ background: "rgba(0,0,0,0.88)" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      >
+        <motion.div
+          className="relative max-w-4xl max-h-[90vh] rounded-2xl overflow-hidden shadow-2xl"
+          initial={{ scale: 0.88, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.88, opacity: 0, y: 20 }}
+          transition={{ type: "spring", stiffness: 320, damping: 28 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <img src={src} alt={alt} className="max-w-full max-h-[85vh] object-contain" />
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm"
+            style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)" }}
+          >
+            ✕
+          </button>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
 }
 
 interface ResultCardProps {
@@ -56,145 +80,364 @@ interface ResultCardProps {
 }
 
 export function ResultCard({ item, index }: ResultCardProps) {
+  const [showModal, setShowModal] = useState(false);
+  const [hovering, setHovering] = useState(false);
+
   const score = getPerformanceScore(item.downloads);
-  const scoreColor = getScoreColor(score);
-  const scoreBg = getScoreBg(score);
-  const keywords = getKeywords(item.title, item.category);
-  const trendIsPositive = item.trend.startsWith("+");
+  const timeAgo = item.uploadDate ? getTimeAgoFromDate(item.uploadDate) : "";
+  const keywords = item.keywords && item.keywords.length > 0 ? item.keywords : [];
+
+  // Performance color — all warm, no blue
+  const perfColor =
+    score >= 70
+      ? { bg: "#16a34a", light: "#dcfce7", text: "#15803d" }
+      : score >= 40
+      ? { bg: "#f97316", light: "#fff7ed", text: "#ea580c" }
+      : { bg: "#94a3b8", light: "#f1f5f9", text: "#64748b" };
 
   return (
-    <div
-      className="group relative bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-300 hover:border-orange-400/50 hover:shadow-xl hover:shadow-orange-500/10 hover:-translate-y-0.5"
-      style={{ animationDelay: `${index * 40}ms` }}
-    >
-      {/* ── Thumbnail ── */}
-      <div className="relative w-full aspect-[4/3] bg-gray-50 overflow-hidden">
-        {item.thumbnail ? (
-          <img
-            src={item.thumbnail}
-            alt={item.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              (e.currentTarget.nextElementSibling as HTMLElement | null)?.removeAttribute("style");
-            }}
-          />
-        ) : null}
+    <>
+      {showModal && item.thumbnail && (
+        <ImageModal src={item.thumbnail} alt={item.title} onClose={() => setShowModal(false)} />
+      )}
 
-        {/* Emoji fallback */}
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+        whileHover={{ y: -6, transition: { duration: 0.22 } }}
+        className="group relative bg-white rounded-2xl overflow-hidden flex flex-col"
+        style={{
+          border: "1px solid #f0ede8",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+        }}
+        onMouseEnter={() => {}}
+        onMouseLeave={() => {}}
+      >
+        {/* ── Thumbnail ── */}
         <div
-          className="absolute inset-0 flex items-center justify-center text-5xl"
-          style={item.thumbnail ? { display: "none" } : {}}
+          className="relative w-full aspect-[4/3] overflow-hidden bg-gray-50 cursor-pointer"
+          onMouseEnter={() => setHovering(true)}
+          onMouseLeave={() => setHovering(false)}
+          onClick={() => item.thumbnail && setShowModal(true)}
         >
-          {PREVIEW[item.category] ?? PREVIEW.Default}
-        </div>
-
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Type badge top-right */}
-        <div className="absolute top-2.5 right-2.5">
-          <span
-            className="text-[10px] font-semibold px-2 py-1 rounded-md backdrop-blur-sm"
-            style={{
-              background: "rgba(255,255,255,0.85)",
-              border: "1px solid rgba(0,0,0,0.08)",
-              color: "#475569",
-            }}
-          >
-            {item.type}
-          </span>
-        </div>
-
-        {/* Trend badge top-left */}
-        <div className="absolute top-2.5 left-2.5">
-          <span
-            className="text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-sm"
-            style={{
-              background: trendIsPositive ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)",
-              border: trendIsPositive ? "1px solid rgba(34,197,94,0.35)" : "1px solid rgba(239,68,68,0.35)",
-              color: trendIsPositive ? "#16a34a" : "#dc2626",
-            }}
-          >
-            {item.trend}
-          </span>
-        </div>
-      </div>
-
-      {/* ── Body ── */}
-      <div className="p-4">
-        {/* Title */}
-        <h3 className="text-sm font-semibold text-gray-800 leading-snug mb-0.5 line-clamp-2 group-hover:text-orange-600 transition-colors">
-          {item.title}
-        </h3>
-        <p className="text-[11px] text-gray-400 mb-3 truncate">by {item.creator}</p>
-
-        {/* Downloads + Performance score */}
-        <div className="grid grid-cols-2 gap-2 mb-3">
-          <div
-            className="rounded-xl p-2.5 text-center"
-            style={{ background: "rgba(249,115,22,0.07)", border: "1px solid rgba(249,115,22,0.18)" }}
-          >
-            <div className="text-[10px] text-orange-500/70 mb-0.5 uppercase tracking-wide">Downloads</div>
-            <div className="text-base font-bold text-orange-500">{item.downloads.toLocaleString()}</div>
-          </div>
-          <div
-            className="rounded-xl p-2.5 text-center"
-            style={{ background: scoreBg, border: `1px solid ${scoreColor}28` }}
-          >
-            <div className="text-[10px] mb-0.5 uppercase tracking-wide" style={{ color: `${scoreColor}99` }}>
-              Performance
+          {item.thumbnail ? (
+            <motion.img
+              src={item.thumbnail}
+              alt={item.title}
+              className="w-full h-full object-cover"
+              animate={{ scale: hovering ? 1.07 : 1 }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).style.display = "none";
+              }}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-5xl bg-orange-50">
+              🖼️
             </div>
-            <div className="text-base font-bold" style={{ color: scoreColor }}>
-              {score}
-              <span className="text-[10px] font-normal opacity-60">/100</span>
-            </div>
-          </div>
-        </div>
+          )}
 
-        {/* Revenue */}
-        <div className="flex items-center justify-between mb-3 px-0.5">
-          <span className="text-[11px] text-gray-400">Revenue Est.</span>
-          <span className="text-sm font-bold text-orange-500">{item.revenue}</span>
-        </div>
+          {/* Gradient overlay on hover */}
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)",
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: hovering ? 1 : 0 }}
+            transition={{ duration: 0.3 }}
+          />
 
-        {/* Divider */}
-        <div className="border-t border-gray-100 mb-3" />
-
-        {/* Keywords */}
-        <div className="flex flex-wrap gap-1.5">
-          {keywords.map((kw, i) => (
-            <span
-              key={`${kw}-${i}`}
-              className="text-[10px] px-2 py-0.5 rounded-md transition-colors cursor-default"
+          {/* Action buttons */}
+          <motion.div
+            className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2.5 px-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: hovering ? 1 : 0, y: hovering ? 0 : 10 }}
+            transition={{ duration: 0.25 }}
+          >
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-bold text-white"
               style={{
-                background: "#f8fafc",
-                border: "1px solid #e2e8f0",
-                color: "#94a3b8",
+                background: "rgba(255,255,255,0.18)",
+                backdropFilter: "blur(8px)",
+                border: "1px solid rgba(255,255,255,0.32)",
               }}
             >
-              {kw}
+              🔍 Preview
+            </motion.button>
+
+            {item.contentUrl && (
+              <motion.a
+                href={item.contentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-bold text-white"
+                style={{
+                  background: "linear-gradient(135deg, #f97316, #ea580c)",
+                  border: "1px solid rgba(249,115,22,0.4)",
+                }}
+              >
+                🔗 Adobe Stock
+              </motion.a>
+            )}
+          </motion.div>
+
+          {/* Status badge — top left */}
+          <div className="absolute top-2.5 left-2.5">
+            <span
+              className="text-[10px] font-bold px-2.5 py-1 rounded-lg"
+              style={{
+                background:
+                  item.status === "Free"
+                    ? "rgba(22,163,74,0.92)"
+                    : "rgba(234,88,12,0.92)",
+                color: "#fff",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              {item.status}
             </span>
-          ))}
+          </div>
+
+          {/* Type badge — top right */}
+          <div className="absolute top-2.5 right-2.5">
+            <span
+              className="text-[10px] font-semibold px-2.5 py-1 rounded-lg"
+              style={{
+                background: "rgba(255,255,255,0.9)",
+                color: "#6b7280",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              {item.type}
+            </span>
+          </div>
         </div>
-      </div>
-    </div>
+
+        {/* ── Card Body ── */}
+        <div className="p-4 flex flex-col gap-3 flex-1">
+
+          {/* Title */}
+          <div>
+            <p className="text-[9px] font-black text-orange-300 uppercase tracking-[0.18em] mb-0.5">Asset Title</p>
+            <h3 className="text-[13px] font-bold text-gray-800 leading-snug line-clamp-2 group-hover:text-orange-500 transition-colors duration-200">
+              {item.title}
+            </h3>
+          </div>
+
+          {/* ── Stats row: Downloads + Performance ── */}
+          <div className="grid grid-cols-2 gap-2">
+            {/* Downloads — orange warm instead of blue */}
+            <div
+              className="rounded-xl p-3"
+              style={{
+                background: "linear-gradient(135deg, #fff7ed, #ffedd5)",
+                border: "1px solid #fed7aa",
+              }}
+            >
+              <div className="flex items-center gap-1 mb-1">
+                <span className="text-orange-400 text-[10px]">⬇</span>
+                <span className="text-[9px] font-black text-orange-400 uppercase tracking-wider">Downloads</span>
+              </div>
+              <div className="text-xl font-black text-orange-600">{item.downloads.toLocaleString()}</div>
+            </div>
+
+            {/* Performance */}
+            <div
+              className="rounded-xl p-3"
+              style={{
+                background: `linear-gradient(135deg, ${perfColor.light}, ${perfColor.light})`,
+                border: `1px solid ${perfColor.bg}30`,
+              }}
+            >
+              <div className="flex items-center gap-1 mb-1">
+                <span className="text-[10px]" style={{ color: perfColor.text }}>⚡</span>
+                <span className="text-[9px] font-black uppercase tracking-wider" style={{ color: perfColor.text }}>
+                  Score
+                </span>
+              </div>
+              <div className="flex items-end gap-0.5">
+                <span className="text-xl font-black" style={{ color: perfColor.bg }}>{score}</span>
+                <span className="text-[11px] font-medium mb-0.5" style={{ color: perfColor.text }}>/100</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress bar for score */}
+          <div className="space-y-1">
+            <div className="w-full h-1.5 rounded-full bg-gray-100 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: perfColor.bg }}
+                initial={{ width: 0 }}
+                animate={{ width: `${score}%` }}
+                transition={{ duration: 0.9, delay: index * 0.07 + 0.3, ease: "easeOut" }}
+              />
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1.5">
+            <span
+              className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
+              style={{ background: "#fff7ed", color: "#ea580c", border: "1px solid #fed7aa" }}
+            >
+              {item.category}
+            </span>
+            <span
+              className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
+              style={{ background: "#f8fafc", color: "#64748b", border: "1px solid #e2e8f0" }}
+            >
+              {item.type}
+            </span>
+          </div>
+
+          {/* Upload date */}
+          {item.uploadDate && item.uploadDate !== "-" && (
+            <div
+              className="flex items-center gap-2 px-3 py-2 rounded-xl"
+              style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}
+            >
+              <span className="text-green-500 text-xs">📅</span>
+              <span className="text-[11px] text-green-700">
+                {item.uploadDate}
+                {timeAgo && (
+                  <span className="text-green-400 ml-1.5 font-normal">· {timeAgo}</span>
+                )}
+              </span>
+            </div>
+          )}
+
+          {/* Artist / Portfolio */}
+          {item.artistUrl && (
+            <motion.a
+              href={item.artistUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ x: 2 }}
+              className="flex items-center justify-between w-full px-3 py-2.5 rounded-xl transition-all duration-200"
+              style={{ border: "1px solid #f0ede8" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = "#fed7aa";
+                (e.currentTarget as HTMLElement).style.background = "#fff7ed";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = "#f0ede8";
+                (e.currentTarget as HTMLElement).style.background = "transparent";
+              }}
+            >
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-black flex-shrink-0"
+                  style={{ background: "linear-gradient(135deg, #f97316, #c2410c)" }}
+                >
+                  {item.creator.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-[8px] font-black text-orange-300 uppercase tracking-wider">Portfolio</p>
+                  <p className="text-[11px] font-semibold text-gray-700 truncate max-w-[120px]">
+                    {item.creator}
+                  </p>
+                </div>
+              </div>
+              <span className="text-orange-300 text-base font-light">›</span>
+            </motion.a>
+          )}
+
+          {/* Revenue */}
+          <div
+            className="flex items-center justify-between px-3 py-2 rounded-xl"
+            style={{ background: "#fafafa", border: "1px solid #f0ede8" }}
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="text-gray-300 text-xs">💰</span>
+              <span className="text-[11px] text-gray-400 font-medium">Revenue Est.</span>
+            </div>
+            <span
+              className="text-sm font-black"
+              style={{ color: "#ea580c" }}
+            >
+              {item.revenue}
+            </span>
+          </div>
+
+          {/* Keywords */}
+          {keywords.length > 0 && (
+            <div style={{ borderTop: "1px solid #f0ede8" }} className="pt-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-orange-400 text-xs">🏷</span>
+                <span className="text-[9px] font-black text-gray-300 uppercase tracking-wider">
+                  Keywords
+                </span>
+                <span
+                  className="text-[9px] font-bold px-1.5 py-0.5 rounded-md"
+                  style={{ background: "#fff7ed", color: "#ea580c" }}
+                >
+                  {keywords.length}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {keywords.slice(0, 8).map((kw, i) => (
+                  <motion.span
+                    key={`${kw}-${i}`}
+                    whileHover={{ scale: 1.06 }}
+                    className="text-[10px] px-2 py-0.5 rounded-md cursor-default transition-all duration-150"
+                    style={{
+                      background: "#f8fafc",
+                      border: "1px solid #e2e8f0",
+                      color: "#64748b",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor = "#fed7aa";
+                      (e.currentTarget as HTMLElement).style.color = "#ea580c";
+                      (e.currentTarget as HTMLElement).style.background = "#fff7ed";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor = "#e2e8f0";
+                      (e.currentTarget as HTMLElement).style.color = "#64748b";
+                      (e.currentTarget as HTMLElement).style.background = "#f8fafc";
+                    }}
+                  >
+                    {kw}
+                  </motion.span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </>
   );
 }
 
-// ── Locked placeholder card ────────────────────────────────────
 export function LockedCard() {
   return (
-    <div className="relative bg-white border border-gray-200 rounded-2xl overflow-hidden opacity-40 blur-[2px] pointer-events-none select-none">
-      <div className="w-full aspect-[4/3] bg-gray-100" />
-      <div className="p-4 space-y-2">
-        <div className="h-3 bg-gray-200 rounded w-3/4" />
-        <div className="h-2 bg-gray-100 rounded w-1/2" />
-        <div className="grid grid-cols-2 gap-2 mt-3">
-          <div className="h-12 bg-gray-100 rounded-xl" />
-          <div className="h-12 bg-gray-100 rounded-xl" />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="relative bg-white rounded-2xl overflow-hidden opacity-30 blur-[2.5px] pointer-events-none select-none"
+      style={{ border: "1px solid #f0ede8" }}
+    >
+      <div className="w-full aspect-[4/3] bg-gradient-to-br from-orange-50 to-amber-100" />
+      <div className="p-4 space-y-3">
+        <div className="h-2.5 bg-orange-100 rounded-lg w-3/4" />
+        <div className="h-2 bg-gray-100 rounded-lg w-1/2" />
+        <div className="grid grid-cols-2 gap-2">
+          <div className="h-16 bg-orange-50 rounded-xl border border-orange-100" />
+          <div className="h-16 bg-gray-50 rounded-xl border border-gray-100" />
         </div>
+        <div className="h-1.5 bg-orange-100 rounded-full" />
+        <div className="h-9 bg-gray-50 rounded-xl" />
+        <div className="h-9 bg-gray-50 rounded-xl" />
       </div>
-    </div>
+    </motion.div>
   );
 }

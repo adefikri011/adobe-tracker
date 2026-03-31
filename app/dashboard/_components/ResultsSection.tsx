@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { ResultCard, LockedCard, Asset } from "./ResultCard";
 
 function getTimeAgo(dateStr: string): string {
@@ -9,65 +10,66 @@ function getTimeAgo(dateStr: string): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
+const TYPE_FILTERS = ["All Types", "Photo", "Video", "Vector", "Template"];
+
 interface ResultsSectionProps {
   results: Asset[];
   query: string;
   isPro: boolean;
   fromCache: boolean;
   cachedAt: string | null;
+  total?: number;
   onUpgradeClick: () => void;
   onExportCSV: () => void;
 }
 
 export function ResultsSection({
-  results,
-  query,
-  isPro,
-  fromCache,
-  cachedAt,
-  onUpgradeClick,
-  onExportCSV,
+  results, query, isPro, fromCache, cachedAt, total,
+  onUpgradeClick, onExportCSV,
 }: ResultsSectionProps) {
-  const visibleResults = isPro ? results : results.slice(0, 6);
-  const lockedResults = isPro ? [] : results.slice(6);
+  const [activeFilter, setActiveFilter] = useState("All Types");
+
+  const filtered = activeFilter === "All Types"
+    ? results
+    : results.filter((r) => r.type.toLowerCase() === activeFilter.toLowerCase());
+
+  const visibleResults = isPro ? filtered : filtered.slice(0, 6);
+  const lockedResults = isPro ? [] : filtered.slice(6);
 
   return (
     <div>
-      {/* ── Toolbar ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="font-semibold text-sm sm:text-base">
-              Results for{" "}
+            <h2 className="font-semibold text-sm sm:text-base text-gray-800">
+              <span className="font-bold text-orange-500">{total ?? results.length}</span>
+              {" "}results for{" "}
               <span className="text-orange-500">&ldquo;{query}&rdquo;</span>
             </h2>
             {fromCache ? (
-              <span className="text-xs bg-green-500/10 border border-green-500/30 text-green-400 px-2 py-1 rounded-lg">
+              <span className="text-xs bg-green-50 border border-green-200 text-green-600 px-2 py-0.5 rounded-lg">
                 ⚡ Cached {cachedAt ? getTimeAgo(cachedAt) : ""}
               </span>
             ) : (
-              <span className="text-xs bg-blue-500/10 border border-blue-500/30 text-blue-400 px-2 py-1 rounded-lg">
+              <span className="text-xs bg-blue-50 border border-blue-200 text-blue-600 px-2 py-0.5 rounded-lg">
                 🔄 Live Data
               </span>
             )}
           </div>
-          <p className="text-white/30 text-xs mt-0.5">
-            {results.length} assets · Sorted by downloads
-          </p>
+          <p className="text-gray-400 text-xs mt-0.5">Sorted by popularity</p>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={onExportCSV}
-            className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition px-3 sm:px-4 py-2 rounded-lg text-xs font-medium text-white/60 hover:text-white"
-          >
+          <button onClick={onExportCSV}
+            className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 transition px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:text-gray-800">
             ⬇ Export CSV
-            {!isPro && <span className="text-white/25">(6 rows)</span>}
+            {!isPro && <span className="text-gray-400">(6 rows)</span>}
           </button>
           {!isPro && (
-            <div className="bg-orange-500/10 border border-orange-500/30 px-3 py-2 rounded-lg text-xs text-orange-400">
-              6 of {results.length} shown ·{" "}
-              <span onClick={onUpgradeClick} className="underline cursor-pointer">
+            <div className="bg-orange-50 border border-orange-200 px-3 py-2 rounded-lg text-xs text-orange-600">
+              6 of {filtered.length} shown ·{" "}
+              <span onClick={onUpgradeClick} className="underline cursor-pointer font-semibold">
                 Upgrade
               </span>
             </div>
@@ -75,76 +77,59 @@ export function ResultsSection({
         </div>
       </div>
 
-      {/* ── Card Grid ── */}
+      {/* Filter tabs */}
+      <div className="flex items-center gap-2 flex-wrap mb-5">
+        {TYPE_FILTERS.map((f) => (
+          <button key={f} onClick={() => setActiveFilter(f)}
+            className="text-xs px-3 py-1.5 rounded-full border transition-all font-medium"
+            style={{
+              background: activeFilter === f ? "#f97316" : "#f8fafc",
+              borderColor: activeFilter === f ? "#f97316" : "#e2e8f0",
+              color: activeFilter === f ? "#fff" : "#64748b",
+            }}>
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {visibleResults.map((item, i) => (
           <ResultCard key={item.adobeId} item={item} index={i} />
         ))}
-
-        {/* Locked cards */}
         {!isPro && lockedResults.length > 0 && (
-          <>
-            {lockedResults.slice(0, 3).map((item) => (
-              <LockedCard key={item.adobeId} />
-            ))}
-          </>
+          lockedResults.slice(0, 3).map((item) => (
+            <LockedCard key={item.adobeId} />
+          ))
         )}
       </div>
 
-      {/* ── Locked Upgrade Overlay ── */}
+      {/* Upgrade CTA */}
       {!isPro && lockedResults.length > 0 && (
         <div className="relative mt-6">
-          {/* Fade mask */}
-          <div
-            className="absolute -top-20 left-0 right-0 h-20 pointer-events-none z-10"
-            style={{
-              background: "linear-gradient(to bottom, transparent, #0a0a0a)",
-            }}
-          />
-
-          {/* CTA */}
-          <div
-            className="relative z-20 rounded-2xl p-6 sm:p-8 text-center mx-auto max-w-md"
-            style={{
-              background: "rgba(10,10,10,0.95)",
-              border: "1px solid rgba(249,115,22,0.25)",
-              boxShadow: "0 0 40px rgba(249,115,22,0.08)",
-            }}
-          >
-            <div
-              className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl"
-              style={{ background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.2)" }}
-            >
+          <div className="absolute -top-20 left-0 right-0 h-20 pointer-events-none z-10"
+            style={{ background: "linear-gradient(to bottom, transparent, #ffffff)" }} />
+          <div className="relative z-20 rounded-2xl p-6 sm:p-8 text-center mx-auto max-w-md border border-orange-200 bg-orange-50">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl bg-orange-100">
               🔒
             </div>
-            <h3 className="font-bold text-base mb-1">Unlock All {results.length} Results</h3>
-            <p className="text-white/40 text-sm mb-5">
-              {lockedResults.length} more assets are hidden. Upgrade to Pro to see everything.
+            <h3 className="font-bold text-base mb-1 text-gray-800">Unlock All {filtered.length} Results</h3>
+            <p className="text-gray-500 text-sm mb-5">
+              {lockedResults.length} more assets hidden. Upgrade to Pro.
             </p>
             <div className="grid grid-cols-2 gap-2 mb-5 text-left">
-              {[
-                "Unlimited search results",
-                "Full analytics data",
-                "Export CSV / Excel",
-                "Priority support",
-              ].map((f) => (
-                <div key={f} className="flex items-center gap-1.5 text-xs text-white/50">
-                  <span className="text-green-400 flex-shrink-0">✓</span>
-                  {f}
+              {["Unlimited results", "Full analytics", "Export CSV", "Priority support"].map((f) => (
+                <div key={f} className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <span className="text-green-500">✓</span> {f}
                 </div>
               ))}
             </div>
-            <button
-              onClick={onUpgradeClick}
-              className="w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.99]"
-              style={{
-                background: "linear-gradient(135deg, #f97316, #ea580c)",
-                boxShadow: "0 0 24px rgba(249,115,22,0.35)",
-              }}
-            >
+            <button onClick={onUpgradeClick}
+              className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-all hover:scale-[1.02]"
+              style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}>
               Upgrade to Pro — $9/mo
             </button>
-            <p className="text-white/20 text-xs mt-3">No commitment · Cancel anytime</p>
+            <p className="text-gray-400 text-xs mt-3">No commitment · Cancel anytime</p>
           </div>
         </div>
       )}

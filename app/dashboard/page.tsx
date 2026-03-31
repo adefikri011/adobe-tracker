@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Navbar } from "./_components/Navbar";
 import { SearchBar } from "./_components/SearchBar";
 import { DashboardHome } from "./_components/DashboardHome";
-import { StatsCards } from "./_components/StatsCards";
 import { SearchCharts } from "./_components/SearchCharts";
+import { KeywordStats } from "./_components/KeywordStats";
 import { ResultsSection } from "./_components/ResultsSection";
 import { PaymentModal } from "./_components/PaymentModal";
 import { Asset } from "./_components/ResultCard";
@@ -21,6 +21,7 @@ export default function DashboardPage() {
   const [results, setResults] = useState<Asset[]>([]);
   const [fromCache, setFromCache] = useState(false);
   const [cachedAt, setCachedAt] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
   const [isPro, setIsPro] = useState(false);
   const [planLoading, setPlanLoading] = useState(true);
   const [showPayment, setShowPayment] = useState(false);
@@ -40,7 +41,6 @@ export default function DashboardPage() {
 
     const checkSessionStatus = async () => {
       if (isRedirecting) return;
-
       try {
         const res = await fetch("/api/auth/session-status", {
           method: "GET",
@@ -76,9 +76,7 @@ export default function DashboardPage() {
     };
 
     const handleVisibilityOrFocus = () => {
-      if (!document.hidden) {
-        checkSessionStatus();
-      }
+      if (!document.hidden) checkSessionStatus();
     };
 
     checkSessionStatus();
@@ -104,9 +102,10 @@ export default function DashboardPage() {
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
-      setResults(data.results);
-      setFromCache(data.fromCache);
+      setResults(data.results ?? []);
+      setFromCache(data.fromCache ?? false);
       setCachedAt(data.cachedAt ?? null);
+      setTotal(data.total ?? data.results?.length ?? 0);
       setSearched(true);
     } catch {
       console.error("Search failed");
@@ -116,10 +115,16 @@ export default function DashboardPage() {
 
   const handleExportCSV = () => {
     const exportData = isPro ? results : results.slice(0, 6);
-    const headers = ["Title", "Creator", "Category", "Type", "Downloads", "Trend", "Revenue"];
+    const headers = ["Title", "Creator", "Category", "Type", "Downloads", "Trend", "Revenue", "Upload Date"];
     const rows = exportData.map((a) => [
-      `"${a.title}"`, `"${a.creator}"`, `"${a.category}"`,
-      a.type, a.downloads, a.trend, `"${a.revenue}"`,
+      `"${a.title}"`,
+      `"${a.creator}"`,
+      `"${a.category}"`,
+      a.type,
+      a.downloads,
+      a.trend,
+      `"${a.revenue}"`,
+      `"${a.uploadDate ?? "-"}"`,
     ]);
     const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -159,14 +164,20 @@ export default function DashboardPage() {
 
           {searched && (
             <div>
-              <StatsCards results={results} query={query} />
+              {/* Charts — bar + pie */}
               <SearchCharts results={results} query={query} />
+
+              {/* Keyword stats bar — di bawah grafik, di atas results */}
+              <KeywordStats results={results} query={query} total={total} />
+
+              {/* Results grid */}
               <ResultsSection
                 results={results}
                 query={query}
                 isPro={isPro}
                 fromCache={fromCache}
                 cachedAt={cachedAt}
+                total={total}
                 onUpgradeClick={() => setShowPayment(true)}
                 onExportCSV={handleExportCSV}
               />

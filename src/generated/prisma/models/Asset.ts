@@ -27,109 +27,151 @@ export type AggregateAsset = {
 }
 
 export type AssetAvgAggregateOutputType = {
-  id: number | null
   downloads: number | null
+  earnings: number | null
+  popularity: number | null
 }
 
 export type AssetSumAggregateOutputType = {
-  id: number | null
   downloads: number | null
+  earnings: number | null
+  popularity: number | null
 }
 
 export type AssetMinAggregateOutputType = {
-  id: number | null
-  adobeId: string | null
+  id: string | null
+  assetId: string | null
   title: string | null
-  creator: string | null
-  category: string | null
-  type: string | null
+  thumbnail: string | null
   downloads: number | null
-  trend: string | null
-  revenue: string | null
-  status: string | null
+  earnings: number | null
+  category: string | null
+  fileType: string | null
+  uploadedAt: Date | null
+  previewUrl: string | null
+  assetUrl: string | null
+  contributor: string | null
+  contributorId: string | null
+  popularity: number | null
+  profileId: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type AssetMaxAggregateOutputType = {
-  id: number | null
-  adobeId: string | null
+  id: string | null
+  assetId: string | null
   title: string | null
-  creator: string | null
-  category: string | null
-  type: string | null
+  thumbnail: string | null
   downloads: number | null
-  trend: string | null
-  revenue: string | null
-  status: string | null
+  earnings: number | null
+  category: string | null
+  fileType: string | null
+  uploadedAt: Date | null
+  previewUrl: string | null
+  assetUrl: string | null
+  contributor: string | null
+  contributorId: string | null
+  popularity: number | null
+  profileId: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type AssetCountAggregateOutputType = {
   id: number
-  adobeId: number
+  assetId: number
   title: number
-  creator: number
-  category: number
-  type: number
+  thumbnail: number
   downloads: number
-  trend: number
-  revenue: number
-  status: number
+  earnings: number
+  keywords: number
+  category: number
+  fileType: number
+  uploadedAt: number
+  previewUrl: number
+  assetUrl: number
+  contributor: number
+  contributorId: number
+  popularity: number
+  profileId: number
   createdAt: number
+  updatedAt: number
   _all: number
 }
 
 
 export type AssetAvgAggregateInputType = {
-  id?: true
   downloads?: true
+  earnings?: true
+  popularity?: true
 }
 
 export type AssetSumAggregateInputType = {
-  id?: true
   downloads?: true
+  earnings?: true
+  popularity?: true
 }
 
 export type AssetMinAggregateInputType = {
   id?: true
-  adobeId?: true
+  assetId?: true
   title?: true
-  creator?: true
-  category?: true
-  type?: true
+  thumbnail?: true
   downloads?: true
-  trend?: true
-  revenue?: true
-  status?: true
+  earnings?: true
+  category?: true
+  fileType?: true
+  uploadedAt?: true
+  previewUrl?: true
+  assetUrl?: true
+  contributor?: true
+  contributorId?: true
+  popularity?: true
+  profileId?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type AssetMaxAggregateInputType = {
   id?: true
-  adobeId?: true
+  assetId?: true
   title?: true
-  creator?: true
-  category?: true
-  type?: true
+  thumbnail?: true
   downloads?: true
-  trend?: true
-  revenue?: true
-  status?: true
+  earnings?: true
+  category?: true
+  fileType?: true
+  uploadedAt?: true
+  previewUrl?: true
+  assetUrl?: true
+  contributor?: true
+  contributorId?: true
+  popularity?: true
+  profileId?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type AssetCountAggregateInputType = {
   id?: true
-  adobeId?: true
+  assetId?: true
   title?: true
-  creator?: true
-  category?: true
-  type?: true
+  thumbnail?: true
   downloads?: true
-  trend?: true
-  revenue?: true
-  status?: true
+  earnings?: true
+  keywords?: true
+  category?: true
+  fileType?: true
+  uploadedAt?: true
+  previewUrl?: true
+  assetUrl?: true
+  contributor?: true
+  contributorId?: true
+  popularity?: true
+  profileId?: true
   createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -220,17 +262,24 @@ export type AssetGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 }
 
 export type AssetGroupByOutputType = {
-  id: number
-  adobeId: string
+  id: string
+  assetId: string
   title: string
-  creator: string
-  category: string
-  type: string
+  thumbnail: string | null
   downloads: number
-  trend: string
-  revenue: string
-  status: string
+  earnings: number
+  keywords: string[]
+  category: string | null
+  fileType: string | null
+  uploadedAt: Date | null
+  previewUrl: string | null
+  assetUrl: string | null
+  contributor: string | null
+  contributorId: string | null
+  popularity: number
+  profileId: string
   createdAt: Date
+  updatedAt: Date
   _count: AssetCountAggregateOutputType | null
   _avg: AssetAvgAggregateOutputType | null
   _sum: AssetSumAggregateOutputType | null
@@ -257,62 +306,93 @@ export type AssetWhereInput = {
   AND?: Prisma.AssetWhereInput | Prisma.AssetWhereInput[]
   OR?: Prisma.AssetWhereInput[]
   NOT?: Prisma.AssetWhereInput | Prisma.AssetWhereInput[]
-  id?: Prisma.IntFilter<"Asset"> | number
-  adobeId?: Prisma.StringFilter<"Asset"> | string
+  id?: Prisma.StringFilter<"Asset"> | string
+  assetId?: Prisma.StringFilter<"Asset"> | string
   title?: Prisma.StringFilter<"Asset"> | string
-  creator?: Prisma.StringFilter<"Asset"> | string
-  category?: Prisma.StringFilter<"Asset"> | string
-  type?: Prisma.StringFilter<"Asset"> | string
+  thumbnail?: Prisma.StringNullableFilter<"Asset"> | string | null
   downloads?: Prisma.IntFilter<"Asset"> | number
-  trend?: Prisma.StringFilter<"Asset"> | string
-  revenue?: Prisma.StringFilter<"Asset"> | string
-  status?: Prisma.StringFilter<"Asset"> | string
+  earnings?: Prisma.FloatFilter<"Asset"> | number
+  keywords?: Prisma.StringNullableListFilter<"Asset">
+  category?: Prisma.StringNullableFilter<"Asset"> | string | null
+  fileType?: Prisma.StringNullableFilter<"Asset"> | string | null
+  uploadedAt?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
+  previewUrl?: Prisma.StringNullableFilter<"Asset"> | string | null
+  assetUrl?: Prisma.StringNullableFilter<"Asset"> | string | null
+  contributor?: Prisma.StringNullableFilter<"Asset"> | string | null
+  contributorId?: Prisma.StringNullableFilter<"Asset"> | string | null
+  popularity?: Prisma.FloatFilter<"Asset"> | number
+  profileId?: Prisma.StringFilter<"Asset"> | string
   createdAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
+  profile?: Prisma.XOR<Prisma.ProfileScalarRelationFilter, Prisma.ProfileWhereInput>
 }
 
 export type AssetOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  adobeId?: Prisma.SortOrder
+  assetId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  creator?: Prisma.SortOrder
-  category?: Prisma.SortOrder
-  type?: Prisma.SortOrder
+  thumbnail?: Prisma.SortOrderInput | Prisma.SortOrder
   downloads?: Prisma.SortOrder
-  trend?: Prisma.SortOrder
-  revenue?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  earnings?: Prisma.SortOrder
+  keywords?: Prisma.SortOrder
+  category?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileType?: Prisma.SortOrderInput | Prisma.SortOrder
+  uploadedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  previewUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  assetUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  contributor?: Prisma.SortOrderInput | Prisma.SortOrder
+  contributorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  popularity?: Prisma.SortOrder
+  profileId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  profile?: Prisma.ProfileOrderByWithRelationInput
 }
 
 export type AssetWhereUniqueInput = Prisma.AtLeast<{
-  id?: number
-  adobeId?: string
+  id?: string
+  assetId?: string
   AND?: Prisma.AssetWhereInput | Prisma.AssetWhereInput[]
   OR?: Prisma.AssetWhereInput[]
   NOT?: Prisma.AssetWhereInput | Prisma.AssetWhereInput[]
   title?: Prisma.StringFilter<"Asset"> | string
-  creator?: Prisma.StringFilter<"Asset"> | string
-  category?: Prisma.StringFilter<"Asset"> | string
-  type?: Prisma.StringFilter<"Asset"> | string
+  thumbnail?: Prisma.StringNullableFilter<"Asset"> | string | null
   downloads?: Prisma.IntFilter<"Asset"> | number
-  trend?: Prisma.StringFilter<"Asset"> | string
-  revenue?: Prisma.StringFilter<"Asset"> | string
-  status?: Prisma.StringFilter<"Asset"> | string
+  earnings?: Prisma.FloatFilter<"Asset"> | number
+  keywords?: Prisma.StringNullableListFilter<"Asset">
+  category?: Prisma.StringNullableFilter<"Asset"> | string | null
+  fileType?: Prisma.StringNullableFilter<"Asset"> | string | null
+  uploadedAt?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
+  previewUrl?: Prisma.StringNullableFilter<"Asset"> | string | null
+  assetUrl?: Prisma.StringNullableFilter<"Asset"> | string | null
+  contributor?: Prisma.StringNullableFilter<"Asset"> | string | null
+  contributorId?: Prisma.StringNullableFilter<"Asset"> | string | null
+  popularity?: Prisma.FloatFilter<"Asset"> | number
+  profileId?: Prisma.StringFilter<"Asset"> | string
   createdAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
-}, "id" | "adobeId">
+  updatedAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
+  profile?: Prisma.XOR<Prisma.ProfileScalarRelationFilter, Prisma.ProfileWhereInput>
+}, "id" | "assetId">
 
 export type AssetOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  adobeId?: Prisma.SortOrder
+  assetId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  creator?: Prisma.SortOrder
-  category?: Prisma.SortOrder
-  type?: Prisma.SortOrder
+  thumbnail?: Prisma.SortOrderInput | Prisma.SortOrder
   downloads?: Prisma.SortOrder
-  trend?: Prisma.SortOrder
-  revenue?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  earnings?: Prisma.SortOrder
+  keywords?: Prisma.SortOrder
+  category?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileType?: Prisma.SortOrderInput | Prisma.SortOrder
+  uploadedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  previewUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  assetUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  contributor?: Prisma.SortOrderInput | Prisma.SortOrder
+  contributorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  popularity?: Prisma.SortOrder
+  profileId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.AssetCountOrderByAggregateInput
   _avg?: Prisma.AssetAvgOrderByAggregateInput
   _max?: Prisma.AssetMaxOrderByAggregateInput
@@ -324,241 +404,620 @@ export type AssetScalarWhereWithAggregatesInput = {
   AND?: Prisma.AssetScalarWhereWithAggregatesInput | Prisma.AssetScalarWhereWithAggregatesInput[]
   OR?: Prisma.AssetScalarWhereWithAggregatesInput[]
   NOT?: Prisma.AssetScalarWhereWithAggregatesInput | Prisma.AssetScalarWhereWithAggregatesInput[]
-  id?: Prisma.IntWithAggregatesFilter<"Asset"> | number
-  adobeId?: Prisma.StringWithAggregatesFilter<"Asset"> | string
+  id?: Prisma.StringWithAggregatesFilter<"Asset"> | string
+  assetId?: Prisma.StringWithAggregatesFilter<"Asset"> | string
   title?: Prisma.StringWithAggregatesFilter<"Asset"> | string
-  creator?: Prisma.StringWithAggregatesFilter<"Asset"> | string
-  category?: Prisma.StringWithAggregatesFilter<"Asset"> | string
-  type?: Prisma.StringWithAggregatesFilter<"Asset"> | string
+  thumbnail?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   downloads?: Prisma.IntWithAggregatesFilter<"Asset"> | number
-  trend?: Prisma.StringWithAggregatesFilter<"Asset"> | string
-  revenue?: Prisma.StringWithAggregatesFilter<"Asset"> | string
-  status?: Prisma.StringWithAggregatesFilter<"Asset"> | string
+  earnings?: Prisma.FloatWithAggregatesFilter<"Asset"> | number
+  keywords?: Prisma.StringNullableListFilter<"Asset">
+  category?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  fileType?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  uploadedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Asset"> | Date | string | null
+  previewUrl?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  assetUrl?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  contributor?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  contributorId?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  popularity?: Prisma.FloatWithAggregatesFilter<"Asset"> | number
+  profileId?: Prisma.StringWithAggregatesFilter<"Asset"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Asset"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Asset"> | Date | string
 }
 
 export type AssetCreateInput = {
-  adobeId: string
+  id?: string
+  assetId: string
   title: string
-  creator: string
-  category?: string
-  type?: string
+  thumbnail?: string | null
   downloads?: number
-  trend?: string
-  revenue?: string
-  status?: string
+  earnings?: number
+  keywords?: Prisma.AssetCreatekeywordsInput | string[]
+  category?: string | null
+  fileType?: string | null
+  uploadedAt?: Date | string | null
+  previewUrl?: string | null
+  assetUrl?: string | null
+  contributor?: string | null
+  contributorId?: string | null
+  popularity?: number
   createdAt?: Date | string
+  updatedAt?: Date | string
+  profile: Prisma.ProfileCreateNestedOneWithoutAssetsInput
 }
 
 export type AssetUncheckedCreateInput = {
-  id?: number
-  adobeId: string
+  id?: string
+  assetId: string
   title: string
-  creator: string
-  category?: string
-  type?: string
+  thumbnail?: string | null
   downloads?: number
-  trend?: string
-  revenue?: string
-  status?: string
+  earnings?: number
+  keywords?: Prisma.AssetCreatekeywordsInput | string[]
+  category?: string | null
+  fileType?: string | null
+  uploadedAt?: Date | string | null
+  previewUrl?: string | null
+  assetUrl?: string | null
+  contributor?: string | null
+  contributorId?: string | null
+  popularity?: number
+  profileId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type AssetUpdateInput = {
-  adobeId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  creator?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   downloads?: Prisma.IntFieldUpdateOperationsInput | number
-  trend?: Prisma.StringFieldUpdateOperationsInput | string
-  revenue?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  earnings?: Prisma.FloatFieldUpdateOperationsInput | number
+  keywords?: Prisma.AssetUpdatekeywordsInput | string[]
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  previewUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  popularity?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.ProfileUpdateOneRequiredWithoutAssetsNestedInput
 }
 
 export type AssetUncheckedUpdateInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  adobeId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  creator?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   downloads?: Prisma.IntFieldUpdateOperationsInput | number
-  trend?: Prisma.StringFieldUpdateOperationsInput | string
-  revenue?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  earnings?: Prisma.FloatFieldUpdateOperationsInput | number
+  keywords?: Prisma.AssetUpdatekeywordsInput | string[]
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  previewUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  popularity?: Prisma.FloatFieldUpdateOperationsInput | number
+  profileId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AssetCreateManyInput = {
-  id?: number
-  adobeId: string
+  id?: string
+  assetId: string
   title: string
-  creator: string
-  category?: string
-  type?: string
+  thumbnail?: string | null
   downloads?: number
-  trend?: string
-  revenue?: string
-  status?: string
+  earnings?: number
+  keywords?: Prisma.AssetCreatekeywordsInput | string[]
+  category?: string | null
+  fileType?: string | null
+  uploadedAt?: Date | string | null
+  previewUrl?: string | null
+  assetUrl?: string | null
+  contributor?: string | null
+  contributorId?: string | null
+  popularity?: number
+  profileId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type AssetUpdateManyMutationInput = {
-  adobeId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  creator?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   downloads?: Prisma.IntFieldUpdateOperationsInput | number
-  trend?: Prisma.StringFieldUpdateOperationsInput | string
-  revenue?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  earnings?: Prisma.FloatFieldUpdateOperationsInput | number
+  keywords?: Prisma.AssetUpdatekeywordsInput | string[]
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  previewUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  popularity?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AssetUncheckedUpdateManyInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  adobeId?: Prisma.StringFieldUpdateOperationsInput | string
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  creator?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   downloads?: Prisma.IntFieldUpdateOperationsInput | number
-  trend?: Prisma.StringFieldUpdateOperationsInput | string
-  revenue?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  earnings?: Prisma.FloatFieldUpdateOperationsInput | number
+  keywords?: Prisma.AssetUpdatekeywordsInput | string[]
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  previewUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  popularity?: Prisma.FloatFieldUpdateOperationsInput | number
+  profileId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AssetListRelationFilter = {
+  every?: Prisma.AssetWhereInput
+  some?: Prisma.AssetWhereInput
+  none?: Prisma.AssetWhereInput
+}
+
+export type AssetOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type AssetCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  adobeId?: Prisma.SortOrder
+  assetId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  creator?: Prisma.SortOrder
-  category?: Prisma.SortOrder
-  type?: Prisma.SortOrder
+  thumbnail?: Prisma.SortOrder
   downloads?: Prisma.SortOrder
-  trend?: Prisma.SortOrder
-  revenue?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  earnings?: Prisma.SortOrder
+  keywords?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  fileType?: Prisma.SortOrder
+  uploadedAt?: Prisma.SortOrder
+  previewUrl?: Prisma.SortOrder
+  assetUrl?: Prisma.SortOrder
+  contributor?: Prisma.SortOrder
+  contributorId?: Prisma.SortOrder
+  popularity?: Prisma.SortOrder
+  profileId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type AssetAvgOrderByAggregateInput = {
-  id?: Prisma.SortOrder
   downloads?: Prisma.SortOrder
+  earnings?: Prisma.SortOrder
+  popularity?: Prisma.SortOrder
 }
 
 export type AssetMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  adobeId?: Prisma.SortOrder
+  assetId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  creator?: Prisma.SortOrder
-  category?: Prisma.SortOrder
-  type?: Prisma.SortOrder
+  thumbnail?: Prisma.SortOrder
   downloads?: Prisma.SortOrder
-  trend?: Prisma.SortOrder
-  revenue?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  earnings?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  fileType?: Prisma.SortOrder
+  uploadedAt?: Prisma.SortOrder
+  previewUrl?: Prisma.SortOrder
+  assetUrl?: Prisma.SortOrder
+  contributor?: Prisma.SortOrder
+  contributorId?: Prisma.SortOrder
+  popularity?: Prisma.SortOrder
+  profileId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type AssetMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  adobeId?: Prisma.SortOrder
+  assetId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  creator?: Prisma.SortOrder
-  category?: Prisma.SortOrder
-  type?: Prisma.SortOrder
+  thumbnail?: Prisma.SortOrder
   downloads?: Prisma.SortOrder
-  trend?: Prisma.SortOrder
-  revenue?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  earnings?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  fileType?: Prisma.SortOrder
+  uploadedAt?: Prisma.SortOrder
+  previewUrl?: Prisma.SortOrder
+  assetUrl?: Prisma.SortOrder
+  contributor?: Prisma.SortOrder
+  contributorId?: Prisma.SortOrder
+  popularity?: Prisma.SortOrder
+  profileId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type AssetSumOrderByAggregateInput = {
-  id?: Prisma.SortOrder
   downloads?: Prisma.SortOrder
+  earnings?: Prisma.SortOrder
+  popularity?: Prisma.SortOrder
+}
+
+export type AssetCreateNestedManyWithoutProfileInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutProfileInput, Prisma.AssetUncheckedCreateWithoutProfileInput> | Prisma.AssetCreateWithoutProfileInput[] | Prisma.AssetUncheckedCreateWithoutProfileInput[]
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutProfileInput | Prisma.AssetCreateOrConnectWithoutProfileInput[]
+  createMany?: Prisma.AssetCreateManyProfileInputEnvelope
+  connect?: Prisma.AssetWhereUniqueInput | Prisma.AssetWhereUniqueInput[]
+}
+
+export type AssetUncheckedCreateNestedManyWithoutProfileInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutProfileInput, Prisma.AssetUncheckedCreateWithoutProfileInput> | Prisma.AssetCreateWithoutProfileInput[] | Prisma.AssetUncheckedCreateWithoutProfileInput[]
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutProfileInput | Prisma.AssetCreateOrConnectWithoutProfileInput[]
+  createMany?: Prisma.AssetCreateManyProfileInputEnvelope
+  connect?: Prisma.AssetWhereUniqueInput | Prisma.AssetWhereUniqueInput[]
+}
+
+export type AssetUpdateManyWithoutProfileNestedInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutProfileInput, Prisma.AssetUncheckedCreateWithoutProfileInput> | Prisma.AssetCreateWithoutProfileInput[] | Prisma.AssetUncheckedCreateWithoutProfileInput[]
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutProfileInput | Prisma.AssetCreateOrConnectWithoutProfileInput[]
+  upsert?: Prisma.AssetUpsertWithWhereUniqueWithoutProfileInput | Prisma.AssetUpsertWithWhereUniqueWithoutProfileInput[]
+  createMany?: Prisma.AssetCreateManyProfileInputEnvelope
+  set?: Prisma.AssetWhereUniqueInput | Prisma.AssetWhereUniqueInput[]
+  disconnect?: Prisma.AssetWhereUniqueInput | Prisma.AssetWhereUniqueInput[]
+  delete?: Prisma.AssetWhereUniqueInput | Prisma.AssetWhereUniqueInput[]
+  connect?: Prisma.AssetWhereUniqueInput | Prisma.AssetWhereUniqueInput[]
+  update?: Prisma.AssetUpdateWithWhereUniqueWithoutProfileInput | Prisma.AssetUpdateWithWhereUniqueWithoutProfileInput[]
+  updateMany?: Prisma.AssetUpdateManyWithWhereWithoutProfileInput | Prisma.AssetUpdateManyWithWhereWithoutProfileInput[]
+  deleteMany?: Prisma.AssetScalarWhereInput | Prisma.AssetScalarWhereInput[]
+}
+
+export type AssetUncheckedUpdateManyWithoutProfileNestedInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutProfileInput, Prisma.AssetUncheckedCreateWithoutProfileInput> | Prisma.AssetCreateWithoutProfileInput[] | Prisma.AssetUncheckedCreateWithoutProfileInput[]
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutProfileInput | Prisma.AssetCreateOrConnectWithoutProfileInput[]
+  upsert?: Prisma.AssetUpsertWithWhereUniqueWithoutProfileInput | Prisma.AssetUpsertWithWhereUniqueWithoutProfileInput[]
+  createMany?: Prisma.AssetCreateManyProfileInputEnvelope
+  set?: Prisma.AssetWhereUniqueInput | Prisma.AssetWhereUniqueInput[]
+  disconnect?: Prisma.AssetWhereUniqueInput | Prisma.AssetWhereUniqueInput[]
+  delete?: Prisma.AssetWhereUniqueInput | Prisma.AssetWhereUniqueInput[]
+  connect?: Prisma.AssetWhereUniqueInput | Prisma.AssetWhereUniqueInput[]
+  update?: Prisma.AssetUpdateWithWhereUniqueWithoutProfileInput | Prisma.AssetUpdateWithWhereUniqueWithoutProfileInput[]
+  updateMany?: Prisma.AssetUpdateManyWithWhereWithoutProfileInput | Prisma.AssetUpdateManyWithWhereWithoutProfileInput[]
+  deleteMany?: Prisma.AssetScalarWhereInput | Prisma.AssetScalarWhereInput[]
+}
+
+export type AssetCreatekeywordsInput = {
+  set: string[]
+}
+
+export type FloatFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type AssetUpdatekeywordsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
+export type AssetCreateWithoutProfileInput = {
+  id?: string
+  assetId: string
+  title: string
+  thumbnail?: string | null
+  downloads?: number
+  earnings?: number
+  keywords?: Prisma.AssetCreatekeywordsInput | string[]
+  category?: string | null
+  fileType?: string | null
+  uploadedAt?: Date | string | null
+  previewUrl?: string | null
+  assetUrl?: string | null
+  contributor?: string | null
+  contributorId?: string | null
+  popularity?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type AssetUncheckedCreateWithoutProfileInput = {
+  id?: string
+  assetId: string
+  title: string
+  thumbnail?: string | null
+  downloads?: number
+  earnings?: number
+  keywords?: Prisma.AssetCreatekeywordsInput | string[]
+  category?: string | null
+  fileType?: string | null
+  uploadedAt?: Date | string | null
+  previewUrl?: string | null
+  assetUrl?: string | null
+  contributor?: string | null
+  contributorId?: string | null
+  popularity?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type AssetCreateOrConnectWithoutProfileInput = {
+  where: Prisma.AssetWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssetCreateWithoutProfileInput, Prisma.AssetUncheckedCreateWithoutProfileInput>
+}
+
+export type AssetCreateManyProfileInputEnvelope = {
+  data: Prisma.AssetCreateManyProfileInput | Prisma.AssetCreateManyProfileInput[]
+  skipDuplicates?: boolean
+}
+
+export type AssetUpsertWithWhereUniqueWithoutProfileInput = {
+  where: Prisma.AssetWhereUniqueInput
+  update: Prisma.XOR<Prisma.AssetUpdateWithoutProfileInput, Prisma.AssetUncheckedUpdateWithoutProfileInput>
+  create: Prisma.XOR<Prisma.AssetCreateWithoutProfileInput, Prisma.AssetUncheckedCreateWithoutProfileInput>
+}
+
+export type AssetUpdateWithWhereUniqueWithoutProfileInput = {
+  where: Prisma.AssetWhereUniqueInput
+  data: Prisma.XOR<Prisma.AssetUpdateWithoutProfileInput, Prisma.AssetUncheckedUpdateWithoutProfileInput>
+}
+
+export type AssetUpdateManyWithWhereWithoutProfileInput = {
+  where: Prisma.AssetScalarWhereInput
+  data: Prisma.XOR<Prisma.AssetUpdateManyMutationInput, Prisma.AssetUncheckedUpdateManyWithoutProfileInput>
+}
+
+export type AssetScalarWhereInput = {
+  AND?: Prisma.AssetScalarWhereInput | Prisma.AssetScalarWhereInput[]
+  OR?: Prisma.AssetScalarWhereInput[]
+  NOT?: Prisma.AssetScalarWhereInput | Prisma.AssetScalarWhereInput[]
+  id?: Prisma.StringFilter<"Asset"> | string
+  assetId?: Prisma.StringFilter<"Asset"> | string
+  title?: Prisma.StringFilter<"Asset"> | string
+  thumbnail?: Prisma.StringNullableFilter<"Asset"> | string | null
+  downloads?: Prisma.IntFilter<"Asset"> | number
+  earnings?: Prisma.FloatFilter<"Asset"> | number
+  keywords?: Prisma.StringNullableListFilter<"Asset">
+  category?: Prisma.StringNullableFilter<"Asset"> | string | null
+  fileType?: Prisma.StringNullableFilter<"Asset"> | string | null
+  uploadedAt?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
+  previewUrl?: Prisma.StringNullableFilter<"Asset"> | string | null
+  assetUrl?: Prisma.StringNullableFilter<"Asset"> | string | null
+  contributor?: Prisma.StringNullableFilter<"Asset"> | string | null
+  contributorId?: Prisma.StringNullableFilter<"Asset"> | string | null
+  popularity?: Prisma.FloatFilter<"Asset"> | number
+  profileId?: Prisma.StringFilter<"Asset"> | string
+  createdAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
+}
+
+export type AssetCreateManyProfileInput = {
+  id?: string
+  assetId: string
+  title: string
+  thumbnail?: string | null
+  downloads?: number
+  earnings?: number
+  keywords?: Prisma.AssetCreatekeywordsInput | string[]
+  category?: string | null
+  fileType?: string | null
+  uploadedAt?: Date | string | null
+  previewUrl?: string | null
+  assetUrl?: string | null
+  contributor?: string | null
+  contributorId?: string | null
+  popularity?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type AssetUpdateWithoutProfileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  downloads?: Prisma.IntFieldUpdateOperationsInput | number
+  earnings?: Prisma.FloatFieldUpdateOperationsInput | number
+  keywords?: Prisma.AssetUpdatekeywordsInput | string[]
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  previewUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  popularity?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AssetUncheckedUpdateWithoutProfileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  downloads?: Prisma.IntFieldUpdateOperationsInput | number
+  earnings?: Prisma.FloatFieldUpdateOperationsInput | number
+  keywords?: Prisma.AssetUpdatekeywordsInput | string[]
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  previewUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  popularity?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AssetUncheckedUpdateManyWithoutProfileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  downloads?: Prisma.IntFieldUpdateOperationsInput | number
+  earnings?: Prisma.FloatFieldUpdateOperationsInput | number
+  keywords?: Prisma.AssetUpdatekeywordsInput | string[]
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  uploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  previewUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assetUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contributorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  popularity?: Prisma.FloatFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
 
 export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  adobeId?: boolean
+  assetId?: boolean
   title?: boolean
-  creator?: boolean
-  category?: boolean
-  type?: boolean
+  thumbnail?: boolean
   downloads?: boolean
-  trend?: boolean
-  revenue?: boolean
-  status?: boolean
+  earnings?: boolean
+  keywords?: boolean
+  category?: boolean
+  fileType?: boolean
+  uploadedAt?: boolean
+  previewUrl?: boolean
+  assetUrl?: boolean
+  contributor?: boolean
+  contributorId?: boolean
+  popularity?: boolean
+  profileId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
+  profile?: boolean | Prisma.ProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["asset"]>
 
 export type AssetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  adobeId?: boolean
+  assetId?: boolean
   title?: boolean
-  creator?: boolean
-  category?: boolean
-  type?: boolean
+  thumbnail?: boolean
   downloads?: boolean
-  trend?: boolean
-  revenue?: boolean
-  status?: boolean
+  earnings?: boolean
+  keywords?: boolean
+  category?: boolean
+  fileType?: boolean
+  uploadedAt?: boolean
+  previewUrl?: boolean
+  assetUrl?: boolean
+  contributor?: boolean
+  contributorId?: boolean
+  popularity?: boolean
+  profileId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
+  profile?: boolean | Prisma.ProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["asset"]>
 
 export type AssetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  adobeId?: boolean
+  assetId?: boolean
   title?: boolean
-  creator?: boolean
-  category?: boolean
-  type?: boolean
+  thumbnail?: boolean
   downloads?: boolean
-  trend?: boolean
-  revenue?: boolean
-  status?: boolean
+  earnings?: boolean
+  keywords?: boolean
+  category?: boolean
+  fileType?: boolean
+  uploadedAt?: boolean
+  previewUrl?: boolean
+  assetUrl?: boolean
+  contributor?: boolean
+  contributorId?: boolean
+  popularity?: boolean
+  profileId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
+  profile?: boolean | Prisma.ProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["asset"]>
 
 export type AssetSelectScalar = {
   id?: boolean
-  adobeId?: boolean
+  assetId?: boolean
   title?: boolean
-  creator?: boolean
-  category?: boolean
-  type?: boolean
+  thumbnail?: boolean
   downloads?: boolean
-  trend?: boolean
-  revenue?: boolean
-  status?: boolean
+  earnings?: boolean
+  keywords?: boolean
+  category?: boolean
+  fileType?: boolean
+  uploadedAt?: boolean
+  previewUrl?: boolean
+  assetUrl?: boolean
+  contributor?: boolean
+  contributorId?: boolean
+  popularity?: boolean
+  profileId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "adobeId" | "title" | "creator" | "category" | "type" | "downloads" | "trend" | "revenue" | "status" | "createdAt", ExtArgs["result"]["asset"]>
+export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assetId" | "title" | "thumbnail" | "downloads" | "earnings" | "keywords" | "category" | "fileType" | "uploadedAt" | "previewUrl" | "assetUrl" | "contributor" | "contributorId" | "popularity" | "profileId" | "createdAt" | "updatedAt", ExtArgs["result"]["asset"]>
+export type AssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  profile?: boolean | Prisma.ProfileDefaultArgs<ExtArgs>
+}
+export type AssetIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  profile?: boolean | Prisma.ProfileDefaultArgs<ExtArgs>
+}
+export type AssetIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  profile?: boolean | Prisma.ProfileDefaultArgs<ExtArgs>
+}
 
 export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Asset"
-  objects: {}
+  objects: {
+    profile: Prisma.$ProfilePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
-    id: number
-    adobeId: string
+    id: string
+    assetId: string
     title: string
-    creator: string
-    category: string
-    type: string
+    thumbnail: string | null
     downloads: number
-    trend: string
-    revenue: string
-    status: string
+    earnings: number
+    keywords: string[]
+    category: string | null
+    fileType: string | null
+    uploadedAt: Date | null
+    previewUrl: string | null
+    assetUrl: string | null
+    contributor: string | null
+    contributorId: string | null
+    popularity: number
+    profileId: string
     createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["asset"]>
   composites: {}
 }
@@ -953,6 +1412,7 @@ readonly fields: AssetFieldRefs;
  */
 export interface Prisma__AssetClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  profile<T extends Prisma.ProfileDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProfileDefaultArgs<ExtArgs>>): Prisma.Prisma__ProfileClient<runtime.Types.Result.GetResult<Prisma.$ProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -982,17 +1442,24 @@ export interface Prisma__AssetClient<T, Null = never, ExtArgs extends runtime.Ty
  * Fields of the Asset model
  */
 export interface AssetFieldRefs {
-  readonly id: Prisma.FieldRef<"Asset", 'Int'>
-  readonly adobeId: Prisma.FieldRef<"Asset", 'String'>
+  readonly id: Prisma.FieldRef<"Asset", 'String'>
+  readonly assetId: Prisma.FieldRef<"Asset", 'String'>
   readonly title: Prisma.FieldRef<"Asset", 'String'>
-  readonly creator: Prisma.FieldRef<"Asset", 'String'>
-  readonly category: Prisma.FieldRef<"Asset", 'String'>
-  readonly type: Prisma.FieldRef<"Asset", 'String'>
+  readonly thumbnail: Prisma.FieldRef<"Asset", 'String'>
   readonly downloads: Prisma.FieldRef<"Asset", 'Int'>
-  readonly trend: Prisma.FieldRef<"Asset", 'String'>
-  readonly revenue: Prisma.FieldRef<"Asset", 'String'>
-  readonly status: Prisma.FieldRef<"Asset", 'String'>
+  readonly earnings: Prisma.FieldRef<"Asset", 'Float'>
+  readonly keywords: Prisma.FieldRef<"Asset", 'String[]'>
+  readonly category: Prisma.FieldRef<"Asset", 'String'>
+  readonly fileType: Prisma.FieldRef<"Asset", 'String'>
+  readonly uploadedAt: Prisma.FieldRef<"Asset", 'DateTime'>
+  readonly previewUrl: Prisma.FieldRef<"Asset", 'String'>
+  readonly assetUrl: Prisma.FieldRef<"Asset", 'String'>
+  readonly contributor: Prisma.FieldRef<"Asset", 'String'>
+  readonly contributorId: Prisma.FieldRef<"Asset", 'String'>
+  readonly popularity: Prisma.FieldRef<"Asset", 'Float'>
+  readonly profileId: Prisma.FieldRef<"Asset", 'String'>
   readonly createdAt: Prisma.FieldRef<"Asset", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Asset", 'DateTime'>
 }
     
 
@@ -1009,6 +1476,10 @@ export type AssetFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the Asset
    */
   omit?: Prisma.AssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
   /**
    * Filter, which Asset to fetch.
    */
@@ -1028,6 +1499,10 @@ export type AssetFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.AssetOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
+  /**
    * Filter, which Asset to fetch.
    */
   where: Prisma.AssetWhereUniqueInput
@@ -1045,6 +1520,10 @@ export type AssetFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the Asset
    */
   omit?: Prisma.AssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
   /**
    * Filter, which Asset to fetch.
    */
@@ -1094,6 +1573,10 @@ export type AssetFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.AssetOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
+  /**
    * Filter, which Asset to fetch.
    */
   where?: Prisma.AssetWhereInput
@@ -1141,6 +1624,10 @@ export type AssetFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Omit specific fields from the Asset
    */
   omit?: Prisma.AssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
   /**
    * Filter, which Assets to fetch.
    */
@@ -1190,6 +1677,10 @@ export type AssetCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   omit?: Prisma.AssetOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
+  /**
    * The data needed to create a Asset.
    */
   data: Prisma.XOR<Prisma.AssetCreateInput, Prisma.AssetUncheckedCreateInput>
@@ -1223,6 +1714,10 @@ export type AssetCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    */
   data: Prisma.AssetCreateManyInput | Prisma.AssetCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1237,6 +1732,10 @@ export type AssetUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the Asset
    */
   omit?: Prisma.AssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
   /**
    * The data needed to update a Asset.
    */
@@ -1289,6 +1788,10 @@ export type AssetUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many Assets to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1303,6 +1806,10 @@ export type AssetUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the Asset
    */
   omit?: Prisma.AssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
   /**
    * The filter to search for the Asset to update in case it exists.
    */
@@ -1329,6 +1836,10 @@ export type AssetDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the Asset
    */
   omit?: Prisma.AssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
   /**
    * Filter which Asset to delete.
    */
@@ -1361,4 +1872,8 @@ export type AssetDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    * Omit specific fields from the Asset
    */
   omit?: Prisma.AssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
 }

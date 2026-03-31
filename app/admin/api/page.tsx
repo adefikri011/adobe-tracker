@@ -2,139 +2,159 @@
 
 import React, { useState } from "react";
 import { 
-  Plug, RefreshCw, CheckCircle2, AlertCircle, 
-  Database, Zap, Clock, ExternalLink 
+  RefreshCw, CheckCircle2, AlertCircle, 
+  Database, Zap, Clock 
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 export default function ApiIntegrationPage() {
   const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSync, setLastSync] = useState("2 hours ago");
+  const [lastSync, setLastSync] = useState("Not synced yet");
 
-  // Fungsi simulasi narik data (Trigger Apify Actor)
-  const handleSync = () => {
+  const handleSync = async () => {
     setIsSyncing(true);
-    // Di sini nanti panggil API Route Next.js kamu yang nembak ke Apify
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch("/api/adobe/sync", {
+        method: "POST",
+      });
+
+      const contentType = response.headers.get("content-type") || "";
+      const data = contentType.includes("application/json")
+        ? await response.json()
+        : { error: await response.text() };
+
+      console.log("[Sync Response]", data);
+
+      if (response.ok && data.success) {
+        setLastSync("Just now");
+        
+        const totalMsg = data.totalInDatabase ? ` (Total in database: ${data.totalInDatabase})` : "";
+        const successMsg = data.skipped && data.skipped > 0 
+          ? `✅ Success! ${data.count} new records updated.\n(${data.skipped} invalid items skipped)${totalMsg}`
+          : `✅ Success! ${data.count} portfolio records have been updated.${totalMsg}`;
+        
+        alert(successMsg);
+      } else {
+        const errorMsg = data.error || "A server error occurred";
+        alert(`❌ Failed: ${errorMsg}`);
+      }
+    } catch (error: any) {
+      const errorMsg = error?.message || "Make sure the server is running.";
+      alert(`⚠️ Connection failed: ${errorMsg}`);
+    } finally {
       setIsSyncing(false);
-      setLastSync("Just now");
-    }, 5000); 
+    }
   };
 
   return (
     <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-8">
-      
-      {/* ── Header Area ────────────────────────────────────────── */}
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 italic">API Integration</h1>
-          <p className="text-sm text-slate-400 font-medium">Connect and sync your Adobe Stock data via Apify.</p>
+          <h1 className="text-2xl font-black text-slate-900 italic tracking-tight">API <span className="text-orange-500">INTEGRATION</span></h1>
+          <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Connect Adobe Stock via Apify</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-100 rounded-2xl">
-          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">System Online</span>
+          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+          <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">Gateway Ready</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* ── Left: Main Action Card (Narik Data) ────────────────── */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white border border-orange-100 rounded-[40px] p-8 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-5">
-              <Zap size={120} className="text-orange-500" />
+          {/* MAIN SYNC CARD */}
+          <div className="bg-white border border-slate-100 rounded-[40px] p-10 shadow-sm relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 opacity-[0.03] text-orange-500 rotate-12">
+              <Zap size={240} />
             </div>
             
-            <div className="relative z-10">
-              <h3 className="text-lg font-bold text-slate-800 mb-2">Manual Synchronization</h3>
-              <p className="text-xs text-slate-400 mb-8 leading-relaxed max-w-md">
-                Trigger the robot to fetch the latest sales, earnings, and asset performance from your Adobe Stock account. 
-                <span className="text-orange-500 font-bold"> (Cost: ~Rp800/sync)</span>
-              </p>
+            <div className="relative z-10 space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-slate-800">Manual Synchronization</h3>
+                <p className="text-xs text-slate-400 leading-relaxed max-w-md">
+                  Run the crawler bot to fetch the latest sales and asset performance data from Adobe Stock.
+                  <span className="text-orange-500 font-bold"> (Estimated: Rp800/sync)</span>
+                </p>
+              </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center gap-6 pt-4">
                 <button 
                   onClick={handleSync}
                   disabled={isSyncing}
-                  className={`w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 rounded-3xl font-black text-sm transition-all shadow-xl ${
+                  className={`w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 rounded-[24px] font-black text-[12px] uppercase tracking-widest transition-all shadow-xl ${
                     isSyncing 
                     ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
-                    : "bg-[#ff6b00] text-white shadow-orange-200 hover:scale-[1.03] active:scale-95"
+                    : "bg-slate-900 text-white hover:bg-orange-500 hover:scale-[1.02] active:scale-95 shadow-slate-200"
                   }`}
                 >
-                  <RefreshCw size={20} className={isSyncing ? "animate-spin" : ""} />
-                  {isSyncing ? "FETCHING DATA..." : "SYNC NOW"}
+                  <RefreshCw size={18} className={isSyncing ? "animate-spin" : ""} />
+                  {isSyncing ? "Syncing..." : "Sync Now"}
                 </button>
                 
-                <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
-                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Last Activity</span>
-                  <span className="text-sm font-bold text-slate-600">{lastSync}</span>
+                <div className="flex flex-col items-center sm:items-start">
+                  <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Activity Status</span>
+                  <span className="text-xs font-bold text-slate-600 flex items-center gap-2">
+                    <Clock size={12} className="text-orange-500"/> {lastSync}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Setup Table (API Credentials) */}
+          {/* API CONFIG */}
           <div className="bg-white border border-slate-100 rounded-[32px] p-8">
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-6">API Configuration</h3>
-            <div className="space-y-4">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div className="space-y-1">
-                   <label className="text-[10px] font-bold text-slate-400 ml-2">Apify Token</label>
-                   <input type="password" value="************************" readOnly className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-mono" />
-                 </div>
-                 <div className="space-y-1">
-                   <label className="text-[10px] font-bold text-slate-400 ml-2">Actor ID (louisdeconinck)</label>
-                   <input type="text" value="louisdeconinck/adobe-stock-scraper" readOnly className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-mono text-slate-400" />
-                 </div>
-               </div>
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Configuration Status</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <p className="text-[9px] font-black text-slate-400 uppercase mb-2">Apify Agent</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-700 font-mono">cOsM6h...SG1E</span>
+                    <CheckCircle2 size={14} className="text-green-500" />
+                  </div>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <p className="text-[9px] font-black text-slate-400 uppercase mb-2">Target Profile</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-700">Adobe Contributor</span>
+                    <CheckCircle2 size={14} className="text-green-500" />
+                  </div>
+                </div>
             </div>
           </div>
         </div>
 
-        {/* ── Right: Stats & Info ────────────────────────────────── */}
+        {/* SIDEBAR STATS */}
         <div className="space-y-6">
-          <div className="bg-[#1e293b] rounded-[32px] p-8 text-white shadow-xl">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-white/10 rounded-xl text-orange-400">
-                <Database size={20} />
-              </div>
-              <h4 className="font-bold">Sync Stats</h4>
+          <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Database size={80} />
             </div>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8">Database Stats</h4>
             
-            <div className="space-y-4">
-              <div className="flex justify-between items-end border-b border-white/5 pb-4">
-                <span className="text-[10px] text-slate-400 font-bold uppercase">Total Syncs (Monthly)</span>
-                <span className="text-xl font-black">124</span>
+            <div className="space-y-6 relative z-10">
+              <div className="flex justify-between items-end">
+                <span className="text-[10px] text-slate-400 font-bold uppercase">Stored Assets</span>
+                <span className="text-2xl font-black italic italic">--</span>
               </div>
-              <div className="flex justify-between items-end border-b border-white/5 pb-4">
-                <span className="text-[10px] text-slate-400 font-bold uppercase">Estimated Cost</span>
-                <span className="text-xl font-black text-orange-400">$1.24</span>
+              <div className="flex justify-between items-end">
+                <span className="text-[10px] text-slate-400 font-bold uppercase">Last Est. Cost</span>
+                <span className="text-xl font-black text-orange-400">$0.04</span>
               </div>
-            </div>
-
-            <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/10">
-              <div className="flex items-center gap-2 mb-2">
-                <Clock size={14} className="text-orange-400" />
-                <span className="text-[10px] font-bold uppercase">Auto-Sync Schedule</span>
-              </div>
-              <p className="text-xs font-bold text-slate-300">Every 6 Hours (00:00, 06:00, 12:00, 18:00)</p>
             </div>
           </div>
 
-          <div className="p-6 bg-blue-50 border border-blue-100 rounded-3xl">
-            <div className="flex gap-3">
-              <AlertCircle size={18} className="text-blue-600 shrink-0" />
+          <div className="p-6 bg-orange-50 border border-orange-100 rounded-[32px]">
+            <div className="flex gap-4">
+              <AlertCircle size={20} className="text-orange-500 shrink-0" />
               <div className="space-y-1">
-                <p className="text-[11px] font-bold text-blue-900">How it works?</p>
-                <p className="text-[10px] text-blue-700 leading-relaxed">
-                  Clicking "Sync Now" will trigger the Apify Actor. Data will be saved to your Supabase DB instantly once the process is complete.
+                <p className="text-xs font-bold text-orange-900">Information</p>
+                <p className="text-[10px] text-orange-700 leading-relaxed font-medium">
+                  Each synchronization will take around 1-2 minutes depending on the number of assets in your Adobe Stock portfolio.
                 </p>
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

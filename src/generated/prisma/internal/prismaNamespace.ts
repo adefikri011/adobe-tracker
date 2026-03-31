@@ -768,16 +768,23 @@ export type SearchCacheScalarFieldEnum = (typeof SearchCacheScalarFieldEnum)[key
 
 export const AssetScalarFieldEnum = {
   id: 'id',
-  adobeId: 'adobeId',
+  assetId: 'assetId',
   title: 'title',
-  creator: 'creator',
-  category: 'category',
-  type: 'type',
+  thumbnail: 'thumbnail',
   downloads: 'downloads',
-  trend: 'trend',
-  revenue: 'revenue',
-  status: 'status',
-  createdAt: 'createdAt'
+  earnings: 'earnings',
+  keywords: 'keywords',
+  category: 'category',
+  fileType: 'fileType',
+  uploadedAt: 'uploadedAt',
+  previewUrl: 'previewUrl',
+  assetUrl: 'assetUrl',
+  contributor: 'contributor',
+  contributorId: 'contributorId',
+  popularity: 'popularity',
+  profileId: 'profileId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type AssetScalarFieldEnum = (typeof AssetScalarFieldEnum)[keyof typeof AssetScalarFieldEnum]
