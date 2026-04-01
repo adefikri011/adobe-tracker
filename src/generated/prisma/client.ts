@@ -86,3 +86,8 @@ export type AppSettings = Prisma.AppSettingsModel
  * 
  */
 export type LoginLog = Prisma.LoginLogModel
+/**
+ * Model SyncLog
+ * 
+ */
+export type SyncLog = Prisma.SyncLogModel

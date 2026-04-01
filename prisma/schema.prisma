@@ -23,6 +23,7 @@ model Profile {
   transactions    Transaction[]
   subscriptions   Subscription[]
   loginLogs       LoginLog[]
+  syncLogs        SyncLog[]
 
   @@map("Profile")
 }
@@ -152,6 +153,24 @@ enum UserRole {
 enum UserStatus {
   active
   suspended
+}
+
+// Sync history tracking
+model SyncLog {
+  id            String   @id @default(cuid())
+  profileId     String
+  status        String   @default("success") // "success" atau "failed"
+  totalCollected Int     @default(0)
+  created       Int      @default(0)
+  updated       Int      @default(0)
+  totalInDatabase Int    @default(0)
+  errorMessage  String?
+  startedAt     DateTime @default(now())
+  completedAt   DateTime @updatedAt
+  
+  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("SyncLog")
 }
 
 enum TransactionStatus {

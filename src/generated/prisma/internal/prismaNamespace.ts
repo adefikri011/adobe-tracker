@@ -392,7 +392,8 @@ export const ModelName = {
   Transaction: 'Transaction',
   Subscription: 'Subscription',
   AppSettings: 'AppSettings',
-  LoginLog: 'LoginLog'
+  LoginLog: 'LoginLog',
+  SyncLog: 'SyncLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -408,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "searchCache" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog"
+    modelProps: "profile" | "searchCache" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog" | "syncLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1078,6 +1079,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SyncLog: {
+      payload: Prisma.$SyncLogPayload<ExtArgs>
+      fields: Prisma.SyncLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SyncLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SyncLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        findFirst: {
+          args: Prisma.SyncLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SyncLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        findMany: {
+          args: Prisma.SyncLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>[]
+        }
+        create: {
+          args: Prisma.SyncLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        createMany: {
+          args: Prisma.SyncLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SyncLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>[]
+        }
+        delete: {
+          args: Prisma.SyncLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        update: {
+          args: Prisma.SyncLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.SyncLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SyncLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SyncLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.SyncLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        aggregate: {
+          args: Prisma.SyncLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSyncLog>
+        }
+        groupBy: {
+          args: Prisma.SyncLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SyncLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SyncLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SyncLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1251,6 +1326,22 @@ export const LoginLogScalarFieldEnum = {
 } as const
 
 export type LoginLogScalarFieldEnum = (typeof LoginLogScalarFieldEnum)[keyof typeof LoginLogScalarFieldEnum]
+
+
+export const SyncLogScalarFieldEnum = {
+  id: 'id',
+  profileId: 'profileId',
+  status: 'status',
+  totalCollected: 'totalCollected',
+  created: 'created',
+  updated: 'updated',
+  totalInDatabase: 'totalInDatabase',
+  errorMessage: 'errorMessage',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type SyncLogScalarFieldEnum = (typeof SyncLogScalarFieldEnum)[keyof typeof SyncLogScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1543,6 +1634,7 @@ export type GlobalOmitConfig = {
   subscription?: Prisma.SubscriptionOmit
   appSettings?: Prisma.AppSettingsOmit
   loginLog?: Prisma.LoginLogOmit
+  syncLog?: Prisma.SyncLogOmit
 }
 
 /* Types for Logging */

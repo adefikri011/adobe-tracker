@@ -329,6 +329,18 @@ export async function POST() {
 
         const totalInDb = await prisma.asset.count({ where: { profileId: user.id } });
 
+        // Save sync log
+        await prisma.syncLog.create({
+          data: {
+            profileId: user.id,
+            status: "success",
+            totalCollected: normalizedItems.length,
+            created: newCreated,
+            updated,
+            totalInDatabase: totalInDb,
+          },
+        });
+
         sseEvent(controller, encoder, {
           type: "done",
           count: normalizedItems.length,
@@ -339,6 +351,15 @@ export async function POST() {
         });
 
       } catch (error: any) {
+        // Save error log
+        await prisma.syncLog.create({
+          data: {
+            profileId: user.id,
+            status: "failed",
+            errorMessage: error?.message || "Internal server error",
+          },
+        }).catch(() => {}); // ignore if table doesn't exist yet
+
         sseEvent(controller, encoder, {
           type: "error",
           message: error?.message || "Internal server error",

@@ -2,12 +2,12 @@
 
 import { motion } from "framer-motion";
 import { Wifi, WifiOff, RefreshCw, CheckCircle2, XCircle, Clock } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface ApiStatus {
   connected: boolean;
-  lastSync: string;
-  nextSync: string;
+  lastSync: string | null;
+  nextSync: string | null;
   totalSynced: number;
   errors: number;
 }
@@ -15,36 +15,71 @@ interface ApiStatus {
 export default function ApiStatusCard() {
   const [apiStatus, setApiStatus] = useState<ApiStatus>({
     connected: true,
-    lastSync: "10 minutes ago",
-    nextSync: "50 minutes later",
+    lastSync: "Not synced yet",
+    nextSync: null,
     totalSynced: 0,
     errors: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    const fetchStatus = async () => {
-      try {
-        const assetCount = await fetch('/api/admin/dashboard/top-assets');
-        if (assetCount.ok) {
-          const data = await assetCount.json();
-          // Count total assets from database
-          const totalAssets = data.assets?.length || 0;
-          
-          setApiStatus((prev) => ({
-            ...prev,
-            totalSynced: totalAssets > 0 ? totalAssets * 100 : 0, // Estimate
-          }));
-        }
-      } catch (error) {
-        console.error('Failed to fetch API status:', error);
-      } finally {
-        setLoading(false);
+  const fetchStatus = async () => {
+    try {
+      const response = await fetch("/api/admin/dashboard/sync-status", {
+        method: "GET",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      // Even if response is not ok, try to parse
+      const data = await response.json();
+      
+      if (data && typeof data === "object") {
+        setApiStatus({
+          connected: data.connected ?? true,
+          lastSync: data.lastSync || "Not synced yet",
+          nextSync: data.nextSync || null,
+          totalSynced: data.totalSynced || 0,
+          errors: data.errors || 0,
+        });
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch sync status:", error);
+      // Set fallback state
+      setApiStatus((prev) => ({
+        ...prev,
+        connected: false,
+        errors: 1,
+      }));
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
+  // Fetch on mount
+  useEffect(() => {
     fetchStatus();
   }, []);
+
+  // Auto-refresh every 10 seconds
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      fetchStatus();
+    }, 10000);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    await fetchStatus();
+  };
 
   const { connected } = apiStatus;
 
@@ -86,8 +121,8 @@ export default function ApiStatusCard() {
       {/* Info rows */}
       <div className="space-y-3.5 flex-1">
         {[
-          { icon: CheckCircle2, cls: "text-emerald-500", label: "Last Sync",    val: apiStatus.lastSync               },
-          { icon: Clock,        cls: "text-blue-400",    label: "Next Sync",    val: apiStatus.nextSync               },
+          { icon: CheckCircle2, cls: "text-emerald-500", label: "Last Sync",    val: apiStatus.lastSync ?? "—"               },
+          { icon: Clock,        cls: "text-blue-400",    label: "Next Sync",    val: apiStatus.nextSync ?? "—"               },
           { icon: RefreshCw,    cls: "text-orange-400",  label: "Assets Synced",val: apiStatus.totalSynced.toLocaleString() },
           { icon: XCircle,      cls: apiStatus.errors > 0 ? "text-red-400" : "text-slate-200",
             label: "Errors", val: apiStatus.errors > 0 ? `${apiStatus.errors} error` : "None" },
@@ -104,10 +139,16 @@ export default function ApiStatusCard() {
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.97 }}
-        className="mt-6 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-orange-200 text-xs font-semibold text-orange-500 hover:bg-orange-50 transition-colors"
+        onClick={handleManualRefresh}
+        disabled={refreshing}
+        className={`mt-6 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-semibold transition-colors ${
+          refreshing
+            ? "border-slate-200 text-slate-400 bg-slate-50 cursor-not-allowed"
+            : "border-orange-200 text-orange-500 hover:bg-orange-50"
+        }`}
       >
-        <RefreshCw size={13} />
-        Manual Refresh
+        <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+        {refreshing ? "Refreshing..." : "Manual Refresh"}
       </motion.button>
     </div>
   );

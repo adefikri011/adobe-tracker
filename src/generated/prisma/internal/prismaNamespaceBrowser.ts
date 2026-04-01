@@ -59,7 +59,8 @@ export const ModelName = {
   Transaction: 'Transaction',
   Subscription: 'Subscription',
   AppSettings: 'AppSettings',
-  LoginLog: 'LoginLog'
+  LoginLog: 'LoginLog',
+  SyncLog: 'SyncLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -212,6 +213,22 @@ export const LoginLogScalarFieldEnum = {
 } as const
 
 export type LoginLogScalarFieldEnum = (typeof LoginLogScalarFieldEnum)[keyof typeof LoginLogScalarFieldEnum]
+
+
+export const SyncLogScalarFieldEnum = {
+  id: 'id',
+  profileId: 'profileId',
+  status: 'status',
+  totalCollected: 'totalCollected',
+  created: 'created',
+  updated: 'updated',
+  totalInDatabase: 'totalInDatabase',
+  errorMessage: 'errorMessage',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type SyncLogScalarFieldEnum = (typeof SyncLogScalarFieldEnum)[keyof typeof SyncLogScalarFieldEnum]
 
 
 export const SortOrder = {

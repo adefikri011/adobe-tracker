@@ -49,17 +49,17 @@ const navGroups = [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     ],
   },
-  {
-    group: "Analytics",
-    items: [
-      { label: "Total Earning", href: "/admin/stats/earning", icon: TrendingUp },
-      { label: "Downloads", href: "/admin/stats/downloads", icon: Download },
-      { label: "Assets", href: "/admin/stats/assets", icon: ImageIcon },
-      { label: "Top Keywords", href: "/admin/stats/keywords", icon: BarChart3 },
-      { label: "Activity", href: "/admin/stats/activity", icon: Activity },
+  // {
+  //   group: "Analytics",
+  //   items: [
+  //     { label: "Total Earning", href: "/admin/stats/earning", icon: TrendingUp },
+  //     { label: "Downloads", href: "/admin/stats/downloads", icon: Download },
+  //     { label: "Assets", href: "/admin/stats/assets", icon: ImageIcon },
+  //     { label: "Top Keywords", href: "/admin/stats/keywords", icon: BarChart3 },
+  //     { label: "Activity", href: "/admin/stats/activity", icon: Activity },
 
-    ],
-  },
+  //   ],
+  // },
   {
     group: "Users",
     items: [
