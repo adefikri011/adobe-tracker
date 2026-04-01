@@ -2,14 +2,14 @@
 
 import { motion } from "framer-motion";
 import { Download, ImageIcon, Film, Layers } from "lucide-react";
+import { useEffect, useState } from "react";
 
-const assets = [
-  { id: "1", title: "Modern Technology Background", downloads: 1240, type: "Photo"  },
-  { id: "2", title: "Abstract Business Vector Set",  downloads: 980,  type: "Vector" },
-  { id: "3", title: "Nature Landscape Collection",   downloads: 870,  type: "Photo"  },
-  { id: "4", title: "Health & Wellness Icons",        downloads: 740,  type: "Vector" },
-  { id: "5", title: "Corporate Team Meeting",         downloads: 610,  type: "Video"  },
-];
+interface Asset {
+  id: string;
+  title: string;
+  downloads: number;
+  type: "Photo" | "Vector" | "Video";
+}
 
 const typeConfig: Record<string, { icon: React.ElementType; bg: string; text: string }> = {
   Photo:  { icon: ImageIcon, bg: "bg-blue-50  border-blue-100",   text: "text-blue-500"   },
@@ -18,6 +18,41 @@ const typeConfig: Record<string, { icon: React.ElementType; bg: string; text: st
 };
 
 export default function TopAssets() {
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAssets = async () => {
+      try {
+        const res = await fetch('/api/admin/dashboard/top-assets');
+        if (res.ok) {
+          const data = await res.json();
+          setAssets(data.assets);
+        }
+      } catch (error) {
+        console.error('Failed to fetch assets:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssets();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="space-y-2">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="animate-pulse h-12 bg-slate-100 rounded-xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (assets.length === 0) {
+    return <p className="text-sm text-slate-400 py-8 text-center">No assets data yet</p>;
+  }
+
   return (
     <div className="space-y-2">
       {assets.map((asset, i) => {

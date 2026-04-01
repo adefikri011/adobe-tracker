@@ -1,21 +1,54 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
-const keywords = [
-  { keyword: "technology", downloads: 6820, rank: 1 },
-  { keyword: "nature",     downloads: 5340, rank: 2 },
-  { keyword: "business",   downloads: 4210, rank: 3 },
-  { keyword: "health",     downloads: 3780, rank: 4 },
-  { keyword: "abstract",   downloads: 2960, rank: 5 },
-  { keyword: "food",       downloads: 2410, rank: 6 },
-];
-
-const max = keywords[0].downloads;
+interface Keyword {
+  keyword: string;
+  downloads: number;
+  rank: number;
+}
 
 const rankColor = ["text-orange-500", "text-orange-400", "text-orange-300"];
 
 export default function TopKeywords() {
+  const [keywords, setKeywords] = useState<Keyword[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchKeywords = async () => {
+      try {
+        const res = await fetch('/api/admin/dashboard/top-keywords');
+        if (res.ok) {
+          const data = await res.json();
+          setKeywords(data.keywords);
+        }
+      } catch (error) {
+        console.error('Failed to fetch keywords:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchKeywords();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="animate-pulse h-8 bg-slate-100 rounded-lg" />
+        ))}
+      </div>
+    );
+  }
+
+  if (keywords.length === 0) {
+    return <p className="text-sm text-slate-400 py-8 text-center">No keywords data yet</p>;
+  }
+
+  const max = keywords[0]?.downloads || 1;
+
   return (
     <div className="space-y-4">
       {keywords.map((item, i) => (

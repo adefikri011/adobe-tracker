@@ -2,17 +2,16 @@
 
 import { motion } from "framer-motion";
 import { UserPlus, Download, AlertCircle, ShieldCheck, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
 
 type ActivityType = "new_user" | "download" | "error" | "admin" | "sync";
 
-const activities = [
-  { id: "1", type: "new_user" as ActivityType,  message: "New user registered: john@example.com",          time: "2 min ago"   },
-  { id: "2", type: "download" as ActivityType,  message: "Asset #1042 was downloaded 12 times today",      time: "15 min ago"  },
-  { id: "3", type: "error"    as ActivityType,  message: "Adobe Stock API rate limit reached",               time: "32 min ago"  },
-  { id: "4", type: "admin"    as ActivityType,  message: "Admin upgraded jane@example.com to Pro",           time: "1 hour ago"  },
-  { id: "5", type: "sync"     as ActivityType,  message: "Auto-sync completed: 756 assets updated",          time: "2 hours ago" },
-  { id: "6", type: "new_user" as ActivityType,  message: "New user registered: alice@example.com",           time: "3 hours ago" },
-];
+interface Activity {
+  id: string;
+  type: ActivityType;
+  message: string;
+  time: string;
+}
 
 const iconMap: Record<ActivityType, { icon: React.ElementType; bg: string; color: string; ring: string }> = {
   new_user: { icon: UserPlus,    bg: "bg-blue-50",     color: "text-blue-500",    ring: "ring-blue-100"    },
@@ -23,6 +22,41 @@ const iconMap: Record<ActivityType, { icon: React.ElementType; bg: string; color
 };
 
 export default function RecentActivity() {
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const res = await fetch('/api/admin/dashboard/activities');
+        if (res.ok) {
+          const data = await res.json();
+          setActivities(data.activities);
+        }
+      } catch (error) {
+        console.error('Failed to fetch activities:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchActivities();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="divide-y divide-slate-50">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="animate-pulse h-12 bg-slate-100 rounded my-3" />
+        ))}
+      </div>
+    );
+  }
+
+  if (activities.length === 0) {
+    return <p className="text-sm text-slate-400 py-8 text-center">No activities yet</p>;
+  }
+
   return (
     <div className="divide-y divide-slate-50">
       {activities.map((item, i) => {

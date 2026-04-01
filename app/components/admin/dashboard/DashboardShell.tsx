@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import {
   DollarSign, Download, ImageIcon, Users,
   ArrowUpRight, Clock,
@@ -11,8 +12,6 @@ const STATS_CONFIG = [
   {
     key:        "earning",
     label:      "Total Earning",
-    value:      "$12,480",           // placeholder — ganti dengan data real
-    change:     "+8.2% this month",
     icon:       DollarSign,
     iconBg:     "bg-emerald-50",
     iconColor:  "text-emerald-500",
@@ -22,8 +21,6 @@ const STATS_CONFIG = [
   {
     key:        "downloads",
     label:      "Total Downloads",
-    value:      "34,291",            // placeholder
-    change:     "+12.5% this month",
     icon:       Download,
     iconBg:     "bg-blue-50",
     iconColor:  "text-blue-500",
@@ -33,8 +30,6 @@ const STATS_CONFIG = [
   {
     key:        "assets",
     label:      "Total Assets",
-    value:      "756",               // placeholder
-    change:     "+3 this week",
     icon:       ImageIcon,
     iconBg:     "bg-orange-50",
     iconColor:  "text-orange-500",
@@ -64,6 +59,12 @@ interface Props {
   children:  React.ReactNode;
 }
 
+interface DashboardStats {
+  totalEarning: number;
+  totalDownloads: number;
+  totalAssets: number;
+}
+
 const container = {
   hidden: {},
   show:   { transition: { staggerChildren: 0.08 } },
@@ -75,11 +76,45 @@ const fadeUp = {
 };
 
 export default function DashboardShell({ statsData, children }: Props) {
-  // Resolve nilai untuk card "users" dari props primitif
+  const [dashStats, setDashStats] = useState<DashboardStats>({
+    totalEarning: 0,
+    totalDownloads: 0,
+    totalAssets: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/admin/dashboard/stats');
+        if (res.ok) {
+          const data = await res.json();
+          setDashStats(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  // Resolve nilai untuk card dari API dan props
   const resolvedValues: Record<string, { value: string; change: string }> = {
-    earning:   { value: "$12,480", change: "+8.2% this month"  },
-    downloads: { value: "34,291",  change: "+12.5% this month" },
-    assets:    { value: "756",     change: "+3 this week"      },
+    earning: { 
+      value: `$${(dashStats.totalEarning || 0).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`, 
+      change: "From transactions & assets" 
+    },
+    downloads: { 
+      value: (dashStats.totalDownloads || 0).toLocaleString(), 
+      change: "Total downloads" 
+    },
+    assets: { 
+      value: (dashStats.totalAssets || 0).toLocaleString(), 
+      change: "Assets in database" 
+    },
     users: {
       value:  String(statsData.totalUsers),
       change: `${statsData.userCount} regular · ${statsData.adminCount} admin`,
@@ -115,6 +150,7 @@ export default function DashboardShell({ statsData, children }: Props) {
         {STATS_CONFIG.map((stat) => {
           const Icon    = stat.icon;
           const { value, change } = resolvedValues[stat.key];
+          const isLoading = loading && stat.key !== 'users';
 
           return (
             <motion.div
@@ -136,9 +172,15 @@ export default function DashboardShell({ statsData, children }: Props) {
               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                 {stat.label}
               </p>
-              <p className={`text-2xl sm:text-3xl font-bold ${stat.valueColor} leading-none tracking-tight`}>
-                {value}
-              </p>
+              
+              {isLoading ? (
+                <div className="animate-pulse h-8 bg-slate-100 rounded" />
+              ) : (
+                <p className={`text-2xl sm:text-3xl font-bold ${stat.valueColor} leading-none tracking-tight`}>
+                  {value}
+                </p>
+              )}
+              
               <p className="text-[11px] text-slate-400 mt-2">{change}</p>
             </motion.div>
           );
