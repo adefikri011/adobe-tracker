@@ -22,6 +22,7 @@ model Profile {
   assets          Asset[]
   transactions    Transaction[]
   subscriptions   Subscription[]
+  loginLogs       LoginLog[]
 
   @@map("Profile")
 }
@@ -125,6 +126,22 @@ model AppSettings {
   updatedAt       DateTime  @updatedAt
 
   @@map("AppSettings")
+}
+
+// Login attempts tracking
+model LoginLog {
+  id        String   @id @default(cuid())
+  profileId String?
+  email     String
+  status    String   @default("success") // "success" ou "failed"
+  ipAddress String?
+  device    String?  // dari User-Agent
+  loginTime DateTime @default(now())
+  createdAt DateTime @default(now())
+  
+  profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("LoginLog")
 }
 
 enum UserRole {

@@ -57,3 +57,8 @@ export type Subscription = Prisma.SubscriptionModel
  * 
  */
 export type AppSettings = Prisma.AppSettingsModel
+/**
+ * Model LoginLog
+ * 
+ */
+export type LoginLog = Prisma.LoginLogModel

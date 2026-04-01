@@ -63,6 +63,45 @@ function normalizeDeviceKey(userAgent: string) {
   return `${browserName}-${browserVersion || "0"}-${osName}`.toLowerCase();
 }
 
+function parseDeviceInfo(userAgent: string): string {
+  if (!userAgent) return 'Unknown Device';
+  
+  let browser = 'Unknown Browser';
+  let os = 'Unknown OS';
+  
+  // Parse browser
+  if (userAgent.includes('Chrome/')) {
+    const match = userAgent.match(/Chrome\/(\d+)/);
+    browser = `Chrome ${match?.[1] || ''}`.trim();
+  } else if (userAgent.includes('Safari/') && !userAgent.includes('Chrome')) {
+    const match = userAgent.match(/Version\/(\d+)/);
+    browser = `Safari ${match?.[1] || ''}`.trim();
+  } else if (userAgent.includes('Firefox/')) {
+    const match = userAgent.match(/Firefox\/(\d+)/);
+    browser = `Firefox ${match?.[1] || ''}`.trim();
+  } else if (userAgent.includes('Edg/')) {
+    const match = userAgent.match(/Edg\/(\d+)/);
+    browser = `Edge ${match?.[1] || ''}`.trim();
+  }
+  
+  // Parse OS
+  if (userAgent.includes('Windows')) {
+    os = 'Windows';
+  } else if (userAgent.includes('Macintosh')) {
+    os = 'macOS';
+  } else if (userAgent.includes('Linux')) {
+    os = 'Linux';
+  } else if (userAgent.includes('iPhone')) {
+    os = 'iOS';
+  } else if (userAgent.includes('iPad')) {
+    os = 'iPadOS';
+  } else if (userAgent.includes('Android')) {
+    os = 'Android';
+  }
+  
+  return `${browser} / ${os}`;
+}
+
 function getGlobalPolicy(raw: unknown) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
     return {
@@ -152,6 +191,29 @@ export async function GET(request: Request) {
 
     if (error) {
       console.error("Auth Error:", error.message);
+      
+      // Log failed login attempt
+      try {
+        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+                         request.headers.get('remoteAddress') || 
+                         'unknown';
+        const userAgent = request.headers.get('user-agent') || 'Unknown Device';
+        const device = parseDeviceInfo(userAgent);
+        
+        await prisma.loginLog.create({
+          data: {
+            email: 'unknown@failed.local',
+            status: 'failed',
+            ipAddress: ipAddress.trim(),
+            device,
+          },
+        }).catch(() => {
+          // Ignore if loginLog creation fails
+        });
+      } catch (logError) {
+        console.error('Failed to create failed login log:', logError);
+      }
+      
       return NextResponse.redirect(`${origin}/login?error=auth_failed`);
     }
 
@@ -236,6 +298,28 @@ export async function GET(request: Request) {
       }
 
       if (existingSession?.suspendedUntil && existingSession.suspendedUntil > new Date()) {
+        // Log failed login due to suspension
+        try {
+          const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+                           request.headers.get('remoteAddress') || 
+                           'unknown';
+          const device = parseDeviceInfo(userAgent);
+          
+          await prisma.loginLog.create({
+            data: {
+              profileId: userId,
+              email: data.user.email || 'unknown',
+              status: 'failed',
+              ipAddress: ipAddress.trim(),
+              device,
+            },
+          }).catch(() => {
+            // Ignore if loginLog creation fails
+          });
+        } catch (logError) {
+          console.error('Failed to create failed login log:', logError);
+        }
+
         await supabase.auth.signOut();
         const diffMs = existingSession.suspendedUntil.getTime() - Date.now();
         const diffMin = Math.max(1, Math.ceil(diffMs / 60000));
@@ -243,6 +327,28 @@ export async function GET(request: Request) {
       }
 
       if (profile.status === "suspended") {
+        // Log failed login due to suspension
+        try {
+          const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+                           request.headers.get('remoteAddress') || 
+                           'unknown';
+          const device = parseDeviceInfo(userAgent);
+          
+          await prisma.loginLog.create({
+            data: {
+              profileId: userId,
+              email: data.user.email || 'unknown',
+              status: 'failed',
+              ipAddress: ipAddress.trim(),
+              device,
+            },
+          }).catch(() => {
+            // Ignore if loginLog creation fails
+          });
+        } catch (logError) {
+          console.error('Failed to create failed login log:', logError);
+        }
+
         await supabase.auth.signOut();
         return NextResponse.redirect(`${origin}/login?error=suspended&minutes=${suspendDurationMinutes}`);
       }
@@ -277,6 +383,28 @@ export async function GET(request: Request) {
           }),
         ]);
 
+        // Log failed login due to multiple devices
+        try {
+          const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+                           request.headers.get('remoteAddress') || 
+                           'unknown';
+          const device = parseDeviceInfo(userAgent);
+          
+          await prisma.loginLog.create({
+            data: {
+              profileId: userId,
+              email: data.user.email || 'unknown',
+              status: 'failed',
+              ipAddress: ipAddress.trim(),
+              device,
+            },
+          }).catch(() => {
+            // Ignore if loginLog creation fails
+          });
+        } catch (logError) {
+          console.error('Failed to create failed login log:', logError);
+        }
+
         await supabase.auth.signOut();
         return NextResponse.redirect(`${origin}/login?error=double_login&minutes=${suspendDurationMinutes}`);
       }
@@ -304,6 +432,27 @@ export async function GET(request: Request) {
       } catch (dbError) {
         console.error("Database Error:", dbError);
         return NextResponse.redirect(`${origin}/login?error=database_error`);
+      }
+
+      // Log successful login
+      try {
+        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+                         request.headers.get('remoteAddress') || 
+                         'unknown';
+        const device = parseDeviceInfo(userAgent);
+        
+        await prisma.loginLog.create({
+          data: {
+            profileId: userId,
+            email: data.user.email || 'unknown',
+            status: 'success',
+            ipAddress: ipAddress.trim(),
+            device,
+          },
+        });
+      } catch (logError) {
+        console.error('Failed to create login log:', logError);
+        // Don't fail login if logging fails
       }
 
       const roleProfile = await prisma.profile.findUnique({

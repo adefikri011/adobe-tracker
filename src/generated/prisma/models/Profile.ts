@@ -251,6 +251,7 @@ export type ProfileWhereInput = {
   assets?: Prisma.AssetListRelationFilter
   transactions?: Prisma.TransactionListRelationFilter
   subscriptions?: Prisma.SubscriptionListRelationFilter
+  loginLogs?: Prisma.LoginLogListRelationFilter
 }
 
 export type ProfileOrderByWithRelationInput = {
@@ -266,6 +267,7 @@ export type ProfileOrderByWithRelationInput = {
   assets?: Prisma.AssetOrderByRelationAggregateInput
   transactions?: Prisma.TransactionOrderByRelationAggregateInput
   subscriptions?: Prisma.SubscriptionOrderByRelationAggregateInput
+  loginLogs?: Prisma.LoginLogOrderByRelationAggregateInput
 }
 
 export type ProfileWhereUniqueInput = Prisma.AtLeast<{
@@ -284,6 +286,7 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   assets?: Prisma.AssetListRelationFilter
   transactions?: Prisma.TransactionListRelationFilter
   subscriptions?: Prisma.SubscriptionListRelationFilter
+  loginLogs?: Prisma.LoginLogListRelationFilter
 }, "id" | "email">
 
 export type ProfileOrderByWithAggregationInput = {
@@ -331,6 +334,7 @@ export type ProfileCreateInput = {
   assets?: Prisma.AssetCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutProfileInput
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutProfileInput
+  loginLogs?: Prisma.LoginLogCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUncheckedCreateInput = {
@@ -346,6 +350,7 @@ export type ProfileUncheckedCreateInput = {
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutProfileInput
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutProfileInput
+  loginLogs?: Prisma.LoginLogUncheckedCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUpdateInput = {
@@ -361,6 +366,7 @@ export type ProfileUpdateInput = {
   assets?: Prisma.AssetUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutProfileNestedInput
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutProfileNestedInput
+  loginLogs?: Prisma.LoginLogUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileUncheckedUpdateInput = {
@@ -376,6 +382,7 @@ export type ProfileUncheckedUpdateInput = {
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutProfileNestedInput
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutProfileNestedInput
+  loginLogs?: Prisma.LoginLogUncheckedUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileCreateManyInput = {
@@ -463,6 +470,11 @@ export type ProfileScalarRelationFilter = {
   isNot?: Prisma.ProfileWhereInput
 }
 
+export type ProfileNullableScalarRelationFilter = {
+  is?: Prisma.ProfileWhereInput | null
+  isNot?: Prisma.ProfileWhereInput | null
+}
+
 export type StringFieldUpdateOperationsInput = {
   set?: string
 }
@@ -537,6 +549,22 @@ export type ProfileUpdateOneRequiredWithoutSubscriptionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutSubscriptionsInput, Prisma.ProfileUpdateWithoutSubscriptionsInput>, Prisma.ProfileUncheckedUpdateWithoutSubscriptionsInput>
 }
 
+export type ProfileCreateNestedOneWithoutLoginLogsInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutLoginLogsInput, Prisma.ProfileUncheckedCreateWithoutLoginLogsInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutLoginLogsInput
+  connect?: Prisma.ProfileWhereUniqueInput
+}
+
+export type ProfileUpdateOneWithoutLoginLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutLoginLogsInput, Prisma.ProfileUncheckedCreateWithoutLoginLogsInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutLoginLogsInput
+  upsert?: Prisma.ProfileUpsertWithoutLoginLogsInput
+  disconnect?: Prisma.ProfileWhereInput | boolean
+  delete?: Prisma.ProfileWhereInput | boolean
+  connect?: Prisma.ProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutLoginLogsInput, Prisma.ProfileUpdateWithoutLoginLogsInput>, Prisma.ProfileUncheckedUpdateWithoutLoginLogsInput>
+}
+
 export type ProfileCreateWithoutAssetsInput = {
   id: string
   fullName?: string | null
@@ -549,6 +577,7 @@ export type ProfileCreateWithoutAssetsInput = {
   createdAt?: Date | string
   transactions?: Prisma.TransactionCreateNestedManyWithoutProfileInput
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutProfileInput
+  loginLogs?: Prisma.LoginLogCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUncheckedCreateWithoutAssetsInput = {
@@ -563,6 +592,7 @@ export type ProfileUncheckedCreateWithoutAssetsInput = {
   createdAt?: Date | string
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutProfileInput
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutProfileInput
+  loginLogs?: Prisma.LoginLogUncheckedCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileCreateOrConnectWithoutAssetsInput = {
@@ -593,6 +623,7 @@ export type ProfileUpdateWithoutAssetsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transactions?: Prisma.TransactionUpdateManyWithoutProfileNestedInput
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutProfileNestedInput
+  loginLogs?: Prisma.LoginLogUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutAssetsInput = {
@@ -607,6 +638,7 @@ export type ProfileUncheckedUpdateWithoutAssetsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutProfileNestedInput
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutProfileNestedInput
+  loginLogs?: Prisma.LoginLogUncheckedUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileCreateWithoutTransactionsInput = {
@@ -621,6 +653,7 @@ export type ProfileCreateWithoutTransactionsInput = {
   createdAt?: Date | string
   assets?: Prisma.AssetCreateNestedManyWithoutProfileInput
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutProfileInput
+  loginLogs?: Prisma.LoginLogCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUncheckedCreateWithoutTransactionsInput = {
@@ -635,6 +668,7 @@ export type ProfileUncheckedCreateWithoutTransactionsInput = {
   createdAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProfileInput
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutProfileInput
+  loginLogs?: Prisma.LoginLogUncheckedCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileCreateOrConnectWithoutTransactionsInput = {
@@ -665,6 +699,7 @@ export type ProfileUpdateWithoutTransactionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUpdateManyWithoutProfileNestedInput
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutProfileNestedInput
+  loginLogs?: Prisma.LoginLogUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutTransactionsInput = {
@@ -679,6 +714,7 @@ export type ProfileUncheckedUpdateWithoutTransactionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProfileNestedInput
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutProfileNestedInput
+  loginLogs?: Prisma.LoginLogUncheckedUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileCreateWithoutSubscriptionsInput = {
@@ -693,6 +729,7 @@ export type ProfileCreateWithoutSubscriptionsInput = {
   createdAt?: Date | string
   assets?: Prisma.AssetCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutProfileInput
+  loginLogs?: Prisma.LoginLogCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUncheckedCreateWithoutSubscriptionsInput = {
@@ -707,6 +744,7 @@ export type ProfileUncheckedCreateWithoutSubscriptionsInput = {
   createdAt?: Date | string
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutProfileInput
+  loginLogs?: Prisma.LoginLogUncheckedCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileCreateOrConnectWithoutSubscriptionsInput = {
@@ -737,6 +775,7 @@ export type ProfileUpdateWithoutSubscriptionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutProfileNestedInput
+  loginLogs?: Prisma.LoginLogUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutSubscriptionsInput = {
@@ -751,6 +790,83 @@ export type ProfileUncheckedUpdateWithoutSubscriptionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutProfileNestedInput
+  loginLogs?: Prisma.LoginLogUncheckedUpdateManyWithoutProfileNestedInput
+}
+
+export type ProfileCreateWithoutLoginLogsInput = {
+  id: string
+  fullName?: string | null
+  email?: string | null
+  plan?: string
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  planExpiry?: Date | string | null
+  deviceLimit?: number
+  createdAt?: Date | string
+  assets?: Prisma.AssetCreateNestedManyWithoutProfileInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutProfileInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutProfileInput
+}
+
+export type ProfileUncheckedCreateWithoutLoginLogsInput = {
+  id: string
+  fullName?: string | null
+  email?: string | null
+  plan?: string
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  planExpiry?: Date | string | null
+  deviceLimit?: number
+  createdAt?: Date | string
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProfileInput
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutProfileInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutProfileInput
+}
+
+export type ProfileCreateOrConnectWithoutLoginLogsInput = {
+  where: Prisma.ProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutLoginLogsInput, Prisma.ProfileUncheckedCreateWithoutLoginLogsInput>
+}
+
+export type ProfileUpsertWithoutLoginLogsInput = {
+  update: Prisma.XOR<Prisma.ProfileUpdateWithoutLoginLogsInput, Prisma.ProfileUncheckedUpdateWithoutLoginLogsInput>
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutLoginLogsInput, Prisma.ProfileUncheckedCreateWithoutLoginLogsInput>
+  where?: Prisma.ProfileWhereInput
+}
+
+export type ProfileUpdateToOneWithWhereWithoutLoginLogsInput = {
+  where?: Prisma.ProfileWhereInput
+  data: Prisma.XOR<Prisma.ProfileUpdateWithoutLoginLogsInput, Prisma.ProfileUncheckedUpdateWithoutLoginLogsInput>
+}
+
+export type ProfileUpdateWithoutLoginLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.AssetUpdateManyWithoutProfileNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutProfileNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutProfileNestedInput
+}
+
+export type ProfileUncheckedUpdateWithoutLoginLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutProfileNestedInput
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutProfileNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutProfileNestedInput
 }
 
 
@@ -762,12 +878,14 @@ export type ProfileCountOutputType = {
   assets: number
   transactions: number
   subscriptions: number
+  loginLogs: number
 }
 
 export type ProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assets?: boolean | ProfileCountOutputTypeCountAssetsArgs
   transactions?: boolean | ProfileCountOutputTypeCountTransactionsArgs
   subscriptions?: boolean | ProfileCountOutputTypeCountSubscriptionsArgs
+  loginLogs?: boolean | ProfileCountOutputTypeCountLoginLogsArgs
 }
 
 /**
@@ -801,6 +919,13 @@ export type ProfileCountOutputTypeCountSubscriptionsArgs<ExtArgs extends runtime
   where?: Prisma.SubscriptionWhereInput
 }
 
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeCountLoginLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LoginLogWhereInput
+}
+
 
 export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -815,6 +940,7 @@ export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   assets?: boolean | Prisma.Profile$assetsArgs<ExtArgs>
   transactions?: boolean | Prisma.Profile$transactionsArgs<ExtArgs>
   subscriptions?: boolean | Prisma.Profile$subscriptionsArgs<ExtArgs>
+  loginLogs?: boolean | Prisma.Profile$loginLogsArgs<ExtArgs>
   _count?: boolean | Prisma.ProfileCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["profile"]>
 
@@ -859,6 +985,7 @@ export type ProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   assets?: boolean | Prisma.Profile$assetsArgs<ExtArgs>
   transactions?: boolean | Prisma.Profile$transactionsArgs<ExtArgs>
   subscriptions?: boolean | Prisma.Profile$subscriptionsArgs<ExtArgs>
+  loginLogs?: boolean | Prisma.Profile$loginLogsArgs<ExtArgs>
   _count?: boolean | Prisma.ProfileCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProfileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -870,6 +997,7 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     assets: Prisma.$AssetPayload<ExtArgs>[]
     transactions: Prisma.$TransactionPayload<ExtArgs>[]
     subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
+    loginLogs: Prisma.$LoginLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1278,6 +1406,7 @@ export interface Prisma__ProfileClient<T, Null = never, ExtArgs extends runtime.
   assets<T extends Prisma.Profile$assetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$assetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   transactions<T extends Prisma.Profile$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   subscriptions<T extends Prisma.Profile$subscriptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  loginLogs<T extends Prisma.Profile$loginLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$loginLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoginLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1778,6 +1907,30 @@ export type Profile$subscriptionsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.SubscriptionScalarFieldEnum | Prisma.SubscriptionScalarFieldEnum[]
+}
+
+/**
+ * Profile.loginLogs
+ */
+export type Profile$loginLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LoginLog
+   */
+  select?: Prisma.LoginLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LoginLog
+   */
+  omit?: Prisma.LoginLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoginLogInclude<ExtArgs> | null
+  where?: Prisma.LoginLogWhereInput
+  orderBy?: Prisma.LoginLogOrderByWithRelationInput | Prisma.LoginLogOrderByWithRelationInput[]
+  cursor?: Prisma.LoginLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LoginLogScalarFieldEnum | Prisma.LoginLogScalarFieldEnum[]
 }
 
 /**
