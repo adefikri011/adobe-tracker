@@ -37,3 +37,18 @@ export type Asset = Prisma.AssetModel
  * 
  */
 export type UserSession = Prisma.UserSessionModel
+/**
+ * Model Plan
+ * 
+ */
+export type Plan = Prisma.PlanModel
+/**
+ * Model Transaction
+ * 
+ */
+export type Transaction = Prisma.TransactionModel
+/**
+ * Model Subscription
+ * 
+ */
+export type Subscription = Prisma.SubscriptionModel

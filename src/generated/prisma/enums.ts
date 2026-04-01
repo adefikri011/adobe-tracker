@@ -23,3 +23,23 @@ export const UserStatus = {
 } as const
 
 export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
+
+
+export const TransactionStatus = {
+  pending: 'pending',
+  success: 'success',
+  failed: 'failed',
+  expired: 'expired',
+  refunded: 'refunded'
+} as const
+
+export type TransactionStatus = (typeof TransactionStatus)[keyof typeof TransactionStatus]
+
+
+export const SubscriptionStatus = {
+  active: 'active',
+  expired: 'expired',
+  cancelled: 'cancelled'
+} as const
+
+export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]

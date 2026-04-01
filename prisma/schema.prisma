@@ -8,15 +8,17 @@ datasource db {
 }
 
 model Profile {
-  id          String     @id
-  fullName    String?
-  email       String?    @unique
-  plan        String     @default("free")
-  role        UserRole   @default(user)
-  status      UserStatus @default(active)
-  deviceLimit Int        @default(1)
-  createdAt   DateTime   @default(now())
-  assets      Asset[]
+  id            String         @id
+  fullName      String?
+  email         String?        @unique
+  plan          String         @default("free")
+  role          UserRole       @default(user)
+  status        UserStatus     @default(active)
+  deviceLimit   Int            @default(1)
+  createdAt     DateTime       @default(now())
+  assets        Asset[]
+  transactions  Transaction[]
+  subscriptions Subscription[]
 
   @@map("Profile")
 }
@@ -59,6 +61,58 @@ model UserSession {
   @@map("UserSession")
 }
 
+// Plan yang tersedia (dikelola admin)
+model Plan {
+  id           String        @id @default(cuid())
+  name         String        // "Pro - 7 Days"
+  slug         String        @unique // "pro-7"
+  description  String?
+  price        Float         // harga asli
+  finalPrice   Float         // harga setelah diskon
+  discount     Float         @default(0) // persen diskon
+  durationDays Int           // durasi dalam hari (0 = selamanya)
+  features     String[]      @default([])
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
+  subscriptions Subscription[]
+}
+
+// Setiap transaksi pembayaran
+model Transaction {
+  id              String            @id @default(cuid())
+  orderId         String            @unique // format: TRX-{timestamp}-{userId}
+  profileId       String
+  planId          String
+  amount          Float
+  status          TransactionStatus @default(pending)
+  paymentMethod   String?           // "credit_card", "gopay", "bca_va", dll
+  snapToken       String?           // token dari Midtrans Snap
+  midtransOrderId String?           // order_id dari Midtrans
+  paidAt          DateTime?
+  expiredAt       DateTime?
+  metadata        Json?             // raw response dari Midtrans
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  profile         Profile           @relation(fields: [profileId], references: [id])
+  plan            Plan              @relation(fields: [planId], references: [id])
+}
+
+// Subscription aktif user
+model Subscription {
+  id          String             @id @default(cuid())
+  profileId   String
+  planId      String
+  status      SubscriptionStatus @default(active)
+  startDate   DateTime           @default(now())
+  endDate     DateTime           // kapan expired
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  profile     Profile            @relation(fields: [profileId], references: [id])
+  plan        Plan               @relation(fields: [planId], references: [id])
+}
+
 enum UserRole {
   user
   admin
@@ -67,4 +121,18 @@ enum UserRole {
 enum UserStatus {
   active
   suspended
+}
+
+enum TransactionStatus {
+  pending
+  success
+  failed
+  expired
+  refunded
+}
+
+enum SubscriptionStatus {
+  active
+  expired
+  cancelled
 }
