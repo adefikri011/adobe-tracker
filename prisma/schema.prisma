@@ -8,17 +8,20 @@ datasource db {
 }
 
 model Profile {
-  id            String         @id
-  fullName      String?
-  email         String?        @unique
-  plan          String         @default("free")
-  role          UserRole       @default(user)
-  status        UserStatus     @default(active)
-  deviceLimit   Int            @default(1)
-  createdAt     DateTime       @default(now())
-  assets        Asset[]
-  transactions  Transaction[]
-  subscriptions Subscription[]
+  id              String         @id
+  fullName        String?
+  email           String?        @unique
+  plan            String         @default("free") // "free" atau "pro"
+  role            UserRole       @default(user)
+  status          UserStatus     @default(active)
+  
+  planExpiry      DateTime?      
+  
+  deviceLimit     Int            @default(1)
+  createdAt       DateTime       @default(now())
+  assets          Asset[]
+  transactions    Transaction[]
+  subscriptions   Subscription[]
 
   @@map("Profile")
 }
@@ -111,6 +114,17 @@ model Subscription {
   updatedAt   DateTime           @updatedAt
   profile     Profile            @relation(fields: [profileId], references: [id])
   plan        Plan               @relation(fields: [planId], references: [id])
+}
+
+// Global App Settings (hanya 1 record)
+model AppSettings {
+  id              String    @id @default("singleton")
+  currency        String    @default("USD")     // USD atau IDR
+  exchangeRate    Float     @default(15800)     // 1 USD = X IDR
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("AppSettings")
 }
 
 enum UserRole {

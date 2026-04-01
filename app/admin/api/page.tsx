@@ -68,7 +68,7 @@ export default function ApiIntegrationPage() {
       updated: 0,
       totalInDatabase: 0,
       errorMessage: "",
-      logs: ["Menghubungkan ke Apify..."],
+      logs: ["Connecting to Apify..."],
     });
 
     try {
@@ -77,7 +77,7 @@ export default function ApiIntegrationPage() {
         signal: abortRef.current.signal,
       });
 
-      if (!response.body) throw new Error("Tidak ada response stream");
+      if (!response.body) throw new Error("No response stream available");
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();

@@ -77,17 +77,17 @@ const topAssets = [
 
 export default function AssetsPage() {
   return (
-    <div className="p-6 md:p-10 bg-[#FBFCFE] min-h-screen space-y-10">
+    <div className="p-4 sm:p-6 md:p-8 lg:p-10 bg-[#FBFCFE] min-h-screen space-y-6 sm:space-y-8 md:space-y-10">
       
       {/* ── Header ───────────────────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1e293b] tracking-tight">Assets Management</h1>
-          <p className="text-sm text-slate-400 mt-1 font-medium">Monitor and track your Adobe Stock asset performance.</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-[#1e293b] tracking-tight">Assets Management</h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">Monitor and track your Adobe Stock asset performance.</p>
         </div>
         
-        <div className="flex items-center gap-3">
-          <div className="relative group hidden md:block">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative group hidden sm:block">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
             <input 
               type="text" 
@@ -99,7 +99,7 @@ export default function AssetsPage() {
             {["Daily", "Monthly", "Yearly"].map((period) => (
               <button
                 key={period}
-                className={`px-4 py-1.5 text-xs font-bold rounded-xl transition-all ${
+                className={`px-3 sm:px-4 py-1.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
                   period === "Yearly" ? "bg-[#ff6b00] text-white shadow-md shadow-orange-100" : "text-slate-400 hover:text-slate-600"
                 }`}
               >
@@ -111,21 +111,21 @@ export default function AssetsPage() {
       </div>
 
       {/* ── Stats Cards (Thin Style) ────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {stats.map((stat, i) => (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
             key={stat.label}
-            className="bg-white p-6 rounded-[24px] border border-slate-100/50 shadow-sm flex flex-col justify-between"
+            className="bg-white p-4 sm:p-5 md:p-6 rounded-[24px] border border-slate-100/50 shadow-sm flex flex-col justify-between"
           >
-            <div className="flex justify-between items-start">
-              <div>
+            <div className="flex justify-between items-start gap-3">
+              <div className="min-w-0">
                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                <h3 className="text-2xl font-semibold text-[#1e293b] mt-1.5">{stat.value}</h3>
+                <h3 className="text-xl sm:text-2xl font-semibold text-[#1e293b] mt-1.5">{stat.value}</h3>
               </div>
-              <div className={`p-2.5 rounded-xl ${stat.color} bg-opacity-40`}>
+              <div className={`p-2.5 rounded-xl ${stat.color} bg-opacity-40 flex-shrink-0`}>
                 <stat.icon size={18} />
               </div>
             </div>
@@ -141,11 +141,11 @@ export default function AssetsPage() {
       </div>
 
       {/* ── Main Content ────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-8">
         
         {/* Asset Growth Chart */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-[24px] border border-slate-100/50 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
+        <div className="lg:col-span-2 bg-white p-5 sm:p-6 md:p-8 rounded-[24px] border border-slate-100/50 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
             <h3 className="text-lg font-semibold text-[#1e293b]">Asset Growth</h3>
             <button className="text-[#ff6b00] text-xs font-bold flex items-center gap-1.5 hover:gap-2 transition-all uppercase tracking-wider">
               Full Report <ArrowUpRight size={14} />

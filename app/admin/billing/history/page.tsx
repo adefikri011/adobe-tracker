@@ -11,7 +11,7 @@ import {
   Search
 } from "lucide-react";
 
-// DATA MOCKUP (Disesuaikan dengan gaya Plans & Pricing kamu)
+// MOCK DATA (Aligned with Plans & Pricing)
 const HISTORY_DATA = [
   { id: "1", user: "Ade Fikri", plan: "Pro - 7 Days", price: "$7.19", date: "30 Mar 2026", expiry: "06 Apr 2026", status: "Active", progress: 85 },
   { id: "2", user: "Masyari Studio", plan: "Pro - 30 Days", price: "$15.99", date: "01 Mar 2026", expiry: "31 Mar 2026", status: "Active", progress: 10 },
@@ -20,27 +20,27 @@ const HISTORY_DATA = [
 
 export default function BillingHistoryPage() {
   return (
-    <div className="p-8 space-y-6 bg-[#f9fafb] min-h-screen">
+    <div className="p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 bg-[#f9fafb] min-h-screen">
       
-      {/* HEADER SECTION - Ringan & Clean */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* HEADER SECTION - Clean & Minimal */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-800">Billing History</h1>
-          <p className="text-sm text-slate-500 mt-1">Monitor and manage all user subscription cycles.</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-slate-800">Billing History</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">Monitor and manage all user subscription cycles.</p>
         </div>
         
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input 
             type="text" 
-            placeholder="Cari user..." 
-            className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-orange-500 transition-all w-64"
+            placeholder="Search user..." 
+            className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-orange-500 transition-all w-full sm:w-64"
           />
         </div>
       </div>
 
       {/* TABLE AREA */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-xl overflow-x-auto shadow-sm">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">

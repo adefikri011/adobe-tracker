@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 const FREE_FEATURES = [
   { text: "5 results per search", included: true },
@@ -27,9 +28,56 @@ const PRO_FEATURES = [
   { text: "Priority support", included: true },
 ];
 
+interface CurrencySettings {
+  currency: string;
+  exchangeRate: number;
+}
+
 export default function PricingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [currencySettings, setCurrencySettings] = useState<CurrencySettings | null>(null);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+
+  const basePrice = 9; // USD price
+
+  useEffect(() => {
+    // Fetch currency settings
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/settings/currency");
+        const data = await res.json();
+        if (data.success) {
+          setCurrencySettings(data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch currency settings:", error);
+        // Fallback to USD
+        setCurrencySettings({ currency: "USD", exchangeRate: 15800 });
+      } finally {
+        setLoadingSettings(false);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
+  const getDisplayPrice = () => {
+    if (!currencySettings) return "$9";
+
+    const { currency, exchangeRate } = currencySettings;
+
+    if (currency === "IDR") {
+      const idrPrice = basePrice * exchangeRate;
+      return `Rp ${Math.round(idrPrice).toLocaleString("id-ID")}`;
+    }
+
+    return `$${basePrice}`;
+  };
+
+  const getCurrencySymbol = () => {
+    return currencySettings?.currency === "IDR" ? "🇮🇩" : "🇺🇸";
+  };
 
   const handleUpgrade = async () => {
     setLoading(true);
@@ -64,6 +112,14 @@ export default function PricingPage() {
           <p className="text-white/40 text-lg max-w-xl mx-auto">
             Start free and upgrade when you need more. No hidden fees, cancel anytime.
           </p>
+          
+          {/* Currency Indicator */}
+          {!loadingSettings && currencySettings && (
+            <div className="mt-6 inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-white/60 text-sm">
+              <span>{getCurrencySymbol()}</span>
+              <span>Pricing in <strong>{currencySettings.currency}</strong></span>
+            </div>
+          )}
         </div>
 
         {/* Plans */}
@@ -102,11 +158,27 @@ export default function PricingPage() {
             </div>
             <div>
               <div className="text-orange-400 text-xs font-semibold uppercase tracking-wider mb-3">Pro</div>
-              <div className="flex items-end gap-1 mb-1">
-                <span className="text-5xl font-bold">$9</span>
-                <span className="text-white/40 text-sm mb-2">/month</span>
+              
+              {loadingSettings ? (
+                <div className="flex items-center gap-2 mb-1">
+                  <Loader2 size={20} className="animate-spin text-orange-400" />
+                  <span className="text-white/40 text-sm">Loading price...</span>
+                </div>
+              ) : (
+                <div className="flex items-end gap-1 mb-1">
+                  <span className="text-5xl font-bold">{getDisplayPrice().split(" ")[0]}</span>
+                  {currencySettings?.currency === "IDR" && (
+                    <span className="text-white/40 text-sm mb-2">{getDisplayPrice().split(" ")[1]}</span>
+                  )}
+                  <span className="text-white/40 text-sm mb-2">/month</span>
+                </div>
+              )}
+              
+              <div className="text-white/30 text-sm mb-8">
+                {currencySettings?.currency === "IDR" 
+                  ? "Billed monthly · Cancel anytime" 
+                  : "Billed monthly · Cancel anytime"}
               </div>
-              <div className="text-white/30 text-sm mb-8">Billed monthly · Cancel anytime</div>
               <ul className="space-y-3 mb-8">
                 {PRO_FEATURES.map((f) => (
                   <li key={f.text} className="flex items-center gap-3 text-sm">
@@ -116,7 +188,7 @@ export default function PricingPage() {
                 ))}
               </ul>
             </div>
-            <button onClick={handleUpgrade} disabled={loading}
+            <button onClick={handleUpgrade} disabled={loading || loadingSettings}
               className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 transition py-3.5 rounded-xl text-sm font-semibold mt-auto">
               {loading ? "Processing..." : "Upgrade to Pro →"}
             </button>

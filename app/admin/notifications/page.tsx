@@ -38,32 +38,32 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Notifications</h1>
+          <p className="text-slate-400 text-xs sm:text-sm mt-1">
             {unreadCount > 0 ? `${unreadCount} unread notifications` : "All caught up!"}
           </p>
         </div>
         <button
           onClick={markAllRead}
-          className="flex items-center gap-2 border border-slate-200 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-xl text-sm font-medium transition"
+          className="flex items-center gap-2 border border-slate-200 text-slate-600 hover:bg-slate-50 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap"
         >
           <Check size={15} /> Mark all read
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left — Notification List */}
-        <div className="col-span-2">
+        <div className="lg:col-span-2">
           {/* Filter tabs */}
           <div className="flex gap-2 mb-5 flex-wrap">
             {["All", "Unread", "Sale", "Error", "Info"].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition whitespace-nowrap ${
                   filter === f
                     ? "bg-orange-500 text-white"
                     : "bg-white border border-slate-200 text-slate-500 hover:border-orange-300"

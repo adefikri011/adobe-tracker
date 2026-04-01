@@ -125,6 +125,27 @@ function formatItem(item: any) {
   };
 }
 
+// Fungsi untuk filter hasil berdasarkan keyword relevance
+function filterByRelevance(items: any[], keyword: string): any[] {
+  const queryLower = keyword.toLowerCase();
+  
+  return items.filter((item) => {
+    const title = (item?.title || "").toLowerCase();
+    const category = (item?.category?.name || item?.category || "").toLowerCase();
+    const tags = (item?.tags || []).map((t: any) => 
+      typeof t === "string" ? t.toLowerCase() : t?.name?.toLowerCase()
+    );
+    
+    // Cek apakah keyword ada di title, category, atau tags
+    const inTitle = title.includes(queryLower);
+    const inCategory = category.includes(queryLower);
+    const inTags = tags.some((tag: string) => tag?.includes(queryLower));
+    
+    // Return hanya jika keyword relevan di minimal satu field
+    return inTitle || inCategory || inTags;
+  });
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const query = searchParams.get("q")?.trim() || "";
@@ -202,13 +223,19 @@ export async function GET(req: NextRequest) {
 
     if (cached) {
       const allResults = cached.results as any[];
-      console.log(`[Search] Cache hit: ${allResults.length} hasil`);
+      // Filter hasil cache untuk memastikan relevan
+      const relevantResults = allResults.filter((r) => {
+        const title = (r?.title || "").toLowerCase();
+        const category = (r?.category || "").toLowerCase();
+        return title.includes(query.toLowerCase()) || category.includes(query.toLowerCase());
+      });
+      console.log(`[Search] Cache hit: ${relevantResults.length}/${allResults.length} hasil relevan`);
       return NextResponse.json({
-        results: allResults.slice(0, limit),
+        results: relevantResults.slice(0, limit),
         fromCache: true,
         cachedAt: cached.createdAt,
         isPro,
-        total: allResults.length,
+        total: relevantResults.length,
       });
     }
 
@@ -259,7 +286,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ results: [], fromCache: false, total: 0, isPro });
     }
 
-    const results = allItems.map(formatItem);
+    // Filter hasil berdasarkan relevance dengan keyword
+    const relevantItems = filterByRelevance(allItems, query);
+    console.log(`[Search] Setelah filter relevance: ${relevantItems.length}/${allItems.length}`);
+
+    const results = relevantItems.map(formatItem);
 
     // Simpan ke cache
     await prisma.searchCache.deleteMany({ where: { query: query.toLowerCase() } });

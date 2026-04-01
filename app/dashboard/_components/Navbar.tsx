@@ -1,12 +1,13 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/dist/client/link";
+import Link from "next/link"; // Pastikan import link benar
+import { useRouter } from "next/navigation";
 
 interface NavbarProps {
   isPro: boolean;
   planLoading: boolean;
-  onUpgradeClick: () => void;
+  onUpgradeClick?: () => void; // Dibuat opsional karena kita pakai router internal
   onSignOut?: () => void;
 }
 
@@ -17,10 +18,7 @@ const TrackStockLogo = () => (
     xmlns="http://www.w3.org/2000/svg"
     className="w-10 h-10 drop-shadow-sm"
   >
-    {/* Background Card dengan Gradient Halus */}
     <rect width="40" height="40" rx="12" fill="url(#logo-gradient)" />
-
-    {/* Abstrak 'T' yang terbentuk dari Chart Bar */}
     <path
       d="M12 22C12 20.8954 12.8954 20 14 20H18V28C18 29.1046 17.1046 30 16 30H14C12.8954 30 12 29.1046 12 28V22Z"
       fill="white"
@@ -34,8 +32,6 @@ const TrackStockLogo = () => (
       d="M10 12C10 10.8954 10.8954 10 12 10H28C29.1046 10 30 10.8954 30 12V14C30 15.1046 29.1046 16 28 16H12C10.8954 16 10 15.1046 10 14V12Z"
       fill="white"
     />
-
-    {/* Definitions untuk Gradient */}
     <defs>
       <linearGradient id="logo-gradient" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
         <stop stopColor="#FB923C" />
@@ -47,12 +43,11 @@ const TrackStockLogo = () => (
 
 export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: NavbarProps) {
   const supabase = createClient();
+  const router = useRouter();
 
   // --- LOGIC LOGOUT FIX (API + SUPABASE) ---
   const handleInternalSignOut = async () => {
     try {
-      // 1. Panggil API Route logout kita untuk membersihkan Prisma
-      // Kita pakai await supaya database terupdate dulu sebelum cookie dihapus
       const logoutRes = await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
@@ -62,21 +57,18 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
         throw new Error("Logout API failed");
       }
 
-      // 2. Bersihkan session di sisi browser (Supabase Cookies)
       await supabase.auth.signOut();
-
-      // 3. Jalankan callback dari parent jika ada
       if (onSignOut) onSignOut();
-
-      // 4. Redirect ke landing page
       window.location.href = "/";
-
     } catch (err) {
       console.error("Logout failed:", err);
-      // Fallback: jika API error, tetap paksa logout dari supabase & redirect
       await supabase.auth.signOut();
       window.location.href = "/";
     }
+  };
+
+  const handleRedirectToPlans = () => {
+    router.push("/dashboard/billing/plans");
   };
 
   return (
@@ -92,9 +84,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
     >
       <Link href="/" className="flex items-center gap-3 z-[110] group">
         <div className="relative">
-          {/* Glow effect di belakang logo saat hover */}
           <div className="absolute inset-0 bg-orange-500/20 blur-lg rounded-2xl group-hover:bg-orange-500/40 transition-all duration-500" />
-
           <TrackStockLogo />
         </div>
 
@@ -108,9 +98,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
         </div>
       </Link>
 
-      {/* Right side */}
       <div className="flex items-center gap-3">
-
         {/* Free badge */}
         {!isPro && !planLoading && (
           <div
@@ -157,10 +145,10 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
           </div>
         )}
 
-        {/* Upgrade button */}
+        {/* Upgrade button - SEKARANG REDIRECT */}
         {!isPro && (
           <button
-            onClick={onUpgradeClick}
+            onClick={handleRedirectToPlans}
             disabled={planLoading}
             className="font-bold rounded-xl transition-all duration-200 disabled:opacity-40 text-white text-[13px] px-4 py-2 flex items-center gap-2"
             style={{

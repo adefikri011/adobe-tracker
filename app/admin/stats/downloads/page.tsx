@@ -150,27 +150,27 @@ const KPICard = ({ data }: { data: typeof kpiData[0] }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1 }}
-      className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow"
+      className="bg-white p-4 sm:p-5 md:p-6 rounded-2xl border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow"
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-500 mb-1">{data.title}</p>
-          <h3 className="text-2xl font-bold text-slate-900">{data.value}</h3>
+          <p className="text-xs sm:text-sm font-medium text-slate-500 mb-1">{data.title}</p>
+          <h3 className="text-xl sm:text-2xl font-bold text-slate-900">{data.value}</h3>
         </div>
-        <div className={`p-3 rounded-xl ${data.bgColor}`}>
-          <Icon size={20} className={data.color} />
+        <div className={`p-2.5 sm:p-3 rounded-xl ${data.bgColor}`}>
+          <Icon size={18} className={data.color} />
         </div>
       </div>
-      <div className="mt-4 flex items-center text-sm">
+      <div className="mt-4 flex items-center text-xs sm:text-sm">
         <span
           className={`flex items-center font-semibold ${
             data.trend === "up" ? "text-emerald-600" : "text-red-500"
           }`}
         >
           {data.trend === "up" ? (
-            <ArrowUpRight size={16} className="mr-1" />
+            <ArrowUpRight size={14} className="mr-1" />
           ) : (
-            <ArrowDownRight size={16} className="mr-1" />
+            <ArrowDownRight size={14} className="mr-1" />
           )}
           {data.change}
         </span>
@@ -192,19 +192,19 @@ export default function DownloadsPage() {
   const [period, setPeriod] = useState<"Daily" | "Monthly" | "Yearly">("Monthly");
 
   return (
-    <div className="w-full min-h-screen bg-slate-50/50 p-4 md:p-8 overflow-y-auto">
+    <div className="w-full min-h-screen bg-slate-50/50 p-4 sm:p-6 md:p-8 overflow-y-auto">
       
       {/* Header Section */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4"
+        className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 sm:mb-8 gap-3 sm:gap-4"
       >
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Total Downloads
           </h1>
-          <p className="text-slate-500 mt-1 font-medium">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
             Track asset performance and user downloads.
           </p>
         </div>
@@ -214,7 +214,7 @@ export default function DownloadsPage() {
             <button
               key={p}
               onClick={() => setPeriod(p as any)}
-              className={`px-6 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+              className={`px-3 sm:px-6 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 whitespace-nowrap ${
                 period === p
                   ? "bg-orange-500 text-white shadow-lg shadow-orange-500/30"
                   : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
@@ -227,7 +227,7 @@ export default function DownloadsPage() {
       </motion.div>
 
       {/* KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
         {kpiData.map((data, index) => (
           <KPICard key={index} data={data} />
         ))}
@@ -238,15 +238,15 @@ export default function DownloadsPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] mb-8"
+        className="bg-white p-4 sm:p-5 md:p-6 rounded-2xl border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] mb-6 sm:mb-8"
       >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-slate-900">Performance Overview</h2>
-          <button className="text-sm text-orange-500 font-semibold hover:underline flex items-center">
-            View Report <ArrowUpRight size={16} className="ml-1" />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900">Performance Overview</h2>
+          <button className="text-xs sm:text-sm text-orange-500 font-semibold hover:underline flex items-center justify-start">
+            View Report <ArrowUpRight size={14} className="ml-1 flex-shrink-0" />
           </button>
         </div>
-        <div className="w-full h-[300px]">
+        <div className="w-full h-[250px] sm:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
               <defs>

@@ -76,3 +76,8 @@ export type Transaction = Prisma.TransactionModel
  * 
  */
 export type Subscription = Prisma.SubscriptionModel
+/**
+ * Model AppSettings
+ * 
+ */
+export type AppSettings = Prisma.AppSettingsModel

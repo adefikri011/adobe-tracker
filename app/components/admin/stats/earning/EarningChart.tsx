@@ -50,11 +50,11 @@ export default function EarningChart() {
   const data = DATA[period];
 
   return (
-    <div className="bg-white rounded-2xl border border-orange-50 shadow-sm p-6">
+    <div className="bg-white rounded-2xl border border-orange-50 shadow-sm p-4 sm:p-5 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6">
         <div className="flex items-center gap-2">
-          <TrendingUp size={16} className="text-orange-400" />
+          <TrendingUp size={16} className="text-orange-400 flex-shrink-0" />
           <div>
             <h2 className="text-sm font-bold text-slate-800">Earnings Overview</h2>
             <p className="text-xs text-slate-400">Revenue vs Payout comparison</p>

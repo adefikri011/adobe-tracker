@@ -94,23 +94,24 @@ export default function DashboardShell({ statsData, children }: Props) {
       className="space-y-6"
     >
       {/* ── Header ───────────────────────────────────────────────── */}
-      <motion.div variants={fadeUp} className="flex items-center justify-between">
+      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Admin Dashboard
           </h1>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-slate-400 mt-0.5 md:mt-1">
             Monitor TrackStock platform performance
           </p>
         </div>
-        <div className="flex items-center gap-1.5 px-4 py-2 bg-white border border-orange-100 rounded-xl text-xs text-slate-400 shadow-sm">
+        <div className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-white border border-orange-100 rounded-xl text-xs text-slate-400 shadow-sm whitespace-nowrap">
           <Clock size={12} />
-          Last updated: just now
+          <span className="hidden sm:inline">Last updated: just now</span>
+          <span className="sm:hidden">Updated now</span>
         </div>
       </motion.div>
 
       {/* ── Stat Cards ───────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {STATS_CONFIG.map((stat) => {
           const Icon    = stat.icon;
           const { value, change } = resolvedValues[stat.key];
@@ -121,13 +122,13 @@ export default function DashboardShell({ statsData, children }: Props) {
               variants={fadeUp}
               whileHover={{ y: -3, boxShadow: "0 8px 30px rgba(249,115,22,0.10)" }}
               transition={{ duration: 0.2 }}
-              className="bg-white rounded-2xl shadow-sm p-5 cursor-default"
+              className="bg-white rounded-2xl shadow-sm p-4 sm:p-5 cursor-default"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className={`w-10 h-10 rounded-xl ${stat.iconBg} flex items-center justify-center`}>
+                <div className={`w-10 h-10 rounded-xl ${stat.iconBg} flex items-center justify-center flex-shrink-0`}>
                   <Icon size={18} className={stat.iconColor} />
                 </div>
-                <span className="flex items-center gap-0.5 text-[11px] font-semibold text-emerald-500">
+                <span className="flex items-center gap-0.5 text-[11px] font-semibold text-emerald-500 flex-shrink-0">
                   <ArrowUpRight size={12} />
                 </span>
               </div>
@@ -135,7 +136,7 @@ export default function DashboardShell({ statsData, children }: Props) {
               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                 {stat.label}
               </p>
-              <p className={`text-3xl font-bold ${stat.valueColor} leading-none tracking-tight`}>
+              <p className={`text-2xl sm:text-3xl font-bold ${stat.valueColor} leading-none tracking-tight`}>
                 {value}
               </p>
               <p className="text-[11px] text-slate-400 mt-2">{change}</p>
@@ -144,8 +145,8 @@ export default function DashboardShell({ statsData, children }: Props) {
         })}
       </div>
 
-      {/* ── Konten lain (chart, activity, dll) ───────────────────── */}
-      <motion.div variants={fadeUp} className="space-y-6">
+      {/* ── Content (chart, activity, etc.) ───────────────────────── */}
+      <motion.div variants={fadeUp} className="space-y-4 sm:space-y-5 md:space-y-6">
         {children}
       </motion.div>
     </motion.div>

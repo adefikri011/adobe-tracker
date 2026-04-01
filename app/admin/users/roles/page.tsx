@@ -46,58 +46,59 @@ const roles = [
 
 export default function RolesPage() {
   return (
-    <div className="p-4 md:p-8 bg-[#FBFCFE] min-h-screen space-y-8">
+    <div className="p-4 sm:p-6 md:p-8 bg-[#FBFCFE] min-h-screen space-y-6 sm:space-y-8">
       
       {/* ── Header ───────────────────────────────────────────────── */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-          <div className="p-2 bg-orange-500 rounded-xl text-white shadow-lg shadow-orange-100">
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+          <div className="p-2 bg-orange-500 rounded-xl text-white shadow-lg shadow-orange-100 flex-shrink-0">
             <ShieldCheck size={20} />
           </div>
-          User Permissions
+          <span>User Permissions</span>
         </h1>
-        <p className="text-sm text-slate-500 font-medium pl-11">
+        <p className="text-xs sm:text-sm text-slate-500 font-medium pl-2 sm:pl-11">
           Access settings to differentiate Admin and Standard Member features.
         </p>
       </div>
 
       {/* ── Roles Grid ──────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 md:gap-8 max-w-5xl">
         {roles.map((role, i) => (
           <motion.div
             key={role.name}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white rounded-[40px] border border-slate-50 shadow-[0_20px_50px_rgba(0,0,0,0.04)] p-8 relative group overflow-hidden"
+            className="bg-white rounded-[24px] sm:rounded-[32px] md:rounded-[40px] border border-slate-50 shadow-[0_20px_50px_rgba(0,0,0,0.04)] p-5 sm:p-6 md:p-8 relative group overflow-hidden"
           >
             {/* Header Card */}
-            <div className="flex items-center gap-4 mb-6">
-              <div className={`p-4 rounded-3xl text-white ${role.color} ${role.shadow} transition-transform group-hover:rotate-6`}>
-                <role.icon size={28} />
+            <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
+              <div className={`p-2 sm:p-4 rounded-2xl sm:rounded-3xl text-white ${role.color} ${role.shadow} transition-transform group-hover:rotate-6 flex-shrink-0`}>
+                <role.icon size={24} className="hidden sm:block" />
+                <role.icon size={20} className="sm:hidden" />
               </div>
-              <div>
-                <h3 className="text-xl font-black text-slate-900">{role.name}</h3>
+              <div className="min-w-0">
+                <h3 className="text-lg sm:text-xl font-black text-slate-900">{role.name}</h3>
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">System Role</span>
               </div>
             </div>
 
-            <p className="text-sm text-slate-500 font-medium leading-relaxed mb-8">
+            <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed mb-6 sm:mb-8">
               {role.description}
             </p>
 
             {/* Permissions List */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-slate-50 pb-2">
                 Access List
               </p>
               {role.features.map((feature) => (
-                <div key={feature.name} className="flex items-center justify-between">
-                  <span className={`text-sm font-bold ${feature.allowed ? 'text-slate-700' : 'text-slate-300 line-through decoration-slate-200'}`}>
+                <div key={feature.name} className="flex items-center justify-between gap-2">
+                  <span className={`text-xs sm:text-sm font-bold ${feature.allowed ? 'text-slate-700' : 'text-slate-300 line-through decoration-slate-200'}`}>
                     {feature.name}
                   </span>
                   {feature.allowed ? (
-                    <CheckCircle2 size={18} className="text-green-500" />
+                    <CheckCircle2 size={18} className="text-green-500 flex-shrink-0" />
                   ) : (
                     <XCircle size={18} className="text-slate-200" />
                   )}

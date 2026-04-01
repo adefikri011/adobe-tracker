@@ -14,9 +14,15 @@ interface Plan {
   isActive: boolean;
 }
 
+interface CurrencySettings {
+  currency: string;
+  exchangeRate: number;
+}
+
 export default function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currencySettings, setCurrencySettings] = useState<CurrencySettings | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [editData, setEditData] = useState({ price: "", discount: "" });
@@ -32,8 +38,22 @@ export default function PlansPage() {
     discount: 0,
   });
 
+  // Fetch currency settings
+  const fetchCurrencySettings = async () => {
+    try {
+      const res = await fetch("/api/settings/currency");
+      const data = await res.json();
+      if (data.success) {
+        setCurrencySettings(data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching currency settings:", err);
+    }
+  };
+
   useEffect(() => {
     fetchPlans();
+    fetchCurrencySettings();
   }, []);
 
   const fetchPlans = async () => {
@@ -128,6 +148,22 @@ export default function PlansPage() {
     setShowAddFeature(null);
   };
 
+  // Format harga sesuai currency
+  const formatPrice = (priceUSD: number) => {
+    if (!currencySettings) return `$${priceUSD.toFixed(2)}`;
+
+    if (currencySettings.currency === "IDR") {
+      const idrPrice = priceUSD * currencySettings.exchangeRate;
+      return `Rp ${Math.round(idrPrice).toLocaleString("id-ID")}`;
+    }
+
+    return `$${priceUSD.toFixed(2)}`;
+  };
+
+  const getCurrencySymbol = () => {
+    return currencySettings?.currency === "IDR" ? "🇮🇩" : "🇺🇸";
+  };
+
   if (loading) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin text-orange-500" /></div>;
 
   return (
@@ -137,6 +173,19 @@ export default function PlansPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Plans & Pricing</h1>
           <p className="text-slate-400 text-sm mt-1">Manage subscription plans, pricing, and discounts</p>
+          
+          {/* Currency Info Badge */}
+          {currencySettings && (
+            <div className="mt-3 inline-flex items-center gap-2 bg-orange-50 border border-orange-100 px-3 py-1.5 rounded-lg text-sm text-slate-600">
+              <span>{getCurrencySymbol()}</span>
+              <span>Pricing in <strong>{currencySettings.currency}</strong></span>
+              {currencySettings.currency === "IDR" && (
+                <span className="text-xs text-slate-400 ml-1">
+                  (1 USD = Rp {currencySettings.exchangeRate.toLocaleString("id-ID")})
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <button 
           onClick={() => setIsAdding(true)}
@@ -191,8 +240,14 @@ export default function PlansPage() {
 
               {isEditing ? (
                 <div className="mb-4 space-y-3 bg-orange-50/50 border border-orange-100 rounded-xl p-3">
-                  <input type="number" value={editData.price} onChange={e => setEditData({...editData, price: e.target.value})} className="w-full border rounded-lg px-3 py-1.5 text-sm" />
-                  <input type="number" value={editData.discount} onChange={e => setEditData({...editData, discount: e.target.value})} className="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Discount %" />
+                  <div>
+                    <label className="text-xs text-slate-500 block mb-1">Price (USD - Base)</label>
+                    <input type="number" value={editData.price} onChange={e => setEditData({...editData, price: e.target.value})} className="w-full border rounded-lg px-3 py-1.5 text-sm" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-500 block mb-1">Discount %</label>
+                    <input type="number" value={editData.discount} onChange={e => setEditData({...editData, discount: e.target.value})} className="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Discount %" />
+                  </div>
                   <div className="flex gap-2">
                     <button onClick={() => handleSaveEdit(plan.id)} className="flex-1 bg-orange-500 text-white py-1.5 rounded-lg text-sm">Save</button>
                     <button onClick={() => setEditing(null)} className="flex-1 border text-slate-500 py-1.5 rounded-lg text-sm">Cancel</button>
@@ -203,16 +258,16 @@ export default function PlansPage() {
                   {plan.discount > 0 ? (
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-slate-400 line-through text-sm">${plan.price.toFixed(2)}</span>
+                        <span className="text-slate-400 line-through text-sm">{formatPrice(plan.price)}</span>
                         <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full font-semibold">{plan.discount}% OFF</span>
                       </div>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-bold text-slate-900">${plan.finalPrice.toFixed(2)}</span>
+                        <span className="text-3xl font-bold text-slate-900">{formatPrice(plan.finalPrice)}</span>
                         <span className="text-slate-400 text-sm">/ {plan.durationDays}d</span>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-3xl font-bold text-slate-900">${plan.price.toFixed(2)}</div>
+                    <div className="text-3xl font-bold text-slate-900">{formatPrice(plan.price)}</div>
                   )}
                 </div>
               )}

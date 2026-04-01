@@ -46,38 +46,38 @@ export default function ReportsPage() {
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
 
   return (
-    <div className="p-6 md:p-10 bg-[#FBFCFE] min-h-screen space-y-10">
+    <div className="p-4 sm:p-6 md:p-8 lg:p-10 bg-[#FBFCFE] min-h-screen space-y-6 sm:space-y-8 md:space-y-10">
       
       {/* ── Header ───────────────────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1e293b] tracking-tight">Financial Reports</h1>
-          <p className="text-sm text-slate-400 mt-1 font-medium">Deep dive into your Adobe Stock earnings and performance.</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-[#1e293b] tracking-tight">Financial Reports</h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">Deep dive into your Adobe Stock earnings and performance.</p>
         </div>
         
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-100 rounded-xl text-xs font-bold text-slate-500 hover:text-[#ff6b00] hover:border-orange-100 transition-all shadow-sm group">
-            <Calendar size={14} className="group-hover:rotate-12 transition-transform" />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <button className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white border border-slate-100 rounded-xl text-xs font-bold text-slate-500 hover:text-[#ff6b00] hover:border-orange-100 transition-all shadow-sm group whitespace-nowrap">
+            <Calendar size={14} className="group-hover:rotate-12 transition-transform flex-shrink-0" />
             <span>Select Range</span>
           </button>
-          <button className="flex items-center gap-2 px-6 py-2.5 bg-[#1e293b] text-white rounded-xl text-xs font-bold hover:bg-[#ff6b00] transition-all shadow-md shadow-slate-200">
-            <Download size={14} />
+          <button className="flex items-center gap-2 px-5 sm:px-6 py-2.5 bg-[#1e293b] text-white rounded-xl text-xs font-bold hover:bg-[#ff6b00] transition-all shadow-md shadow-slate-200 whitespace-nowrap">
+            <Download size={14} className="flex-shrink-0" />
             <span>Export All</span>
           </button>
         </div>
       </div>
 
       {/* ── Visual Analytics ────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-8">
         
         {/* Revenue Bar Chart */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-[24px] border border-slate-100/50 shadow-sm">
-          <div className="flex items-center justify-between mb-10">
+        <div className="lg:col-span-2 bg-white p-5 sm:p-6 md:p-8 rounded-[24px] border border-slate-100/50 shadow-sm">
+          <div className="flex items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-10">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-orange-50 rounded-xl text-orange-500">
                 <TrendingUp size={18} />
               </div>
-              <h3 className="text-lg font-semibold text-[#1e293b]">Revenue Analytics</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-[#1e293b]">Revenue Analytics</h3>
             </div>
             <div className="flex items-center gap-1.5 text-green-500 bg-green-50 px-3 py-1 rounded-lg">
               <ArrowUpRight size={14} />

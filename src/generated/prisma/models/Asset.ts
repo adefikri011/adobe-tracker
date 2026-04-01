@@ -720,10 +720,6 @@ export type AssetUpdatekeywordsInput = {
   push?: string | string[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type AssetCreateWithoutProfileInput = {
   id?: string
   assetId: string

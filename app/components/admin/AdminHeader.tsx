@@ -78,15 +78,15 @@ export default function AdminHeader({ profile }: AdminHeaderProps) {
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="h-16 bg-white border-b border-orange-50 flex items-center justify-between px-6 flex-shrink-0 shadow-[0_2px_12px_0_rgba(249,115,22,0.04)]"
+      className="h-16 bg-white border-b border-orange-50 flex items-center justify-between px-4 md:px-6 flex-shrink-0 shadow-[0_2px_12px_0_rgba(249,115,22,0.04)]"
     >
       {/* Search */}
-      <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 w-64 group focus-within:border-orange-200 focus-within:bg-white transition-all">
-        <Search size={14} className="text-slate-300 group-focus-within:text-orange-400 transition-colors" />
+      <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2 w-full md:w-64 group focus-within:border-orange-200 focus-within:bg-white transition-all">
+        <Search size={14} className="text-slate-300 group-focus-within:text-orange-400 transition-colors flex-shrink-0" />
         <input
           type="text"
-          placeholder="Cari sesuatu..."
-          className="bg-transparent text-sm text-slate-600 placeholder-slate-300 outline-none flex-1"
+          placeholder="Search..."
+          className="bg-transparent text-sm text-slate-600 placeholder-slate-300 outline-none flex-1 min-w-0"
         />
       </div>
 
@@ -115,7 +115,7 @@ export default function AdminHeader({ profile }: AdminHeaderProps) {
               {avatarLetter}
             </div>
             <div className="hidden sm:block text-left">
-              <p className="text-xs font-semibold text-slate-700 leading-tight max-w-[130px] truncate">
+              <p className="text-xs font-semibold text-slate-700 leading-tight max-w-[120px] md:max-w-[130px] truncate">
                 {displayName}
               </p>
               <p className="text-[10px] text-slate-400">{roleLabel}</p>

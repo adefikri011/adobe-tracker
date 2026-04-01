@@ -46,7 +46,7 @@ export default function PerformanceChart() {
           <button
             key={m}
             onClick={() => setMode(m)}
-            className="relative px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+            className="relative px-3 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors"
           >
             {mode === m && (
               <motion.div

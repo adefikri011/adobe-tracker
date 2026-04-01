@@ -5,86 +5,110 @@ import crypto from "crypto";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log("Webhook received:", body);
 
-    // 1. Verifikasi Signature Key (Sangat Penting agar tidak bisa dipalsukan)
+    // 1. Verifikasi Signature Key
     const { order_id, status_code, gross_amount, signature_key, transaction_status } = body;
-    const serverKey = process.env.MIDTRANS_SERVER_KEY || "";
+    const serverKey = process.env.MIDTRANS_SERVER_KEY!;
     
-    // Rumus Midtrans: SHA512(order_id + status_code + gross_amount + serverKey)
-    const hash = crypto
-      .createHash("sha512")
-      .update(order_id + status_code + gross_amount + serverKey)
-      .digest("hex");
-
-    if (hash !== signature_key) {
-      return NextResponse.json({ error: "Invalid Signature" }, { status: 403 });
+    console.log("🔍 Webhook Data Received:", { order_id, status_code, gross_amount });
+    
+    const attempts = [
+      String(gross_amount), 
+      String(parseInt(gross_amount)),
+    ];
+    
+    let validSignature = false;
+    let correctFormat = "";
+    
+    for (const grossAmountStr of attempts) {
+      const hash = crypto
+        .createHash("sha512")
+        .update(`${order_id}${status_code}${grossAmountStr}${serverKey}`)
+        .digest("hex");
+      
+      if (hash === signature_key) {
+        validSignature = true;
+        correctFormat = grossAmountStr;
+        break;
+      }
     }
 
-    // 2. Cari Transaksi di Database kita
-    const myTransaction = await prisma.transaction.findUnique({
+    if (!validSignature) {
+      console.error("❌ Signature mismatch!");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+    }
+    
+    console.log("✅ Signature verified.");
+
+    // 2. Cek Notifikasi Test dari Midtrans
+    if (order_id.startsWith("payment_notif_test")) {
+      return NextResponse.json({ message: "OK - Test notification" });
+    }
+
+    // 3. Cari transaksi & paket di database
+    const transaction = await prisma.transaction.findUnique({
       where: { orderId: order_id },
-      include: { plan: true }, // Ambil data durasi harinya
+      include: { plan: true },
     });
 
-    if (!myTransaction) {
+    if (!transaction) {
+      console.error(`❌ Transaction not found: ${order_id}`);
       return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
     }
 
-    // 3. Update Status Berdasarkan Status dari Midtrans
-    let dbStatus: any = "pending";
-    
-    if (transaction_status === "capture" || transaction_status === "settlement") {
-      dbStatus = "success";
-    } else if (transaction_status === "deny" || transaction_status === "cancel") {
-      dbStatus = "failed";
-    } else if (transaction_status === "expire") {
-      dbStatus = "expired";
-    }
+    // 4. Logika Update Pembayaran Sukses
+    if (transaction_status === "settlement" || transaction_status === "capture") {
+      
+      // HITUNG MASA AKTIF (Berdasarkan durationDays dari paket)
+      const durationDays = transaction.plan.durationDays;
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + durationDays);
 
-    // 4. Jika Sukses, Update Profile dan Buat Subscription
-    if (dbStatus === "success" && myTransaction.status !== "success") {
-      const duration = myTransaction.plan.durationDays;
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + duration);
-
-      // Jalankan semua update dalam satu transaksi DB agar aman
       await prisma.$transaction([
-        // Update status transaksi kita
+        // Update Transaksi ke 'success'
         prisma.transaction.update({
           where: { orderId: order_id },
           data: { 
-            status: "success", 
-            paidAt: new Date(),
-            metadata: body // Simpan raw response buat jaga-jaga
+            status: "success",
+            paidAt: new Date()
+          }, 
+        }),
+        // Update Profile User ke 'pro' & set planExpiry
+        prisma.profile.update({
+          where: { id: transaction.profileId },
+          data: { 
+            plan: "pro", 
+            planExpiry: expiryDate // Field baru di Profile kamu
           },
         }),
-        // Update plan di Profile user
-        prisma.profile.update({
-          where: { id: myTransaction.profileId },
-          data: { plan: myTransaction.plan.slug },
-        }),
-        // Buat record di Subscription aktif
+        // Buat record di tabel Subscription
         prisma.subscription.create({
           data: {
-            profileId: myTransaction.profileId,
-            planId: myTransaction.planId,
+            profileId: transaction.profileId,
+            planId: transaction.planId,
             status: "active",
             startDate: new Date(),
-            endDate: endDate,
-          },
-        }),
+            endDate: expiryDate, // Masa berlaku paket
+          }
+        })
       ]);
-    } else {
-      // Jika status bukan sukses (misal: expired/failed), cukup update status transaksinya saja
+
+      console.log(`✅ SUCCESS: User ${transaction.profileId} upgraded to PRO until ${expiryDate}`);
+    } 
+    
+    // 5. Logika Jika Pembayaran Gagal/Expired
+    else if (transaction_status === "expire" || transaction_status === "cancel") {
       await prisma.transaction.update({
         where: { orderId: order_id },
-        data: { status: dbStatus, metadata: body },
+        data: { status: "failed" },
       });
+      console.log(`⚠️ FAILED: Transaction ${order_id} marked as failed`);
     }
 
-    return NextResponse.json({ message: "Webhook processed successfully" });
+    return NextResponse.json({ message: "OK" });
   } catch (error: any) {
-    console.error("[Webhook POST]", error);
+    console.error("Webhook Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -57,7 +57,8 @@ export const ModelName = {
   UserSession: 'UserSession',
   Plan: 'Plan',
   Transaction: 'Transaction',
-  Subscription: 'Subscription'
+  Subscription: 'Subscription',
+  AppSettings: 'AppSettings'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -83,6 +84,7 @@ export const ProfileScalarFieldEnum = {
   plan: 'plan',
   role: 'role',
   status: 'status',
+  planExpiry: 'planExpiry',
   deviceLimit: 'deviceLimit',
   createdAt: 'createdAt'
 } as const
@@ -184,6 +186,17 @@ export const SubscriptionScalarFieldEnum = {
 } as const
 
 export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[keyof typeof SubscriptionScalarFieldEnum]
+
+
+export const AppSettingsScalarFieldEnum = {
+  id: 'id',
+  currency: 'currency',
+  exchangeRate: 'exchangeRate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AppSettingsScalarFieldEnum = (typeof AppSettingsScalarFieldEnum)[keyof typeof AppSettingsScalarFieldEnum]
 
 
 export const SortOrder = {

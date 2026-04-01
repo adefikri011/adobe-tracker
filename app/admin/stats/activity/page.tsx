@@ -54,17 +54,17 @@ export default function ActivityPage() {
   }, [activeFilter, searchTerm]);
 
   return (
-    <div className="p-6 md:p-10 bg-[#FBFCFE] min-h-screen space-y-10">
+    <div className="p-4 sm:p-6 md:p-8 lg:p-10 bg-[#FBFCFE] min-h-screen space-y-6 sm:space-y-8 md:space-y-10">
       
       {/* ── Header Section ──────────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1e293b] tracking-tight">Recent Activity</h1>
-          <p className="text-sm text-slate-400 mt-1 font-medium">Keep track of everything happening in TrackStock.</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-[#1e293b] tracking-tight">Recent Activity</h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">Keep track of everything happening in TrackStock.</p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative group hidden md:block">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative group hidden sm:block">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
             <input 
               type="text" 
@@ -75,12 +75,12 @@ export default function ActivityPage() {
             />
           </div>
           
-          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-slate-100 shadow-sm">
+          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-slate-100 shadow-sm overflow-x-auto">
             {["All", "Sale", "Upload", "System"].map((f) => (
               <button
                 key={f}
                 onClick={() => setActiveFilter(f as any)}
-                className={`px-5 py-1.5 text-[11px] font-bold rounded-xl transition-all ${
+                className={`px-3 sm:px-5 py-1.5 text-[11px] font-bold rounded-xl transition-all whitespace-nowrap ${
                   activeFilter === f 
                   ? "bg-[#ff6b00] text-white shadow-md shadow-orange-100" 
                   : "text-slate-400 hover:text-slate-600"
@@ -95,8 +95,8 @@ export default function ActivityPage() {
 
       {/* ── Activity List ───────────────────────────────────────── */}
       <div className="bg-white rounded-[24px] border border-slate-100/50 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-50 bg-white">
-          <h3 className="text-base font-semibold text-[#1e293b]">Activity Timeline</h3>
+        <div className="p-4 sm:p-5 md:p-6 border-b border-slate-50 bg-white">
+          <h3 className="text-sm sm:text-base font-semibold text-[#1e293b]">Activity Timeline</h3>
         </div>
 
         <div className="divide-y divide-slate-50">
@@ -108,18 +108,18 @@ export default function ActivityPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="group flex items-center justify-between p-6 hover:bg-slate-50/30 transition-colors cursor-pointer"
+                className="group flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-5 md:p-6 gap-3 sm:gap-4 hover:bg-slate-50/30 transition-colors cursor-pointer"
               >
-                <div className="flex items-center gap-5">
+                <div className="flex items-start sm:items-center gap-3 sm:gap-5 min-w-0">
                   {/* Subtle Icon Box */}
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-slate-100 transition-colors 
+                  <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center border border-slate-100 transition-colors 
                     ${log.status === 'success' ? 'bg-green-50/50 text-green-600' : 
                       log.status === 'warning' ? 'bg-orange-50/50 text-orange-600' : 
                       'bg-blue-50/50 text-blue-600'}`}>
                     {typeIcons[log.type]}
                   </div>
 
-                  <div className="space-y-0.5">
+                  <div className="space-y-0.5 min-w-0">
                     <h4 className="text-sm font-semibold text-[#1e293b] group-hover:text-[#ff6b00] transition-colors">
                       {log.title}
                     </h4>
@@ -129,7 +129,7 @@ export default function ActivityPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
                   <div className="hidden md:flex flex-col items-end">
                     {log.amount && (
                       <span className="text-sm font-semibold text-green-600 mb-0.5">{log.amount}</span>
@@ -139,7 +139,7 @@ export default function ActivityPage() {
                       {log.time}
                     </div>
                   </div>
-                  <ChevronRight size={16} className="text-slate-200 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight size={16} className="text-slate-200 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
                 </div>
               </motion.div>
             ))}

@@ -53,17 +53,17 @@ export default function KeywordsPage() {
   }, [filter, searchQuery]);
 
   return (
-    <div className="p-6 md:p-10 bg-[#FBFCFE] min-h-screen space-y-10">
+    <div className="p-4 sm:p-6 md:p-8 lg:p-10 bg-[#FBFCFE] min-h-screen space-y-6 sm:space-y-8 md:space-y-10">
       
       {/* ── Header Section ──────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1e293b] tracking-tight">Top Keywords</h1>
-          <p className="text-sm text-slate-400 mt-1 font-medium">Identify high-performing tags for your Adobe Stock assets.</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-[#1e293b] tracking-tight">Top Keywords</h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">Identify high-performing tags for your Adobe Stock assets.</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative group hidden md:block">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative group hidden sm:block">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
             <input 
               type="text" 
@@ -74,7 +74,7 @@ export default function KeywordsPage() {
             />
           </div>
 
-          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-slate-100 shadow-sm">
+          <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-slate-100 shadow-sm overflow-x-auto">
             {(["Daily", "Weekly", "Monthly"] as const).map((p) => (
               <button
                 key={p}
