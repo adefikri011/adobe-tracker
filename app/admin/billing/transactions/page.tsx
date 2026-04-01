@@ -1,35 +1,92 @@
 "use client";
-import { useState } from "react";
-import { Download, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Download, Search, Loader2 } from "lucide-react";
 
-const transactions = [
-  { id: "TRX-001", user: "john@example.com", plan: "Pro - 30 Days", amount: 19.99, status: "Success",  date: "2025-03-28", method: "Midtrans" },
-  { id: "TRX-002", user: "sarah@gmail.com",  plan: "Pro - 7 Days",  amount: 7.99,  status: "Success",  date: "2025-03-27", method: "Midtrans" },
-  { id: "TRX-003", user: "mike@yahoo.com",   plan: "Pro - 1 Day",   amount: 1.99,  status: "Failed",   date: "2025-03-27", method: "Stripe"   },
-  { id: "TRX-004", user: "anna@gmail.com",   plan: "Pro - 15 Days", amount: 12.99, status: "Success",  date: "2025-03-26", method: "Midtrans" },
-  { id: "TRX-005", user: "bob@example.com",  plan: "Pro - 3 Days",  amount: 4.99,  status: "Pending",  date: "2025-03-26", method: "Stripe"   },
-  { id: "TRX-006", user: "lisa@gmail.com",   plan: "Pro - 30 Days", amount: 19.99, status: "Success",  date: "2025-03-25", method: "Midtrans" },
-  { id: "TRX-007", user: "tom@yahoo.com",    plan: "Pro - 7 Days",  amount: 7.99,  status: "Refunded", date: "2025-03-24", method: "Stripe"   },
-];
+interface Transaction {
+  id: string;
+  orderId: string;
+  user: string;
+  plan: string;
+  amount: number;
+  status: string;
+  date: string;
+  method: string;
+}
+
+interface CurrencySettings {
+  currency: string;
+  exchangeRate: number;
+}
 
 const statusStyle: Record<string, string> = {
-  Success:  "bg-green-50 text-green-600",
-  Failed:   "bg-red-50 text-red-500",
-  Pending:  "bg-yellow-50 text-yellow-600",
-  Refunded: "bg-slate-100 text-slate-500",
+  success: "bg-green-50 text-green-600",
+  failed: "bg-red-50 text-red-500",
+  pending: "bg-yellow-50 text-yellow-600",
+  refunded: "bg-slate-100 text-slate-500",
 };
 
 export default function TransactionsPage() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+  const [currency, setCurrency] = useState<string>("USD");
+  const [exchangeRate, setExchangeRate] = useState<number>(15800);
 
-  const filtered = transactions.filter(t => {
-    const matchSearch = t.user.includes(search) || t.id.includes(search);
-    const matchFilter = filter === "All" || t.status === filter;
+  // Fetch data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch currency settings
+        const currRes = await fetch("/api/settings/currency");
+        const currData = await currRes.json();
+        if (currData.success) {
+          setCurrency(currData.data.currency);
+          setExchangeRate(currData.data.exchangeRate);
+        }
+
+        // Fetch transactions
+        const txnRes = await fetch("/api/admin/billing/transactions");
+        const txnData = await txnRes.json();
+        if (txnData.transactions) {
+          setTransactions(txnData.transactions);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Format harga sesuai currency
+  const formatPrice = (amountUSD: number): string => {
+    if (currency === "IDR") {
+      const idrPrice = amountUSD * exchangeRate;
+      return `Rp ${Math.round(idrPrice).toLocaleString("id-ID")}`;
+    }
+    return `$${amountUSD.toFixed(2)}`;
+  };
+
+  const filtered = transactions.filter((t) => {
+    const matchSearch = t.user.includes(search) || t.orderId.includes(search);
+    const matchFilter = filter === "All" || t.status.toLowerCase() === filter.toLowerCase();
     return matchSearch && matchFilter;
   });
 
-  const total = transactions.filter(t => t.status === "Success").reduce((s, t) => s + t.amount, 0);
+  const total = transactions
+    .filter((t) => t.status.toLowerCase() === "success")
+    .reduce((s, t) => s + t.amount, 0);
+
+  if (loading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="animate-spin text-orange-500" size={40} />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 md:p-8">
@@ -46,10 +103,10 @@ export default function TransactionsPage() {
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         {[
-          { label: "Total Revenue",    value: `$${total.toFixed(2)}`, color: "text-green-600"  },
-          { label: "Successful",       value: transactions.filter(t => t.status === "Success").length,  color: "text-slate-900"  },
-          { label: "Failed",           value: transactions.filter(t => t.status === "Failed").length,   color: "text-red-500"    },
-          { label: "Pending",          value: transactions.filter(t => t.status === "Pending").length,  color: "text-yellow-600" },
+          { label: "Total Revenue",    value: formatPrice(total), color: "text-green-600"  },
+          { label: "Successful",       value: transactions.filter(t => t.status.toLowerCase() === "success").length,  color: "text-slate-900"  },
+          { label: "Failed",           value: transactions.filter(t => t.status.toLowerCase() === "failed").length,   color: "text-red-500"    },
+          { label: "Pending",          value: transactions.filter(t => t.status.toLowerCase() === "pending").length,  color: "text-yellow-600" },
         ].map((s) => (
           <div key={s.label} className="bg-white border border-orange-100 rounded-2xl p-5 shadow-sm">
             <p className="text-xs text-slate-400 mb-1">{s.label}</p>
@@ -69,12 +126,12 @@ export default function TransactionsPage() {
             className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-orange-400"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {["All", "Success", "Failed", "Pending", "Refunded"].map(s => (
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${filter === s ? "bg-orange-500 text-white" : "bg-white border border-slate-200 text-slate-500 hover:border-orange-300"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition whitespace-nowrap ${filter === s ? "bg-orange-500 text-white" : "bg-white border border-slate-200 text-slate-500 hover:border-orange-300"}`}
             >
               {s}
             </button>
@@ -99,15 +156,15 @@ export default function TransactionsPage() {
           <tbody className="divide-y divide-slate-50">
             {filtered.map((t) => (
               <tr key={t.id} className="hover:bg-slate-50/50 transition">
-                <td className="px-6 py-4 font-mono text-xs text-slate-500">{t.id}</td>
+                <td className="px-6 py-4 font-mono text-xs text-slate-500">{t.orderId}</td>
                 <td className="px-6 py-4 text-sm text-slate-700">{t.user}</td>
                 <td className="px-6 py-4 text-sm text-slate-600">{t.plan}</td>
-                <td className="px-6 py-4 text-sm font-bold text-slate-900">${t.amount.toFixed(2)}</td>
+                <td className="px-6 py-4 text-sm font-bold text-slate-900">{formatPrice(t.amount)}</td>
                 <td className="px-6 py-4 text-sm text-slate-500">{t.method}</td>
                 <td className="px-6 py-4 text-sm text-slate-500">{t.date}</td>
                 <td className="px-6 py-4">
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyle[t.status]}`}>
-                    {t.status}
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyle[t.status.toLowerCase()] || "bg-slate-100 text-slate-500"}`}>
+                    {t.status.charAt(0).toUpperCase() + t.status.slice(1).toLowerCase()}
                   </span>
                 </td>
               </tr>

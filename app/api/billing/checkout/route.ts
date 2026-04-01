@@ -27,13 +27,16 @@ export async function POST(req: NextRequest) {
 
     // 3. Get currency settings
     const currencySettings = await getCurrencySettings();
-    let chargeAmount = plan.finalPrice; // Default USD
+    
+    // Midtrans expects IDR amount (integer)
+    // So we always convert to IDR regardless of display currency
+    const chargeAmount = Math.round(plan.finalPrice * currencySettings.exchangeRate);
 
     // 4. Buat Order ID unik (Format: TRX-Timestamp-UserId)
     const orderId = `TRX-${Date.now()}-${user.id.substring(0, 5)}`;
 
-    // Note: Midtrans primarily uses IDR for Indonesian payment methods
-    // We keep amounts in USD in database, but for clarity in display we note the currency
+    // Note: Midtrans always expects IDR (integer format)
+    // Amount converted from USD base price using current exchange rate
     const parameter = {
       transaction_details: {
         order_id: orderId,
@@ -68,10 +71,12 @@ export async function POST(req: NextRequest) {
         orderId: orderId,
         profileId: user.id,
         planId: plan.id,
-        amount: chargeAmount,
+        amount: plan.finalPrice, // Store original USD amount for consistency
         status: "pending",
         snapToken: transaction.token,
         metadata: {
+          // Store the actual IDR charge to Midtrans for reference
+          chargeAmount: chargeAmount,
           currency: currencySettings.currency,
           exchangeRate: currencySettings.exchangeRate,
         },
