@@ -32,6 +32,10 @@ function formatDuration(ms: number): string {
 
 export default function ApiIntegrationPage() {
   const [lastSync, setLastSync] = useState("Not synced yet");
+  const [totalAssets, setTotalAssets] = useState(0);
+  const [estimatedCost, setEstimatedCost] = useState(0);
+  const [apifyUsage, setApifyUsage] = useState({ current: 0, limit: 5.0 });
+  const [syncLimit, setSyncLimit] = useState(300); // Default 300 items
   const [progress, setProgress] = useState<SyncProgress>({
     phase: "idle",
     currentPage: 0,
@@ -49,6 +53,26 @@ export default function ApiIntegrationPage() {
 
   const abortRef = useRef<AbortController | null>(null);
 
+  // Fetch database stats on mount and after sync
+  const fetchStats = async () => {
+    try {
+      const res = await fetch("/api/admin/api-stats", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setTotalAssets(data.totalAssets || 0);
+        setEstimatedCost(data.estimatedCost || 0);
+        setApifyUsage(data.apifyUsage || { current: 0, limit: 5.0 });
+      }
+    } catch (error) {
+      console.error("Failed to fetch stats:", error);
+    }
+  };
+
+  // Load initial stats on mount
+  React.useEffect(() => {
+    fetchStats();
+  }, []);
+
   const isSyncing = progress.phase === "syncing" || progress.phase === "saving";
 
   const handleSync = async () => {
@@ -59,7 +83,7 @@ export default function ApiIntegrationPage() {
     setProgress({
       phase: "syncing",
       currentPage: 0,
-      totalPages: 10,
+      totalPages: Math.ceil(syncLimit / 10),
       totalCollected: 0,
       currentPageItems: 0,
       elapsedMs: 0,
@@ -72,7 +96,7 @@ export default function ApiIntegrationPage() {
     });
 
     try {
-      const response = await fetch("/api/adobe/sync", {
+      const response = await fetch(`/api/adobe/sync?limit=${syncLimit}`, {
         method: "POST",
         signal: abortRef.current.signal,
       });
@@ -150,6 +174,8 @@ export default function ApiIntegrationPage() {
 
         case "done":
           setLastSync("Just now");
+          // Fetch updated stats after sync completes
+          setTimeout(() => fetchStats(), 1000);
           return {
             ...prev,
             phase: "done",
@@ -210,7 +236,7 @@ export default function ApiIntegrationPage() {
                 <h3 className="text-xl font-bold text-slate-800">Manual Synchronization</h3>
                 <p className="text-xs text-slate-400 leading-relaxed max-w-md">
                   Run the crawler bot to fetch the latest sales and asset performance data from Adobe Stock.
-                  <span className="text-orange-500 font-bold"> (Estimated: Rp800/sync)</span>
+                  <span className="text-orange-500 font-bold"> (Cost per sync: $0.01)</span>
                 </p>
               </div>
 
@@ -315,11 +341,31 @@ export default function ApiIntegrationPage() {
               )}
 
               {/* BUTTON ROW */}
-              <div className="flex flex-col sm:flex-row items-center gap-6 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 pt-2">
+                {/* Sync Limit Input */}
+                {progress.phase === "idle" && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                      Items to Sync
+                    </label>
+                    <input
+                      type="number"
+                      min="10"
+                      max="1000"
+                      step="10"
+                      value={syncLimit}
+                      onChange={(e) => setSyncLimit(Math.max(10, Math.min(1000, parseInt(e.target.value) || 300)))}
+                      className="px-4 py-2.5 border border-slate-200 rounded-[16px] text-sm font-semibold text-slate-700 focus:outline-none focus:border-orange-400 transition"
+                      disabled={isSyncing}
+                    />
+                    <span className="text-[8px] text-slate-400 font-medium">Min: 10, Max: 1000</span>
+                  </div>
+                )}
+
                 <button
                   onClick={handleSync}
                   disabled={isSyncing}
-                  className={`w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 rounded-[24px] font-black text-[12px] uppercase tracking-widest transition-all shadow-xl ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-10 py-5 rounded-[24px] font-black text-[12px] uppercase tracking-widest transition-all shadow-xl ${
                     isSyncing
                       ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                       : "bg-slate-900 text-white hover:bg-orange-500 hover:scale-[1.02] active:scale-95 shadow-slate-200"
@@ -378,13 +424,37 @@ export default function ApiIntegrationPage() {
               <div className="flex justify-between items-end">
                 <span className="text-[10px] text-slate-400 font-bold uppercase">Stored Assets</span>
                 <span className="text-2xl font-black italic">
-                  {progress.totalInDatabase > 0 ? progress.totalInDatabase : "--"}
+                  {progress.phase === "done" && progress.totalInDatabase > 0
+                    ? progress.totalInDatabase
+                    : totalAssets > 0
+                    ? totalAssets
+                    : "--"}
                 </span>
               </div>
-              <div className="flex justify-between items-end">
-                <span className="text-[10px] text-slate-400 font-bold uppercase">Last Est. Cost</span>
-                <span className="text-xl font-black text-orange-400">$0.04</span>
+              
+              {/* Apify Usage */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-end">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">Apify Usage</span>
+                  <span className="text-xl font-black text-orange-400">
+                    ${estimatedCost.toFixed(2)} / ${apifyUsage.limit.toFixed(2)}
+                  </span>
+                </div>
+                <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(100, (estimatedCost / apifyUsage.limit) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <p className="text-[10px] text-slate-400">
+                  {apifyUsage.limit > 0
+                    ? `${Math.round((estimatedCost / apifyUsage.limit) * 100)}% of monthly budget`
+                    : "Budget limit unknown"}
+                </p>
               </div>
+
               {progress.phase === "syncing" && (
                 <div className="flex justify-between items-end">
                   <span className="text-[10px] text-slate-400 font-bold uppercase">Elapsed</span>

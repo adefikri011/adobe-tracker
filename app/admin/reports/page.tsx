@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   FileText, 
@@ -25,25 +25,49 @@ import {
   Cell
 } from "recharts";
 
-const monthlyData = [
-  { name: "Jan", revenue: 2400 },
-  { name: "Feb", revenue: 1398 },
-  { name: "Mar", revenue: 9800 },
-  { name: "Apr", revenue: 3908 },
-  { name: "May", revenue: 4800 },
-  { name: "Jun", revenue: 3800 },
-  { name: "Jul", revenue: 6300 },
-];
-
-const reportList = [
-  { id: "REP-001", name: "Monthly Earning Report", date: "Mar 01, 2026", size: "1.2 MB", type: "PDF" },
-  { id: "REP-002", name: "Asset Performance Audit", date: "Feb 28, 2026", size: "840 KB", type: "CSV" },
-  { id: "REP-003", name: "Keyword Competition Analytics", date: "Feb 15, 2026", size: "2.4 MB", type: "PDF" },
-  { id: "REP-004", name: "User Subscription Growth", date: "Jan 30, 2026", size: "1.1 MB", type: "XLS" },
-];
+interface ReportsData {
+  monthlyData: Array<{ name: string; revenue: number }>;
+  totalRevenue: number;
+  assetsSold: number;
+  avgCommission: number;
+  recentAssets: Array<{
+    id: string;
+    name: string;
+    date: string;
+    downloads: number;
+    earnings: number;
+    thumbnail: string;
+  }>;
+}
 
 export default function ReportsPage() {
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<ReportsData>({
+    monthlyData: [],
+    totalRevenue: 0,
+    assetsSold: 0,
+    avgCommission: 0,
+    recentAssets: [],
+  });
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const res = await fetch("/api/admin/reports/stats", { cache: "no-store" });
+        if (res.ok) {
+          const result = await res.json();
+          setData(result);
+        }
+      } catch (error) {
+        console.error("Failed to fetch reports data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   return (
     <div className="p-4 sm:p-6 md:p-8 lg:p-10 bg-[#FBFCFE] min-h-screen space-y-6 sm:space-y-8 md:space-y-10">
@@ -87,7 +111,7 @@ export default function ReportsPage() {
           
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData}>
+              <BarChart data={data.monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f8fafc" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11}} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 11}} />
@@ -101,7 +125,7 @@ export default function ReportsPage() {
                   onMouseEnter={(_, index) => setHoveredBar(index)}
                   onMouseLeave={() => setHoveredBar(null)}
                 >
-                  {monthlyData.map((entry, index) => (
+                  {data.monthlyData.map((entry: any, index: number) => (
                     <Cell 
                       key={`cell-${index}`} 
                       fill={hoveredBar === index ? '#ff6b00' : '#f1f5f9'} 
@@ -117,9 +141,9 @@ export default function ReportsPage() {
         {/* Quick Stats Sidebar */}
         <div className="space-y-6">
           {[
-            { label: "Total Revenue", value: "$12,840.00", icon: DollarSign, color: "text-green-500", bg: "bg-green-50" },
-            { label: "Assets Sold", value: "842 Items", icon: ImageIcon, color: "text-blue-500", bg: "bg-blue-50" },
-            { label: "Avg. Commission", value: "33%", icon: PieChart, color: "text-purple-500", bg: "bg-purple-50" },
+            { label: "Total Revenue", value: `$${data.totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: DollarSign, color: "text-green-500", bg: "bg-green-50" },
+            { label: "Assets Sold", value: `${data.assetsSold.toLocaleString()} Items`, icon: ImageIcon, color: "text-blue-500", bg: "bg-blue-50" },
+            { label: "Avg. Commission", value: `${data.avgCommission}%`, icon: PieChart, color: "text-purple-500", bg: "bg-purple-50" },
           ].map((stat, i) => (
             <motion.div 
               key={i}
@@ -131,7 +155,7 @@ export default function ReportsPage() {
               </div>
               <div>
                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                <h4 className="text-xl font-semibold text-[#1e293b] mt-0.5">{stat.value}</h4>
+                <h4 className="text-xl font-semibold text-[#1e293b] mt-0.5">{loading ? "—" : stat.value}</h4>
               </div>
             </motion.div>
           ))}
@@ -151,41 +175,45 @@ export default function ReportsPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-[#fcfdfe]">
-                <th className="p-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] pl-10">Report Name</th>
-                <th className="p-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Date Generated</th>
-                <th className="p-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">File Size</th>
-                <th className="p-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] text-center">Format</th>
+                <th className="p-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] pl-10">Asset Name</th>
+                <th className="p-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Upload Date</th>
+                <th className="p-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">Downloads</th>
+                <th className="p-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] text-center">Earnings</th>
                 <th className="p-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] text-right pr-10">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {reportList.map((report) => (
-                <tr key={report.id} className="group hover:bg-slate-50/40 transition-colors cursor-pointer">
-                  <td className="p-5 pl-10">
-                    <div className="flex items-center gap-4">
-                      <div className="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-orange-50 group-hover:text-[#ff6b00] transition-colors border border-slate-100/50">
-                        <FileText size={16} />
+              {data.recentAssets.length > 0 ? (
+                data.recentAssets.map((asset) => (
+                  <tr key={asset.id} className="group hover:bg-slate-50/40 transition-colors cursor-pointer">
+                    <td className="p-5 pl-10">
+                      <div className="flex items-center gap-4">
+                        <div className="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-orange-50 group-hover:text-[#ff6b00] transition-colors border border-slate-100/50">
+                          <ImageIcon size={16} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#1e293b] group-hover:text-[#ff6b00] transition-colors truncate max-w-xs">{asset.name}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{asset.id.slice(0, 8)}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-semibold text-[#1e293b] group-hover:text-[#ff6b00] transition-colors">{report.name}</p>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{report.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-5 text-xs font-medium text-slate-500">{report.date}</td>
-                  <td className="p-5 text-xs font-medium text-slate-500">{report.size}</td>
-                  <td className="p-5 text-center">
-                    <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded text-[9px] font-bold uppercase tracking-widest border border-slate-200/50">
-                      {report.type}
-                    </span>
-                  </td>
-                  <td className="p-5 text-right pr-10">
-                    <button className="p-2 text-slate-300 hover:text-[#ff6b00] hover:bg-orange-50 rounded-lg transition-all group/btn">
-                      <Download size={16} className="group-hover/btn:-translate-y-0.5 transition-transform" />
-                    </button>
+                    </td>
+                    <td className="p-5 text-xs font-medium text-slate-500">{asset.date}</td>
+                    <td className="p-5 text-xs font-medium text-slate-500">{asset.downloads}</td>
+                    <td className="p-5 text-center text-xs font-bold text-green-600">${asset.earnings.toFixed(2)}</td>
+                    <td className="p-5 text-right pr-10">
+                      <button className="p-2 text-slate-300 hover:text-[#ff6b00] hover:bg-orange-50 rounded-lg transition-all group/btn">
+                        <Download size={16} className="group-hover/btn:-translate-y-0.5 transition-transform" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-400">
+                    No assets synced yet
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

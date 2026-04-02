@@ -34,7 +34,7 @@ function buildPageUrl(creatorId: string, page: number): string {
     "filters[content_type:3d]": "1",
     k: "",
     "filters[creator_id]": creatorId,
-    order: "nb_downloads",
+    order: "relevance",
     search_page: String(page),
   });
   return `https://stock.adobe.com/search?${params.toString()}`;
@@ -108,10 +108,37 @@ function normalizeDate(val: any): Date | null {
 }
 
 function normalizeKeywords(item: any): string[] {
+  // Try direct fields first
   const raw = item?.keywords || item?.tags || item?.keyword_list || [];
-  if (Array.isArray(raw)) return raw.map(String).filter(Boolean);
-  if (typeof raw === "string") return raw.split(",").map((s: string) => s.trim()).filter(Boolean);
-  return [];
+  if (Array.isArray(raw) && raw.length > 0) return raw.map(String).filter(Boolean);
+  if (typeof raw === "string" && raw.trim()) return raw.split(",").map((s: string) => s.trim()).filter(Boolean);
+  
+  // Fallback: Extract keywords from title
+  const title = String(item?.title || "").trim();
+  if (!title) return [];
+  
+  // Split by spaces, filter out common words, keep 3-50 char words
+  const commonWords = new Set([
+    "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "he", "in", "is",
+    "it", "its", "of", "on", "or", "she", "that", "the", "to", "was", "will", "with",
+    "modern", "flat", "vector", "illustration", "white", "background", "concept", "piece"
+  ]);
+  
+  return title
+    .split(/[\s\/\-\.\,]+/)
+    .map((w: string) => w.toLowerCase().trim())
+    .filter((w: string) => w.length >= 3 && w.length <= 50 && !commonWords.has(w))
+    .slice(0, 10); // Limit to 10 keywords
+}
+
+// Fisher-Yates shuffle untuk randomize data
+function shuffleArray<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 function normalizeCategory(item: any): string | null {
@@ -161,10 +188,15 @@ function sseEvent(
   controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
 }
 
-export async function POST() {
+export async function POST(req: Request) {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Get limit from query params (default 300)
+  const url = new URL(req.url);
+  const limitParam = url.searchParams.get("limit");
+  const LIMIT = limitParam ? Math.min(Math.max(parseInt(limitParam), 10), 1000) : 300; // Min 10, Max 1000
 
   const token = process.env.APIFY_API_TOKEN;
   const actorId = process.env.APIFY_ACTOR_ID || "cOsM6hOaAbSxqSG1E";
@@ -180,7 +212,8 @@ export async function POST() {
     return NextResponse.json({ error: e.message }, { status: 400 });
   }
 
-  const MAX_PAGES = 10;
+  // Calculate max pages needed (10 items per page)
+  const MAX_PAGES = Math.ceil(LIMIT / 10);
   const encoder = new TextEncoder();
 
   // SSE stream
@@ -293,16 +326,60 @@ export async function POST() {
           })
           .filter((item): item is NormalizedAsset => item !== null);
 
-        // Simpan ke DB
+        // Kategorisasi NEW vs UPDATE dengan check DB
+        const newItems: NormalizedAsset[] = [];
+        const updateItems: NormalizedAsset[] = [];
+
+        // Check setiap item di database dalam batch
         const BATCH_SIZE = 100;
+        for (let i = 0; i < normalizedItems.length; i += BATCH_SIZE) {
+          const batch = normalizedItems.slice(i, i + BATCH_SIZE);
+          const existingAssets = await prisma.asset.findMany({
+            where: {
+              assetId: { in: batch.map((item) => item.assetId) },
+              profileId: user.id,
+            },
+            select: { assetId: true },
+          });
+
+          const existingIds = new Set(existingAssets.map((a) => a.assetId));
+
+          for (const item of batch) {
+            if (existingIds.has(item.assetId)) {
+              updateItems.push(item);
+            } else {
+              newItems.push(item);
+            }
+          }
+        }
+
+        // Shuffle NEW items untuk variasi
+        const shuffledNewItems = shuffleArray(newItems);
+        const shuffledUpdateItems = shuffleArray(updateItems);
+
+        // Prioritas: Ambil NEW items dulu (up to LIMIT)
+        // Jika kurang, fill dengan UPDATE items
+        const itemsToSave: NormalizedAsset[] = [];
+        itemsToSave.push(...shuffledNewItems.slice(0, LIMIT));
+
+        if (itemsToSave.length < LIMIT) {
+          const remainingSlots = LIMIT - itemsToSave.length;
+          itemsToSave.push(...shuffledUpdateItems.slice(0, remainingSlots));
+        }
+
+        // Simpan ke DB
         let newCreated = 0;
         let updated = 0;
 
-        for (let i = 0; i < normalizedItems.length; i += BATCH_SIZE) {
-          const batch = normalizedItems.slice(i, i + BATCH_SIZE);
+        for (let i = 0; i < itemsToSave.length; i += BATCH_SIZE) {
+          const batch = itemsToSave.slice(i, i + BATCH_SIZE);
           const results = await Promise.all(
             batch.map(async (item: NormalizedAsset) => {
-              const existing = await prisma.asset.findUnique({ where: { assetId: item.assetId } });
+              const existing = await prisma.asset.findUnique({ 
+                where: { assetId: item.assetId },
+                select: { assetId: true },
+              });
+              
               await prisma.asset.upsert({
                 where: { assetId: item.assetId },
                 update: {
@@ -320,9 +397,11 @@ export async function POST() {
                   earnings: item.earnings, popularity: item.popularity, profileId: user.id,
                 },
               });
+              
               return { wasCreated: !existing };
             })
           );
+          
           newCreated += results.filter((r) => r.wasCreated).length;
           updated += results.filter((r) => !r.wasCreated).length;
         }
@@ -334,7 +413,7 @@ export async function POST() {
           data: {
             profileId: user.id,
             status: "success",
-            totalCollected: normalizedItems.length,
+            totalCollected: itemsToSave.length,
             created: newCreated,
             updated,
             totalInDatabase: totalInDb,
@@ -343,7 +422,7 @@ export async function POST() {
 
         sseEvent(controller, encoder, {
           type: "done",
-          count: normalizedItems.length,
+          count: itemsToSave.length,
           created: newCreated,
           updated,
           totalInDatabase: totalInDb,

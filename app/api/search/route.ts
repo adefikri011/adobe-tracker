@@ -130,16 +130,20 @@ function filterByRelevance(items: any[], keyword: string): any[] {
   const queryLower = keyword.toLowerCase();
   
   return items.filter((item) => {
-    const title = (item?.title || "").toLowerCase();
-    const category = (item?.category?.name || item?.category || "").toLowerCase();
-    const tags = (item?.tags || []).map((t: any) => 
-      typeof t === "string" ? t.toLowerCase() : t?.name?.toLowerCase()
-    );
+    const title = String(item?.title || "").toLowerCase();
+    const categoryValue = item?.category?.name || item?.category;
+    const category = String(categoryValue || "").toLowerCase();
+    
+    const tags = (item?.tags || []).map((t: any) => {
+      if (typeof t === "string") return t.toLowerCase();
+      if (t?.name) return String(t.name).toLowerCase();
+      return "";
+    }).filter(Boolean);
     
     // Cek apakah keyword ada di title, category, atau tags
     const inTitle = title.includes(queryLower);
     const inCategory = category.includes(queryLower);
-    const inTags = tags.some((tag: string) => tag?.includes(queryLower));
+    const inTags = tags.some((tag: string) => tag.includes(queryLower));
     
     // Return hanya jika keyword relevan di minimal satu field
     return inTitle || inCategory || inTags;
@@ -176,40 +180,50 @@ export async function GET(req: NextRequest) {
   try {
     // ── PRIORITAS 1: Cari dari asset DB milik user ──────────────────────────
     // Ini gratis, instant, dan relevan karena dari portfolio sendiri
+    // SKIP jika user punya banyak assets (>100) untuk avoid slow query
     if (userId) {
-      const dbAssets = await prisma.asset.findMany({
-        where: {
-          profileId: userId,
-          OR: [
-            { title: { contains: query, mode: "insensitive" } },
-            { keywords: { has: query } },
-            { category: { contains: query, mode: "insensitive" } },
-          ],
-        },
-        take: limit,
-        orderBy: { downloads: "desc" },
+      const assetCount = await prisma.asset.count({
+        where: { profileId: userId },
       });
+      
+      // Only query DB kalau assets sedikit (< 100)
+      if (assetCount < 100) {
+        const dbAssets = await prisma.asset.findMany({
+          where: {
+            profileId: userId,
+            OR: [
+              { title: { contains: query, mode: "insensitive" } },
+              { keywords: { has: query } },
+              { category: { contains: query, mode: "insensitive" } },
+            ],
+          },
+          take: limit,
+          orderBy: { downloads: "desc" },
+        });
 
-      if (dbAssets.length >= limit) {
-        console.log(`[Search] ${dbAssets.length} hasil dari DB lokal`);
-        const results = dbAssets.map((a) => ({
-          adobeId: a.assetId,
-          title: a.title,
-          creator: a.contributor || "Unknown",
-          thumbnail: a.thumbnail,
-          type: a.fileType || "Photo",
-          category: a.category || "General",
-          downloads: a.downloads,
-          trend: `+${Math.floor(Math.random() * 30) + 1}%`,
-          revenue: `$${(a.downloads * 0.33).toFixed(2)}`,
-          uploadDate: a.uploadedAt?.toLocaleDateString("id-ID") || "-",
-          contentUrl: a.assetUrl || "",
-          artistUrl: "",
-          status: "Premium",
-          keywords: a.keywords || [],
-          fromDb: true,
-        }));
-        return NextResponse.json({ results, fromCache: false, fromDb: true, total: results.length, isPro });
+        if (dbAssets.length >= limit) {
+          console.log(`[Search] ${dbAssets.length} hasil dari DB lokal`);
+          const results = dbAssets.map((a) => ({
+            adobeId: a.assetId,
+            title: a.title,
+            creator: a.contributor || "Unknown",
+            thumbnail: a.thumbnail,
+            type: a.fileType || "Photo",
+            category: a.category || "General",
+            downloads: a.downloads,
+            trend: `+${Math.floor(Math.random() * 30) + 1}%`,
+            revenue: `$${(a.downloads * 0.33).toFixed(2)}`,
+            uploadDate: a.uploadedAt?.toLocaleDateString("id-ID") || "-",
+            contentUrl: a.assetUrl || "",
+            artistUrl: "",
+            status: "Premium",
+            keywords: a.keywords || [],
+            fromDb: true,
+          }));
+          return NextResponse.json({ results, fromCache: false, fromDb: true, total: results.length, isPro });
+        }
+      } else {
+        console.log(`[Search] Skip DB query (${assetCount} assets) — langsung ke Apify`);
       }
     }
 
