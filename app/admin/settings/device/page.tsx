@@ -1,27 +1,28 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
 
 export default function DeviceLimitPage() {
-  const [maxDevices, setMaxDevices] = useState(2);
-  const [suspendMinutes, setSuspendMinutes] = useState(5);
+  const [globalMaxDevices, setGlobalMaxDevices] = useState(1);
+  const [suspendDurationMinutes, setSuspendDurationMinutes] = useState(30);
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [updatedCount, setUpdatedCount] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
 
-    async function loadPolicy() {
+    async function loadSettings() {
       try {
-        const res = await fetch("/api/admin/device-policy", {
+        const res = await fetch("/api/admin/settings/device", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
 
         if (!res.ok) {
-          throw new Error("Failed to load device policy");
+          throw new Error("Failed to load device settings");
         }
 
         const data = await res.json();
@@ -29,16 +30,16 @@ export default function DeviceLimitPage() {
           return;
         }
 
-        if (typeof data.maxDevices === "number") {
-          setMaxDevices(Math.max(1, Math.floor(data.maxDevices)));
+        if (typeof data.globalMaxDevices === "number") {
+          setGlobalMaxDevices(Math.max(1, Math.floor(data.globalMaxDevices)));
         }
 
-        if (typeof data.suspendMinutes === "number") {
-          setSuspendMinutes(Math.max(1, Math.floor(data.suspendMinutes)));
+        if (typeof data.suspendDurationMinutes === "number") {
+          setSuspendDurationMinutes(Math.max(1, Math.floor(data.suspendDurationMinutes)));
         }
-      } catch {
+      } catch (err: any) {
         if (isMounted) {
-          setError("Failed to load policy. Please refresh.");
+          setError(err.message || "Failed to load settings. Please refresh.");
         }
       } finally {
         if (isMounted) {
@@ -47,7 +48,7 @@ export default function DeviceLimitPage() {
       }
     }
 
-    loadPolicy();
+    loadSettings();
 
     return () => {
       isMounted = false;
@@ -57,25 +58,28 @@ export default function DeviceLimitPage() {
   const handleSave = async () => {
     setSaving(true);
     setError("");
+    setUpdatedCount(0);
 
     try {
-      const res = await fetch("/api/admin/device-policy", {
-        method: "PUT",
+      const res = await fetch("/api/admin/settings/device", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          maxDevices: Math.max(1, Math.floor(maxDevices)),
-          suspendMinutes: Math.max(1, Math.floor(suspendMinutes)),
+          globalMaxDevices: Math.max(1, Math.floor(globalMaxDevices)),
+          suspendDurationMinutes: Math.max(1, Math.floor(suspendDurationMinutes)),
         }),
       });
 
       if (!res.ok) {
-        throw new Error("Failed to save device policy");
+        throw new Error("Failed to save device settings");
       }
 
+      const data = await res.json();
+      setUpdatedCount(data.updatedProfileCount || 0);
       setSaved(true);
-      setTimeout(() => setSaved(false), 1500);
-    } catch {
-      setError("Failed to save policy. Please try again.");
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to save settings. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -83,79 +87,181 @@ export default function DeviceLimitPage() {
 
   if (!loaded) {
     return (
-      <div className="p-8 max-w-2xl">
+      <div className="p-8 max-w-3xl">
         <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm flex items-center gap-3 text-slate-600">
           <Loader2 size={18} className="animate-spin" />
-          Loading device policy...
+          Loading device settings...
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-2xl">
-      <div className="mb-8">
+    <div className="p-8 max-w-3xl space-y-8">
+      <div>
         <h1 className="text-2xl font-bold text-slate-900">Global Device Policy</h1>
-        <p className="text-slate-400 text-sm mt-1">Set max devices and suspend duration for all users</p>
+        <p className="text-slate-400 text-sm mt-1">Set max devices and suspend duration applied to all users</p>
       </div>
 
-      <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm mb-5">
-        <h3 className="font-semibold text-slate-900 mb-1 text-sm">Max Devices (All Users)</h3>
-        <p className="text-xs text-slate-400 mb-5">If a new device exceeds this limit, account will be suspended</p>
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+          <AlertCircle size={18} className="text-red-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-red-700">Error</p>
+            <p className="text-xs text-red-600 mt-0.5">{error}</p>
+          </div>
+        </div>
+      )}
 
-        <div className="mb-4">
+      {saved && (
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-start gap-3">
+          <CheckCircle size={18} className="text-green-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm text-green-700 font-semibold">Settings saved successfully!</p>
+            {updatedCount > 0 && (
+              <p className="text-xs text-green-600 mt-1">
+                ✓ Updated {updatedCount} user{updatedCount !== 1 ? 's' : ''} to new device limit
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Max Devices Card */}
+      <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm space-y-5">
+        <div>
+          <h3 className="font-semibold text-slate-900 text-base">Max Devices (Global)</h3>
+          <p className="text-xs text-slate-400 mt-1">
+            Maximum devices allowed per user. This is the base limit that can be overridden by:
+          </p>
+          <ul className="text-xs text-slate-500 mt-2 ml-4 space-y-1">
+            <li>• Plan device limit (if higher)</li>
+            <li>• Individual user override (if set)</li>
+          </ul>
+        </div>
+
+        <div className="space-y-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-slate-500">1 device</span>
-            <span className="text-2xl font-bold text-orange-500">{maxDevices} {maxDevices === 1 ? "device" : "devices"}</span>
-            <span className="text-xs text-slate-500">20 devices</span>
+            <span className="text-sm font-medium text-slate-600">Current Setting</span>
+            <span className="text-3xl font-bold text-orange-500">{globalMaxDevices}</span>
           </div>
-          <input
-            type="range"
-            min="1"
-            max="20"
-            value={maxDevices}
-            onChange={e => setMaxDevices(parseInt(e.target.value, 10))}
-            className="w-full accent-orange-500"
-          />
-        </div>
-
-        <div className="border-t border-slate-100 pt-4 mt-2">
-          <h3 className="font-semibold text-slate-900 mb-1 text-sm">Suspend Duration</h3>
-          <p className="text-xs text-slate-400 mb-3">Duration when user exceeds max devices</p>
-
-          <div className="flex items-center gap-3">
+          
+          <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
             <input
-              type="number"
-              min={1}
-              max={120}
-              value={suspendMinutes}
-              onChange={(e) => setSuspendMinutes(Math.max(1, Number(e.target.value) || 1))}
-              className="w-24 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-orange-400"
+              type="range"
+              min="1"
+              max="20"
+              value={globalMaxDevices}
+              onChange={e => setGlobalMaxDevices(parseInt(e.target.value, 10))}
+              className="flex-1 accent-orange-500"
             />
-            <span className="text-sm text-slate-600">minutes</span>
+            <div className="text-right">
+              <p className="text-xs text-slate-500">Max</p>
+              <p className="text-sm font-bold text-slate-700">20</p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 text-xs">
+            {[1, 2, 3, 5, 10].map(num => (
+              <button
+                key={num}
+                onClick={() => setGlobalMaxDevices(num)}
+                className={`px-3 py-1.5 rounded-lg font-medium transition ${
+                  globalMaxDevices === num
+                    ? "bg-orange-500 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {num}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      {error ? (
-        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-          {error}
+      {/* Suspend Duration Card */}
+      <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm space-y-5">
+        <div>
+          <h3 className="font-semibold text-slate-900 text-base">Suspend Duration</h3>
+          <p className="text-xs text-slate-400 mt-1">
+            How long to suspend user account when they exceed device limit
+          </p>
         </div>
-      ) : null}
 
-      <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-        Effective policy now: up to <span className="font-semibold text-slate-900">{maxDevices}</span> device(s), suspend for <span className="font-semibold text-slate-900">{suspendMinutes}</span> minute(s) when exceeded.
+        <div className="space-y-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-slate-600">Current Setting</span>
+            <span className="text-3xl font-bold text-orange-500">{suspendDurationMinutes}</span>
+            <span className="text-sm text-slate-500">minutes</span>
+          </div>
+          
+          <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <input
+              type="range"
+              min="1"
+              max="1440"
+              step="5"
+              value={suspendDurationMinutes}
+              onChange={e => setSuspendDurationMinutes(parseInt(e.target.value, 10))}
+              className="flex-1 accent-orange-500"
+            />
+            <div className="text-right">
+              <p className="text-xs text-slate-500">Max</p>
+              <p className="text-sm font-bold text-slate-700">24h</p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 text-xs flex-wrap">
+            {[5, 15, 30, 60, 120, 240].map(num => (
+              <button
+                key={num}
+                onClick={() => setSuspendDurationMinutes(num)}
+                className={`px-3 py-1.5 rounded-lg font-medium transition ${
+                  suspendDurationMinutes === num
+                    ? "bg-orange-500 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {num}m
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
+      {/* Save Button */}
       <button
         onClick={handleSave}
         disabled={saving}
-        className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition ${
-          saved ? "bg-green-500 text-white" : "bg-orange-500 hover:bg-orange-600 text-white"
+        className={`w-full py-3 px-4 rounded-xl font-semibold text-sm transition ${
+          saving
+            ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+            : saved
+            ? "bg-green-500 text-white"
+            : "bg-orange-500 text-white hover:bg-orange-600 active:scale-95"
         }`}
       >
-        {saving ? "Saving..." : saved ? "Saved!" : "Save Changes"}
+        {saving ? (
+          <span className="flex items-center justify-center gap-2">
+            <Loader2 size={16} className="animate-spin" />
+            Saving...
+          </span>
+        ) : saved ? (
+          <span className="flex items-center justify-center gap-2">
+            <CheckCircle size={16} />
+            Saved!
+          </span>
+        ) : (
+          "Save Global Settings"
+        )}
       </button>
+
+      {/* Info Box */}
+      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+        <p className="text-xs text-blue-700 font-medium">
+          <strong>ℹ️ How it works:</strong> When a user tries to connect a new device beyond the limit, their account is automatically suspended for the duration set above. They regain access after the suspension period expires or an admin manually unlocks them.
+        </p>
+      </div>
     </div>
   );
 }

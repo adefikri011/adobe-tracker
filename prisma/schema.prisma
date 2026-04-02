@@ -73,6 +73,7 @@ model Plan {
   finalPrice    Float
   discount      Float          @default(0)
   durationDays  Int
+  deviceLimit   Int            @default(1) // Max devices for this plan
   features      String[]       @default([])
   isActive      Boolean        @default(true)
   createdAt     DateTime       @default(now())
@@ -114,11 +115,13 @@ model Subscription {
 }
 
 model AppSettings {
-  id           String   @id @default("singleton")
-  currency     String   @default("USD")
-  exchangeRate Float    @default(15800)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                      String   @id @default("singleton")
+  currency                String   @default("USD")
+  exchangeRate            Float    @default(15800)
+  globalMaxDevices        Int      @default(1)      // Global device limit for all users
+  suspendDurationMinutes  Int      @default(30)     // How long to suspend user when exceeding device limit
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
   @@map("AppSettings")
 }

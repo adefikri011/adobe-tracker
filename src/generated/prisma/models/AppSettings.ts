@@ -28,16 +28,22 @@ export type AggregateAppSettings = {
 
 export type AppSettingsAvgAggregateOutputType = {
   exchangeRate: number | null
+  globalMaxDevices: number | null
+  suspendDurationMinutes: number | null
 }
 
 export type AppSettingsSumAggregateOutputType = {
   exchangeRate: number | null
+  globalMaxDevices: number | null
+  suspendDurationMinutes: number | null
 }
 
 export type AppSettingsMinAggregateOutputType = {
   id: string | null
   currency: string | null
   exchangeRate: number | null
+  globalMaxDevices: number | null
+  suspendDurationMinutes: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,6 +52,8 @@ export type AppSettingsMaxAggregateOutputType = {
   id: string | null
   currency: string | null
   exchangeRate: number | null
+  globalMaxDevices: number | null
+  suspendDurationMinutes: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,6 +62,8 @@ export type AppSettingsCountAggregateOutputType = {
   id: number
   currency: number
   exchangeRate: number
+  globalMaxDevices: number
+  suspendDurationMinutes: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -62,16 +72,22 @@ export type AppSettingsCountAggregateOutputType = {
 
 export type AppSettingsAvgAggregateInputType = {
   exchangeRate?: true
+  globalMaxDevices?: true
+  suspendDurationMinutes?: true
 }
 
 export type AppSettingsSumAggregateInputType = {
   exchangeRate?: true
+  globalMaxDevices?: true
+  suspendDurationMinutes?: true
 }
 
 export type AppSettingsMinAggregateInputType = {
   id?: true
   currency?: true
   exchangeRate?: true
+  globalMaxDevices?: true
+  suspendDurationMinutes?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -80,6 +96,8 @@ export type AppSettingsMaxAggregateInputType = {
   id?: true
   currency?: true
   exchangeRate?: true
+  globalMaxDevices?: true
+  suspendDurationMinutes?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +106,8 @@ export type AppSettingsCountAggregateInputType = {
   id?: true
   currency?: true
   exchangeRate?: true
+  globalMaxDevices?: true
+  suspendDurationMinutes?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -183,6 +203,8 @@ export type AppSettingsGroupByOutputType = {
   id: string
   currency: string
   exchangeRate: number
+  globalMaxDevices: number
+  suspendDurationMinutes: number
   createdAt: Date
   updatedAt: Date
   _count: AppSettingsCountAggregateOutputType | null
@@ -214,6 +236,8 @@ export type AppSettingsWhereInput = {
   id?: Prisma.StringFilter<"AppSettings"> | string
   currency?: Prisma.StringFilter<"AppSettings"> | string
   exchangeRate?: Prisma.FloatFilter<"AppSettings"> | number
+  globalMaxDevices?: Prisma.IntFilter<"AppSettings"> | number
+  suspendDurationMinutes?: Prisma.IntFilter<"AppSettings"> | number
   createdAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
 }
@@ -222,6 +246,8 @@ export type AppSettingsOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   exchangeRate?: Prisma.SortOrder
+  globalMaxDevices?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -233,6 +259,8 @@ export type AppSettingsWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.AppSettingsWhereInput | Prisma.AppSettingsWhereInput[]
   currency?: Prisma.StringFilter<"AppSettings"> | string
   exchangeRate?: Prisma.FloatFilter<"AppSettings"> | number
+  globalMaxDevices?: Prisma.IntFilter<"AppSettings"> | number
+  suspendDurationMinutes?: Prisma.IntFilter<"AppSettings"> | number
   createdAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
 }, "id">
@@ -241,6 +269,8 @@ export type AppSettingsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   exchangeRate?: Prisma.SortOrder
+  globalMaxDevices?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AppSettingsCountOrderByAggregateInput
@@ -257,6 +287,8 @@ export type AppSettingsScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"AppSettings"> | string
   currency?: Prisma.StringWithAggregatesFilter<"AppSettings"> | string
   exchangeRate?: Prisma.FloatWithAggregatesFilter<"AppSettings"> | number
+  globalMaxDevices?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
+  suspendDurationMinutes?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AppSettings"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AppSettings"> | Date | string
 }
@@ -265,6 +297,8 @@ export type AppSettingsCreateInput = {
   id?: string
   currency?: string
   exchangeRate?: number
+  globalMaxDevices?: number
+  suspendDurationMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -273,6 +307,8 @@ export type AppSettingsUncheckedCreateInput = {
   id?: string
   currency?: string
   exchangeRate?: number
+  globalMaxDevices?: number
+  suspendDurationMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -281,6 +317,8 @@ export type AppSettingsUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   exchangeRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  globalMaxDevices?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -289,6 +327,8 @@ export type AppSettingsUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   exchangeRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  globalMaxDevices?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -297,6 +337,8 @@ export type AppSettingsCreateManyInput = {
   id?: string
   currency?: string
   exchangeRate?: number
+  globalMaxDevices?: number
+  suspendDurationMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -305,6 +347,8 @@ export type AppSettingsUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   exchangeRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  globalMaxDevices?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -313,6 +357,8 @@ export type AppSettingsUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   exchangeRate?: Prisma.FloatFieldUpdateOperationsInput | number
+  globalMaxDevices?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -321,18 +367,24 @@ export type AppSettingsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   exchangeRate?: Prisma.SortOrder
+  globalMaxDevices?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type AppSettingsAvgOrderByAggregateInput = {
   exchangeRate?: Prisma.SortOrder
+  globalMaxDevices?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
 }
 
 export type AppSettingsMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   exchangeRate?: Prisma.SortOrder
+  globalMaxDevices?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -341,12 +393,16 @@ export type AppSettingsMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   currency?: Prisma.SortOrder
   exchangeRate?: Prisma.SortOrder
+  globalMaxDevices?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type AppSettingsSumOrderByAggregateInput = {
   exchangeRate?: Prisma.SortOrder
+  globalMaxDevices?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
 }
 
 
@@ -355,6 +411,8 @@ export type AppSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   id?: boolean
   currency?: boolean
   exchangeRate?: boolean
+  globalMaxDevices?: boolean
+  suspendDurationMinutes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
@@ -363,6 +421,8 @@ export type AppSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   currency?: boolean
   exchangeRate?: boolean
+  globalMaxDevices?: boolean
+  suspendDurationMinutes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
@@ -371,6 +431,8 @@ export type AppSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   id?: boolean
   currency?: boolean
   exchangeRate?: boolean
+  globalMaxDevices?: boolean
+  suspendDurationMinutes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
@@ -379,11 +441,13 @@ export type AppSettingsSelectScalar = {
   id?: boolean
   currency?: boolean
   exchangeRate?: boolean
+  globalMaxDevices?: boolean
+  suspendDurationMinutes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AppSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "currency" | "exchangeRate" | "createdAt" | "updatedAt", ExtArgs["result"]["appSettings"]>
+export type AppSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "currency" | "exchangeRate" | "globalMaxDevices" | "suspendDurationMinutes" | "createdAt" | "updatedAt", ExtArgs["result"]["appSettings"]>
 
 export type $AppSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AppSettings"
@@ -392,6 +456,8 @@ export type $AppSettingsPayload<ExtArgs extends runtime.Types.Extensions.Interna
     id: string
     currency: string
     exchangeRate: number
+    globalMaxDevices: number
+    suspendDurationMinutes: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["appSettings"]>
@@ -820,6 +886,8 @@ export interface AppSettingsFieldRefs {
   readonly id: Prisma.FieldRef<"AppSettings", 'String'>
   readonly currency: Prisma.FieldRef<"AppSettings", 'String'>
   readonly exchangeRate: Prisma.FieldRef<"AppSettings", 'Float'>
+  readonly globalMaxDevices: Prisma.FieldRef<"AppSettings", 'Int'>
+  readonly suspendDurationMinutes: Prisma.FieldRef<"AppSettings", 'Int'>
   readonly createdAt: Prisma.FieldRef<"AppSettings", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AppSettings", 'DateTime'>
 }

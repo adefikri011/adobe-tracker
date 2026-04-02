@@ -1335,6 +1335,7 @@ export const PlanScalarFieldEnum = {
   finalPrice: 'finalPrice',
   discount: 'discount',
   durationDays: 'durationDays',
+  deviceLimit: 'deviceLimit',
   features: 'features',
   isActive: 'isActive',
   createdAt: 'createdAt',
@@ -1382,6 +1383,8 @@ export const AppSettingsScalarFieldEnum = {
   id: 'id',
   currency: 'currency',
   exchangeRate: 'exchangeRate',
+  globalMaxDevices: 'globalMaxDevices',
+  suspendDurationMinutes: 'suspendDurationMinutes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
