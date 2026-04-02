@@ -60,7 +60,8 @@ export const ModelName = {
   Subscription: 'Subscription',
   AppSettings: 'AppSettings',
   LoginLog: 'LoginLog',
-  SyncLog: 'SyncLog'
+  SyncLog: 'SyncLog',
+  GatewayConfig: 'GatewayConfig'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -86,9 +87,9 @@ export const ProfileScalarFieldEnum = {
   plan: 'plan',
   role: 'role',
   status: 'status',
-  planExpiry: 'planExpiry',
   deviceLimit: 'deviceLimit',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  planExpiry: 'planExpiry'
 } as const
 
 export type ProfileScalarFieldEnum = (typeof ProfileScalarFieldEnum)[keyof typeof ProfileScalarFieldEnum]
@@ -204,12 +205,12 @@ export type AppSettingsScalarFieldEnum = (typeof AppSettingsScalarFieldEnum)[key
 export const LoginLogScalarFieldEnum = {
   id: 'id',
   profileId: 'profileId',
-  email: 'email',
   status: 'status',
   ipAddress: 'ipAddress',
+  createdAt: 'createdAt',
   device: 'device',
-  loginTime: 'loginTime',
-  createdAt: 'createdAt'
+  email: 'email',
+  loginTime: 'loginTime'
 } as const
 
 export type LoginLogScalarFieldEnum = (typeof LoginLogScalarFieldEnum)[keyof typeof LoginLogScalarFieldEnum]
@@ -229,6 +230,22 @@ export const SyncLogScalarFieldEnum = {
 } as const
 
 export type SyncLogScalarFieldEnum = (typeof SyncLogScalarFieldEnum)[keyof typeof SyncLogScalarFieldEnum]
+
+
+export const GatewayConfigScalarFieldEnum = {
+  id: 'id',
+  gateway: 'gateway',
+  enabled: 'enabled',
+  serverKey: 'serverKey',
+  clientKey: 'clientKey',
+  publishableKey: 'publishableKey',
+  mode: 'mode',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GatewayConfigScalarFieldEnum = (typeof GatewayConfigScalarFieldEnum)[keyof typeof GatewayConfigScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -91,3 +91,8 @@ export type LoginLog = Prisma.LoginLogModel
  * 
  */
 export type SyncLog = Prisma.SyncLogModel
+/**
+ * Model GatewayConfig
+ * 
+ */
+export type GatewayConfig = Prisma.GatewayConfigModel

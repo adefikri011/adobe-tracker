@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { getGatewayConfig, getEnvFallback } from "@/lib/gateway-config";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,11 +24,15 @@ export const metadata: Metadata = {
   description: "Track and analyze your Adobe Stock performance",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Get Midtrans config from DB, fallback to env
+  const midtransConfig = await getGatewayConfig("midtrans") || getEnvFallback("midtrans");
+  const midtransClientKey = midtransConfig?.clientKey || process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || "";
+
   return (
     <html
       lang="en"
@@ -37,7 +42,7 @@ export default function RootLayout({
         {/* Midtrans Snap SDK - untuk payment gateway */}
         <Script
           src="https://app.sandbox.midtrans.com/snap/snap.js"
-          data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || ""}
+          data-client-key={midtransClientKey}
           strategy="beforeInteractive"
         />
       </head>

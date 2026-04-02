@@ -8,22 +8,20 @@ datasource db {
 }
 
 model Profile {
-  id              String         @id
-  fullName        String?
-  email           String?        @unique
-  plan            String         @default("free") // "free" atau "pro"
-  role            UserRole       @default(user)
-  status          UserStatus     @default(active)
-  
-  planExpiry      DateTime?      
-  
-  deviceLimit     Int            @default(1)
-  createdAt       DateTime       @default(now())
-  assets          Asset[]
-  transactions    Transaction[]
-  subscriptions   Subscription[]
-  loginLogs       LoginLog[]
-  syncLogs        SyncLog[]
+  id            String         @id
+  fullName      String?
+  email         String?        @unique
+  plan          String         @default("free")
+  role          UserRole       @default(user)
+  status        UserStatus     @default(active)
+  deviceLimit   Int            @default(1)
+  createdAt     DateTime       @default(now())
+  planExpiry    DateTime?
+  assets        Asset[]
+  loginLogs     LoginLog[]
+  subscriptions Subscription[]
+  syncLogs      SyncLog[]
+  transactions  Transaction[]
 
   @@map("Profile")
 }
@@ -66,83 +64,108 @@ model UserSession {
   @@map("UserSession")
 }
 
-// Plan yang tersedia (dikelola admin)
 model Plan {
-  id           String        @id @default(cuid())
-  name         String        // "Pro - 7 Days"
-  slug         String        @unique // "pro-7"
-  description  String?
-  price        Float         // harga asli
-  finalPrice   Float         // harga setelah diskon
-  discount     Float         @default(0) // persen diskon
-  durationDays Int           // durasi dalam hari (0 = selamanya)
-  features     String[]      @default([])
-  isActive     Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  transactions Transaction[]
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  description   String?
+  price         Float
+  finalPrice    Float
+  discount      Float          @default(0)
+  durationDays  Int
+  features      String[]       @default([])
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   subscriptions Subscription[]
+  transactions  Transaction[]
 }
 
-// Setiap transaksi pembayaran
 model Transaction {
   id              String            @id @default(cuid())
-  orderId         String            @unique // format: TRX-{timestamp}-{userId}
+  orderId         String            @unique
   profileId       String
   planId          String
   amount          Float
   status          TransactionStatus @default(pending)
-  paymentMethod   String?           // "credit_card", "gopay", "bca_va", dll
-  snapToken       String?           // token dari Midtrans Snap
-  midtransOrderId String?           // order_id dari Midtrans
+  paymentMethod   String?
+  snapToken       String?
+  midtransOrderId String?
   paidAt          DateTime?
   expiredAt       DateTime?
-  metadata        Json?             // raw response dari Midtrans
+  metadata        Json?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
-  profile         Profile           @relation(fields: [profileId], references: [id])
   plan            Plan              @relation(fields: [planId], references: [id])
+  profile         Profile           @relation(fields: [profileId], references: [id])
 }
 
-// Subscription aktif user
 model Subscription {
-  id          String             @id @default(cuid())
-  profileId   String
-  planId      String
-  status      SubscriptionStatus @default(active)
-  startDate   DateTime           @default(now())
-  endDate     DateTime           // kapan expired
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  profile     Profile            @relation(fields: [profileId], references: [id])
-  plan        Plan               @relation(fields: [planId], references: [id])
+  id        String             @id @default(cuid())
+  profileId String
+  planId    String
+  status    SubscriptionStatus @default(active)
+  startDate DateTime           @default(now())
+  endDate   DateTime
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  plan      Plan               @relation(fields: [planId], references: [id])
+  profile   Profile            @relation(fields: [profileId], references: [id])
 }
 
-// Global App Settings (hanya 1 record)
 model AppSettings {
-  id              String    @id @default("singleton")
-  currency        String    @default("USD")     // USD atau IDR
-  exchangeRate    Float     @default(15800)     // 1 USD = X IDR
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id           String   @id @default("singleton")
+  currency     String   @default("USD")
+  exchangeRate Float    @default(15800)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@map("AppSettings")
 }
 
-// Login attempts tracking
 model LoginLog {
   id        String   @id @default(cuid())
   profileId String?
-  email     String
-  status    String   @default("success") // "success" ou "failed"
+  status    String   @default("success")
   ipAddress String?
-  device    String?  // dari User-Agent
-  loginTime DateTime @default(now())
   createdAt DateTime @default(now())
-  
+  device    String?
+  email     String
+  loginTime DateTime @default(now())
   profile   Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@map("LoginLog")
+}
+
+model SyncLog {
+  id              String   @id @default(cuid())
+  profileId       String
+  status          String   @default("success")
+  totalCollected  Int      @default(0)
+  created         Int      @default(0)
+  updated         Int      @default(0)
+  totalInDatabase Int      @default(0)
+  errorMessage    String?
+  startedAt       DateTime @default(now())
+  completedAt     DateTime @updatedAt
+  profile         Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("SyncLog")
+}
+
+model GatewayConfig {
+  id             String   @id @default(cuid())
+  gateway        String   @unique
+  enabled        Boolean  @default(false)
+  serverKey      String?
+  clientKey      String?
+  publishableKey String?
+  mode           String   @default("sandbox")
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("GatewayConfig")
 }
 
 enum UserRole {
@@ -153,24 +176,6 @@ enum UserRole {
 enum UserStatus {
   active
   suspended
-}
-
-// Sync history tracking
-model SyncLog {
-  id            String   @id @default(cuid())
-  profileId     String
-  status        String   @default("success") // "success" atau "failed"
-  totalCollected Int     @default(0)
-  created       Int      @default(0)
-  updated       Int      @default(0)
-  totalInDatabase Int    @default(0)
-  errorMessage  String?
-  startedAt     DateTime @default(now())
-  completedAt   DateTime @updatedAt
-  
-  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  @@map("SyncLog")
 }
 
 enum TransactionStatus {

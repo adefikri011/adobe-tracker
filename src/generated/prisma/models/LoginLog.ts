@@ -27,34 +27,34 @@ export type AggregateLoginLog = {
 export type LoginLogMinAggregateOutputType = {
   id: string | null
   profileId: string | null
-  email: string | null
   status: string | null
   ipAddress: string | null
-  device: string | null
-  loginTime: Date | null
   createdAt: Date | null
+  device: string | null
+  email: string | null
+  loginTime: Date | null
 }
 
 export type LoginLogMaxAggregateOutputType = {
   id: string | null
   profileId: string | null
-  email: string | null
   status: string | null
   ipAddress: string | null
-  device: string | null
-  loginTime: Date | null
   createdAt: Date | null
+  device: string | null
+  email: string | null
+  loginTime: Date | null
 }
 
 export type LoginLogCountAggregateOutputType = {
   id: number
   profileId: number
-  email: number
   status: number
   ipAddress: number
-  device: number
-  loginTime: number
   createdAt: number
+  device: number
+  email: number
+  loginTime: number
   _all: number
 }
 
@@ -62,34 +62,34 @@ export type LoginLogCountAggregateOutputType = {
 export type LoginLogMinAggregateInputType = {
   id?: true
   profileId?: true
-  email?: true
   status?: true
   ipAddress?: true
-  device?: true
-  loginTime?: true
   createdAt?: true
+  device?: true
+  email?: true
+  loginTime?: true
 }
 
 export type LoginLogMaxAggregateInputType = {
   id?: true
   profileId?: true
-  email?: true
   status?: true
   ipAddress?: true
-  device?: true
-  loginTime?: true
   createdAt?: true
+  device?: true
+  email?: true
+  loginTime?: true
 }
 
 export type LoginLogCountAggregateInputType = {
   id?: true
   profileId?: true
-  email?: true
   status?: true
   ipAddress?: true
-  device?: true
-  loginTime?: true
   createdAt?: true
+  device?: true
+  email?: true
+  loginTime?: true
   _all?: true
 }
 
@@ -168,12 +168,12 @@ export type LoginLogGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 export type LoginLogGroupByOutputType = {
   id: string
   profileId: string | null
-  email: string
   status: string
   ipAddress: string | null
-  device: string | null
-  loginTime: Date
   createdAt: Date
+  device: string | null
+  email: string
+  loginTime: Date
   _count: LoginLogCountAggregateOutputType | null
   _min: LoginLogMinAggregateOutputType | null
   _max: LoginLogMaxAggregateOutputType | null
@@ -200,24 +200,24 @@ export type LoginLogWhereInput = {
   NOT?: Prisma.LoginLogWhereInput | Prisma.LoginLogWhereInput[]
   id?: Prisma.StringFilter<"LoginLog"> | string
   profileId?: Prisma.StringNullableFilter<"LoginLog"> | string | null
-  email?: Prisma.StringFilter<"LoginLog"> | string
   status?: Prisma.StringFilter<"LoginLog"> | string
   ipAddress?: Prisma.StringNullableFilter<"LoginLog"> | string | null
-  device?: Prisma.StringNullableFilter<"LoginLog"> | string | null
-  loginTime?: Prisma.DateTimeFilter<"LoginLog"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"LoginLog"> | Date | string
+  device?: Prisma.StringNullableFilter<"LoginLog"> | string | null
+  email?: Prisma.StringFilter<"LoginLog"> | string
+  loginTime?: Prisma.DateTimeFilter<"LoginLog"> | Date | string
   profile?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
 }
 
 export type LoginLogOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   profileId?: Prisma.SortOrderInput | Prisma.SortOrder
-  email?: Prisma.SortOrder
   status?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
-  device?: Prisma.SortOrderInput | Prisma.SortOrder
-  loginTime?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  device?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrder
+  loginTime?: Prisma.SortOrder
   profile?: Prisma.ProfileOrderByWithRelationInput
 }
 
@@ -227,24 +227,24 @@ export type LoginLogWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.LoginLogWhereInput[]
   NOT?: Prisma.LoginLogWhereInput | Prisma.LoginLogWhereInput[]
   profileId?: Prisma.StringNullableFilter<"LoginLog"> | string | null
-  email?: Prisma.StringFilter<"LoginLog"> | string
   status?: Prisma.StringFilter<"LoginLog"> | string
   ipAddress?: Prisma.StringNullableFilter<"LoginLog"> | string | null
-  device?: Prisma.StringNullableFilter<"LoginLog"> | string | null
-  loginTime?: Prisma.DateTimeFilter<"LoginLog"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"LoginLog"> | Date | string
+  device?: Prisma.StringNullableFilter<"LoginLog"> | string | null
+  email?: Prisma.StringFilter<"LoginLog"> | string
+  loginTime?: Prisma.DateTimeFilter<"LoginLog"> | Date | string
   profile?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null
 }, "id">
 
 export type LoginLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   profileId?: Prisma.SortOrderInput | Prisma.SortOrder
-  email?: Prisma.SortOrder
   status?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
-  device?: Prisma.SortOrderInput | Prisma.SortOrder
-  loginTime?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  device?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrder
+  loginTime?: Prisma.SortOrder
   _count?: Prisma.LoginLogCountOrderByAggregateInput
   _max?: Prisma.LoginLogMaxOrderByAggregateInput
   _min?: Prisma.LoginLogMinOrderByAggregateInput
@@ -256,88 +256,88 @@ export type LoginLogScalarWhereWithAggregatesInput = {
   NOT?: Prisma.LoginLogScalarWhereWithAggregatesInput | Prisma.LoginLogScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"LoginLog"> | string
   profileId?: Prisma.StringNullableWithAggregatesFilter<"LoginLog"> | string | null
-  email?: Prisma.StringWithAggregatesFilter<"LoginLog"> | string
   status?: Prisma.StringWithAggregatesFilter<"LoginLog"> | string
   ipAddress?: Prisma.StringNullableWithAggregatesFilter<"LoginLog"> | string | null
-  device?: Prisma.StringNullableWithAggregatesFilter<"LoginLog"> | string | null
-  loginTime?: Prisma.DateTimeWithAggregatesFilter<"LoginLog"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"LoginLog"> | Date | string
+  device?: Prisma.StringNullableWithAggregatesFilter<"LoginLog"> | string | null
+  email?: Prisma.StringWithAggregatesFilter<"LoginLog"> | string
+  loginTime?: Prisma.DateTimeWithAggregatesFilter<"LoginLog"> | Date | string
 }
 
 export type LoginLogCreateInput = {
   id?: string
-  email: string
   status?: string
   ipAddress?: string | null
-  device?: string | null
-  loginTime?: Date | string
   createdAt?: Date | string
+  device?: string | null
+  email: string
+  loginTime?: Date | string
   profile?: Prisma.ProfileCreateNestedOneWithoutLoginLogsInput
 }
 
 export type LoginLogUncheckedCreateInput = {
   id?: string
   profileId?: string | null
-  email: string
   status?: string
   ipAddress?: string | null
-  device?: string | null
-  loginTime?: Date | string
   createdAt?: Date | string
+  device?: string | null
+  email: string
+  loginTime?: Date | string
 }
 
 export type LoginLogUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.ProfileUpdateOneWithoutLoginLogsNestedInput
 }
 
 export type LoginLogUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   profileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  email?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LoginLogCreateManyInput = {
   id?: string
   profileId?: string | null
-  email: string
   status?: string
   ipAddress?: string | null
-  device?: string | null
-  loginTime?: Date | string
   createdAt?: Date | string
+  device?: string | null
+  email: string
+  loginTime?: Date | string
 }
 
 export type LoginLogUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LoginLogUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   profileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  email?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LoginLogListRelationFilter = {
@@ -353,34 +353,34 @@ export type LoginLogOrderByRelationAggregateInput = {
 export type LoginLogCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   profileId?: Prisma.SortOrder
-  email?: Prisma.SortOrder
   status?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
-  device?: Prisma.SortOrder
-  loginTime?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  device?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  loginTime?: Prisma.SortOrder
 }
 
 export type LoginLogMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   profileId?: Prisma.SortOrder
-  email?: Prisma.SortOrder
   status?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
-  device?: Prisma.SortOrder
-  loginTime?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  device?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  loginTime?: Prisma.SortOrder
 }
 
 export type LoginLogMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   profileId?: Prisma.SortOrder
-  email?: Prisma.SortOrder
   status?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
-  device?: Prisma.SortOrder
-  loginTime?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  device?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  loginTime?: Prisma.SortOrder
 }
 
 export type LoginLogCreateNestedManyWithoutProfileInput = {
@@ -427,22 +427,22 @@ export type LoginLogUncheckedUpdateManyWithoutProfileNestedInput = {
 
 export type LoginLogCreateWithoutProfileInput = {
   id?: string
-  email: string
   status?: string
   ipAddress?: string | null
-  device?: string | null
-  loginTime?: Date | string
   createdAt?: Date | string
+  device?: string | null
+  email: string
+  loginTime?: Date | string
 }
 
 export type LoginLogUncheckedCreateWithoutProfileInput = {
   id?: string
-  email: string
   status?: string
   ipAddress?: string | null
-  device?: string | null
-  loginTime?: Date | string
   createdAt?: Date | string
+  device?: string | null
+  email: string
+  loginTime?: Date | string
 }
 
 export type LoginLogCreateOrConnectWithoutProfileInput = {
@@ -477,52 +477,52 @@ export type LoginLogScalarWhereInput = {
   NOT?: Prisma.LoginLogScalarWhereInput | Prisma.LoginLogScalarWhereInput[]
   id?: Prisma.StringFilter<"LoginLog"> | string
   profileId?: Prisma.StringNullableFilter<"LoginLog"> | string | null
-  email?: Prisma.StringFilter<"LoginLog"> | string
   status?: Prisma.StringFilter<"LoginLog"> | string
   ipAddress?: Prisma.StringNullableFilter<"LoginLog"> | string | null
-  device?: Prisma.StringNullableFilter<"LoginLog"> | string | null
-  loginTime?: Prisma.DateTimeFilter<"LoginLog"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"LoginLog"> | Date | string
+  device?: Prisma.StringNullableFilter<"LoginLog"> | string | null
+  email?: Prisma.StringFilter<"LoginLog"> | string
+  loginTime?: Prisma.DateTimeFilter<"LoginLog"> | Date | string
 }
 
 export type LoginLogCreateManyProfileInput = {
   id?: string
-  email: string
   status?: string
   ipAddress?: string | null
-  device?: string | null
-  loginTime?: Date | string
   createdAt?: Date | string
+  device?: string | null
+  email: string
+  loginTime?: Date | string
 }
 
 export type LoginLogUpdateWithoutProfileInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LoginLogUncheckedUpdateWithoutProfileInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LoginLogUncheckedUpdateManyWithoutProfileInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  device?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  loginTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -530,51 +530,51 @@ export type LoginLogUncheckedUpdateManyWithoutProfileInput = {
 export type LoginLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   profileId?: boolean
-  email?: boolean
   status?: boolean
   ipAddress?: boolean
-  device?: boolean
-  loginTime?: boolean
   createdAt?: boolean
+  device?: boolean
+  email?: boolean
+  loginTime?: boolean
   profile?: boolean | Prisma.LoginLog$profileArgs<ExtArgs>
 }, ExtArgs["result"]["loginLog"]>
 
 export type LoginLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   profileId?: boolean
-  email?: boolean
   status?: boolean
   ipAddress?: boolean
-  device?: boolean
-  loginTime?: boolean
   createdAt?: boolean
+  device?: boolean
+  email?: boolean
+  loginTime?: boolean
   profile?: boolean | Prisma.LoginLog$profileArgs<ExtArgs>
 }, ExtArgs["result"]["loginLog"]>
 
 export type LoginLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   profileId?: boolean
-  email?: boolean
   status?: boolean
   ipAddress?: boolean
-  device?: boolean
-  loginTime?: boolean
   createdAt?: boolean
+  device?: boolean
+  email?: boolean
+  loginTime?: boolean
   profile?: boolean | Prisma.LoginLog$profileArgs<ExtArgs>
 }, ExtArgs["result"]["loginLog"]>
 
 export type LoginLogSelectScalar = {
   id?: boolean
   profileId?: boolean
-  email?: boolean
   status?: boolean
   ipAddress?: boolean
-  device?: boolean
-  loginTime?: boolean
   createdAt?: boolean
+  device?: boolean
+  email?: boolean
+  loginTime?: boolean
 }
 
-export type LoginLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "profileId" | "email" | "status" | "ipAddress" | "device" | "loginTime" | "createdAt", ExtArgs["result"]["loginLog"]>
+export type LoginLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "profileId" | "status" | "ipAddress" | "createdAt" | "device" | "email" | "loginTime", ExtArgs["result"]["loginLog"]>
 export type LoginLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   profile?: boolean | Prisma.LoginLog$profileArgs<ExtArgs>
 }
@@ -593,12 +593,12 @@ export type $LoginLogPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     profileId: string | null
-    email: string
     status: string
     ipAddress: string | null
-    device: string | null
-    loginTime: Date
     createdAt: Date
+    device: string | null
+    email: string
+    loginTime: Date
   }, ExtArgs["result"]["loginLog"]>
   composites: {}
 }
@@ -1025,12 +1025,12 @@ export interface Prisma__LoginLogClient<T, Null = never, ExtArgs extends runtime
 export interface LoginLogFieldRefs {
   readonly id: Prisma.FieldRef<"LoginLog", 'String'>
   readonly profileId: Prisma.FieldRef<"LoginLog", 'String'>
-  readonly email: Prisma.FieldRef<"LoginLog", 'String'>
   readonly status: Prisma.FieldRef<"LoginLog", 'String'>
   readonly ipAddress: Prisma.FieldRef<"LoginLog", 'String'>
-  readonly device: Prisma.FieldRef<"LoginLog", 'String'>
-  readonly loginTime: Prisma.FieldRef<"LoginLog", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"LoginLog", 'DateTime'>
+  readonly device: Prisma.FieldRef<"LoginLog", 'String'>
+  readonly email: Prisma.FieldRef<"LoginLog", 'String'>
+  readonly loginTime: Prisma.FieldRef<"LoginLog", 'DateTime'>
 }
     
 

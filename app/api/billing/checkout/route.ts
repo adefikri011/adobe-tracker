@@ -1,22 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { snap } from "../../../../lib/supabase/midtrans";
-import { getCurrencySettings } from "../../../../lib/currency";
+import { getInitializedMidtrans } from "@/lib/supabase/midtrans";
+import { getCurrencySettings } from "@/lib/currency";
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Cek Auth User
+    // 1. Check Auth User
     const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Get initialized Midtrans with DB config priority
+    const midtrans = await getInitializedMidtrans();
+    const snap = midtrans.snap;
 
     const body = await req.json();
     const { planId } = body;
 
     if (!planId) return NextResponse.json({ error: "Plan ID wajib" }, { status: 400 });
 
-    // 2. Ambil data Plan dari DB
+    // 2. Get Plan data from DB
     const plan = await prisma.plan.findUnique({
       where: { id: planId },
     });
@@ -32,7 +36,7 @@ export async function POST(req: NextRequest) {
     // So we always convert to IDR regardless of display currency
     const chargeAmount = Math.round(plan.finalPrice * currencySettings.exchangeRate);
 
-    // 4. Buat Order ID unik (Format: TRX-Timestamp-UserId)
+    // 4. Create unique Order ID (Format: TRX-Timestamp-UserId)
     const orderId = `TRX-${Date.now()}-${user.id.substring(0, 5)}`;
 
     // Note: Midtrans always expects IDR (integer format)
@@ -65,7 +69,7 @@ export async function POST(req: NextRequest) {
     const transaction = await snap.createTransaction(parameter);
     console.log("📥 Midtrans Response:", JSON.stringify(transaction, null, 2));
 
-    // 5. Simpan Transaksi ke Database dengan currency info
+    // 5. Save Transaction to DB with currency info
     const newTransaction = await prisma.transaction.create({
       data: {
         orderId: orderId,

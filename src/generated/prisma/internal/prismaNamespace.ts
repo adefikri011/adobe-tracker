@@ -393,7 +393,8 @@ export const ModelName = {
   Subscription: 'Subscription',
   AppSettings: 'AppSettings',
   LoginLog: 'LoginLog',
-  SyncLog: 'SyncLog'
+  SyncLog: 'SyncLog',
+  GatewayConfig: 'GatewayConfig'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -409,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "searchCache" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog" | "syncLog"
+    modelProps: "profile" | "searchCache" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog" | "syncLog" | "gatewayConfig"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1153,6 +1154,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    GatewayConfig: {
+      payload: Prisma.$GatewayConfigPayload<ExtArgs>
+      fields: Prisma.GatewayConfigFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GatewayConfigFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayConfigPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GatewayConfigFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayConfigPayload>
+        }
+        findFirst: {
+          args: Prisma.GatewayConfigFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayConfigPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GatewayConfigFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayConfigPayload>
+        }
+        findMany: {
+          args: Prisma.GatewayConfigFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayConfigPayload>[]
+        }
+        create: {
+          args: Prisma.GatewayConfigCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayConfigPayload>
+        }
+        createMany: {
+          args: Prisma.GatewayConfigCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GatewayConfigCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayConfigPayload>[]
+        }
+        delete: {
+          args: Prisma.GatewayConfigDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayConfigPayload>
+        }
+        update: {
+          args: Prisma.GatewayConfigUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayConfigPayload>
+        }
+        deleteMany: {
+          args: Prisma.GatewayConfigDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GatewayConfigUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GatewayConfigUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayConfigPayload>[]
+        }
+        upsert: {
+          args: Prisma.GatewayConfigUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GatewayConfigPayload>
+        }
+        aggregate: {
+          args: Prisma.GatewayConfigAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGatewayConfig>
+        }
+        groupBy: {
+          args: Prisma.GatewayConfigGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GatewayConfigGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GatewayConfigCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GatewayConfigCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1199,9 +1274,9 @@ export const ProfileScalarFieldEnum = {
   plan: 'plan',
   role: 'role',
   status: 'status',
-  planExpiry: 'planExpiry',
   deviceLimit: 'deviceLimit',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  planExpiry: 'planExpiry'
 } as const
 
 export type ProfileScalarFieldEnum = (typeof ProfileScalarFieldEnum)[keyof typeof ProfileScalarFieldEnum]
@@ -1317,12 +1392,12 @@ export type AppSettingsScalarFieldEnum = (typeof AppSettingsScalarFieldEnum)[key
 export const LoginLogScalarFieldEnum = {
   id: 'id',
   profileId: 'profileId',
-  email: 'email',
   status: 'status',
   ipAddress: 'ipAddress',
+  createdAt: 'createdAt',
   device: 'device',
-  loginTime: 'loginTime',
-  createdAt: 'createdAt'
+  email: 'email',
+  loginTime: 'loginTime'
 } as const
 
 export type LoginLogScalarFieldEnum = (typeof LoginLogScalarFieldEnum)[keyof typeof LoginLogScalarFieldEnum]
@@ -1342,6 +1417,22 @@ export const SyncLogScalarFieldEnum = {
 } as const
 
 export type SyncLogScalarFieldEnum = (typeof SyncLogScalarFieldEnum)[keyof typeof SyncLogScalarFieldEnum]
+
+
+export const GatewayConfigScalarFieldEnum = {
+  id: 'id',
+  gateway: 'gateway',
+  enabled: 'enabled',
+  serverKey: 'serverKey',
+  clientKey: 'clientKey',
+  publishableKey: 'publishableKey',
+  mode: 'mode',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GatewayConfigScalarFieldEnum = (typeof GatewayConfigScalarFieldEnum)[keyof typeof GatewayConfigScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1441,20 +1532,6 @@ export type ListEnumUserStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 
 
 /**
- * Reference to a field of type 'DateTime'
- */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
-    
-
-
-/**
- * Reference to a field of type 'DateTime[]'
- */
-export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
-    
-
-
-/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -1465,6 +1542,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime[]'
+ */
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
     
 
 
@@ -1635,6 +1726,7 @@ export type GlobalOmitConfig = {
   appSettings?: Prisma.AppSettingsOmit
   loginLog?: Prisma.LoginLogOmit
   syncLog?: Prisma.SyncLogOmit
+  gatewayConfig?: Prisma.GatewayConfigOmit
 }
 
 /* Types for Logging */

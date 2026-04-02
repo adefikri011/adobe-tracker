@@ -1,5 +1,5 @@
 const MidtransClient = require("midtrans-client");
-import { getGatewayConfig, getEnvFallback } from "../../app/lib/gateway-config";
+import { getGatewayConfig, getEnvFallback } from "../gateway-config";
 
 // Initialize with environment variables as fallback
 let fallbackConfig = {

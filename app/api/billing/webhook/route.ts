@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getGatewayConfig, getEnvFallback } from "@/lib/gateway-config";
 import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
@@ -9,7 +10,14 @@ export async function POST(req: NextRequest) {
 
     // 1. Verifikasi Signature Key
     const { order_id, status_code, gross_amount, signature_key, transaction_status } = body;
-    const serverKey = process.env.MIDTRANS_SERVER_KEY!;
+    
+    // Get Midtrans config from DB, fallback to env
+    const midtransConfig = await getGatewayConfig("midtrans") || getEnvFallback("midtrans");
+    if (!midtransConfig) {
+      return NextResponse.json({ error: "Midtrans not configured" }, { status: 500 });
+    }
+    
+    const serverKey = midtransConfig.serverKey;
     
     console.log("🔍 Webhook Data Received:", { order_id, status_code, gross_amount });
     
