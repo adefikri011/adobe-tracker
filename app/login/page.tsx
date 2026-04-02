@@ -112,11 +112,11 @@ export default function LoginPage() {
         return;
       }
 
-      setSuspendSecondsLeft(minutes ? parseInt(minutes, 10) * 60 : 300);
+      setSuspendSecondsLeft(minutes ? parseInt(minutes, 10) * 60 : 1800);
     };
 
     if (errorType === "double_login") {
-      const fallbackSeconds = getSecondsFromUntil(until) || (minutes ? parseInt(minutes, 10) * 60 : 300);
+      const fallbackSeconds = getSecondsFromUntil(until) || (minutes ? parseInt(minutes, 10) * 60 : 1800);
       const msg = minutes
         ? `Account detected login from a second device. For security, this account is temporarily blocked for ${minutes} minutes.`
         : "Account detected login from a second device. For security, this account is temporarily blocked.";
@@ -128,7 +128,7 @@ export default function LoginPage() {
     }
 
     if (errorType === "suspended") {
-      const fallbackSeconds = getSecondsFromUntil(until) || (minutes ? parseInt(minutes, 10) * 60 : 300);
+      const fallbackSeconds = getSecondsFromUntil(until) || (minutes ? parseInt(minutes, 10) * 60 : 1800);
       const msg = minutes
         ? `Your account is currently suspended. Please wait ${minutes} more minutes.`
         : "Your account is currently suspended.";
@@ -146,7 +146,7 @@ export default function LoginPage() {
     }
 
     if (errorType === "device_conflict") {
-      const fallbackSeconds = getSecondsFromUntil(until) || (minutes ? parseInt(minutes, 10) * 60 : 300);
+      const fallbackSeconds = getSecondsFromUntil(until) || (minutes ? parseInt(minutes, 10) * 60 : 1800);
       const msg = minutes
         ? `Your session on this device has been terminated because the account was found active on another device. Account is temporarily blocked for ${minutes} minutes.`
         : "Your session on this device has been terminated because the account was found active on another device.";
@@ -229,7 +229,7 @@ export default function LoginPage() {
           setSuspendMsg(data.message);
           const fromApiUntil = getSecondsFromUntil(data.suspendedUntil ?? null);
           const fromApiMinutes = data.minutesLeft ? Number(data.minutesLeft) * 60 : 0;
-          const nextSeconds = fromApiUntil || fromApiMinutes || 300;
+          const nextSeconds = fromApiUntil || fromApiMinutes || 1800;
           setSuspendFlowActive(true);
           setSuspendSecondsLeft(nextSeconds);
           setShowSuspendModal(true);

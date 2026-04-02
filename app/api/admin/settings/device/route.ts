@@ -24,6 +24,11 @@ export async function GET() {
       });
     }
 
+    console.log("[Device Settings GET] Returning:", {
+      globalMaxDevices: settings.globalMaxDevices,
+      suspendDurationMinutes: settings.suspendDurationMinutes,
+    });
+
     return NextResponse.json({
       globalMaxDevices: settings.globalMaxDevices,
       suspendDurationMinutes: settings.suspendDurationMinutes,
@@ -52,6 +57,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { globalMaxDevices, suspendDurationMinutes } = body;
 
+    console.log("[Device Settings API] Received values:", { globalMaxDevices, suspendDurationMinutes });
+
     if (globalMaxDevices === undefined || suspendDurationMinutes === undefined) {
       return NextResponse.json(
         { error: "globalMaxDevices and suspendDurationMinutes are required" },
@@ -61,6 +68,8 @@ export async function POST(req: NextRequest) {
 
     const newGlobalMaxDevices = Math.max(1, globalMaxDevices);
     const newSuspendMinutes = Math.max(1, suspendDurationMinutes);
+
+    console.log("[Device Settings API] Validated values:", { newGlobalMaxDevices, newSuspendMinutes });
 
     // Update app settings in a transaction
     const settings = await prisma.appSettings.upsert({
@@ -76,6 +85,11 @@ export async function POST(req: NextRequest) {
         globalMaxDevices: newGlobalMaxDevices,
         suspendDurationMinutes: newSuspendMinutes,
       },
+    });
+
+    console.log("[Device Settings API] Saved to DB:", { 
+      globalMaxDevices: settings.globalMaxDevices, 
+      suspendDurationMinutes: settings.suspendDurationMinutes 
     });
 
     // After updating global setting, also update all user profiles that don't have paid plans

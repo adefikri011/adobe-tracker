@@ -2,19 +2,15 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-const GLOBAL_POLICY_ID = "__GLOBAL_DEVICE_POLICY__";
-const DEFAULT_SUSPEND_MINUTES = 5;
+// Note: Device policy is now managed via AppSettings instead of device-policy legacy endpoint
+
+const DEFAULT_SUSPEND_MINUTES = 1; // Default fallback, should always read from AppSettings
 
 type SessionEntry = {
   token: string;
   device: string;
   deviceKey: string;
   createdAt: string;
-};
-
-type PolicyPayload = {
-  maxDevices?: number;
-  suspendMinutes?: number;
 };
 
 function normalizeDeviceKey(userAgent: string) {
@@ -63,26 +59,6 @@ function normalizeDeviceKey(userAgent: string) {
   return `${browserName}-${browserVersion || "0"}-${osName}`.toLowerCase();
 }
 
-function getGlobalPolicy(raw: unknown) {
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
-    return {
-      maxDevices: null as number | null,
-      suspendMinutes: DEFAULT_SUSPEND_MINUTES,
-    };
-  }
-
-  const policy = raw as PolicyPayload;
-  const maxDevices =
-    typeof policy.maxDevices === "number" ? Math.max(1, Math.floor(policy.maxDevices)) : null;
-
-  const suspendMinutes =
-    typeof policy.suspendMinutes === "number"
-      ? Math.max(1, Math.floor(policy.suspendMinutes))
-      : DEFAULT_SUSPEND_MINUTES;
-
-  return { maxDevices, suspendMinutes };
-}
-
 function parseSessionEntries(raw: unknown): SessionEntry[] {
   const rawArray = Array.isArray(raw) ? raw : [];
   return rawArray
@@ -93,13 +69,18 @@ function parseSessionEntries(raw: unknown): SessionEntry[] {
       const createdAt = typeof item.createdAt === "string" ? item.createdAt : new Date().toISOString();
       const token = typeof item.token === "string" ? item.token : "";
       
-      // PENTING: Selalu re-normalize deviceKey saat parse dari DB
-      // Karena session lama mungkin punya deviceKey yang belum normalized
-      const rawDeviceKey =
-        typeof item.deviceKey === "string" && item.deviceKey.length > 0
-          ? item.deviceKey
-          : device;
-      const deviceKey = normalizeDeviceKey(rawDeviceKey);
+      // Use stored deviceKey if it exists and looks normalized (contains "-")
+      // Otherwise fallback to normalizing the full device user agent
+      let deviceKey = "";
+      if (typeof item.deviceKey === "string" && item.deviceKey.length > 0 && item.deviceKey.includes("-")) {
+        // Already normalized from previous sessions
+        deviceKey = item.deviceKey;
+      } else if (typeof item.device === "string") {
+        // Need to normalize from full user agent
+        deviceKey = normalizeDeviceKey(item.device);
+      } else {
+        deviceKey = "unknown-device";
+      }
 
       return {
         token,
@@ -127,6 +108,12 @@ function dedupeByDevice(sessions: SessionEntry[]) {
   const latestByDevice = new Map<string, SessionEntry>();
 
   for (const session of sessions) {
+    // Skip invalid device keys
+    if (session.deviceKey === "unknown-device" || session.deviceKey === "unknown-0-unknown-os") {
+      console.log("[LOGIN] Skipping invalid device key:", session.deviceKey);
+      continue;
+    }
+
     const existing = latestByDevice.get(session.deviceKey);
     if (!existing) {
       latestByDevice.set(session.deviceKey, session);
@@ -194,12 +181,21 @@ export async function POST(req: Request) {
       where: { id: userId },
     });
 
-    const globalPolicyRow = await prisma.userSession.findUnique({
-      where: { id: GLOBAL_POLICY_ID },
-      select: { activeSessions: true },
+    // Read app settings which contains the admin-configured device limits
+    const appSettings = await prisma.appSettings.findUnique({
+      where: { id: "singleton" },
+      select: { 
+        globalMaxDevices: true,
+        suspendDurationMinutes: true,
+      },
     });
-    const globalPolicy = getGlobalPolicy(globalPolicyRow?.activeSessions);
-    const suspendDurationMinutes = globalPolicy.suspendMinutes;
+    
+    console.log("[LOGIN] AppSettings from DB:", appSettings);
+    
+    const globalMaxDevices = appSettings?.globalMaxDevices || null;
+    const suspendDurationMinutes = appSettings?.suspendDurationMinutes || DEFAULT_SUSPEND_MINUTES;
+
+    console.log("[LOGIN] Using suspendDurationMinutes:", suspendDurationMinutes, "DEFAULT_SUSPEND_MINUTES:", DEFAULT_SUSPEND_MINUTES);
 
     // 3. CEK APAKAH SUSPENSION TIME SUDAH EXPIRED
     if (sessionRecord?.suspendedUntil && sessionRecord.suspendedUntil <= new Date()) {
@@ -266,12 +262,17 @@ export async function POST(req: Request) {
 
     // 6. CEK DEVICE LIMIT - hitung berdasarkan UNIQUE DEVICE
     const parsedSessions = parseSessionEntries(sessionRecord?.activeSessions);
+    console.log("[LOGIN] Parsed Sessions:", parsedSessions.length, parsedSessions.map(s => s.deviceKey));
+    
     const recentSessions = keepRecentSessions(parsedSessions);
+    console.log("[LOGIN] Recent Sessions (30 days):", recentSessions.length, recentSessions.map(s => s.deviceKey));
+    
     const uniqueSessions = dedupeByDevice(recentSessions);
+    console.log("[LOGIN] Unique Sessions (after dedup):", uniqueSessions.length, uniqueSessions.map(s => s.deviceKey));
 
-    // Jika admin set global maxDevices, pakai untuk semua user
+    // Gunakan global setting dari admin, atau fallback ke user individual limit
     const perUserLimit = Math.max(1, profile.deviceLimit || 1);
-    const deviceLimit = globalPolicy.maxDevices ?? perUserLimit;
+    const deviceLimit = globalMaxDevices ?? perUserLimit;
 
     const userAgent = req.headers.get("user-agent") || "Unknown Device";
     const currentDeviceKey = normalizeDeviceKey(userAgent);
@@ -285,11 +286,15 @@ export async function POST(req: Request) {
     console.log("Existing Device Index:", existingDeviceIndex);
     console.log("Unique Sessions Count:", uniqueSessions.length);
     console.log("Device Limit:", deviceLimit);
+    console.log("Suspend Duration Minutes:", suspendDurationMinutes);
     console.log("All Session Device Keys:", uniqueSessions.map(s => s.deviceKey));
     console.log("===================");
 
     if (existingDeviceIndex === -1 && uniqueSessions.length >= deviceLimit) {
       const suspendTime = new Date(Date.now() + suspendDurationMinutes * 60 * 1000);
+
+      console.log("[LOGIN] 🔒 SUSPENDING - New device beyond limit");
+      console.log("[LOGIN] Suspend until:", suspendTime.toISOString());
 
       await Promise.all([
         prisma.profile.update({
@@ -309,6 +314,8 @@ export async function POST(req: Request) {
           },
         }),
       ]);
+
+      console.log("[LOGIN] ✅ Profile status = suspended, UserSession.suspendedUntil = set");
 
       await supabase.auth.signOut();
 
@@ -335,6 +342,8 @@ export async function POST(req: Request) {
       updatedSessions.push(newSession);
     }
 
+    console.log("[LOGIN] Updated Sessions to save:", updatedSessions.length, updatedSessions.map(s => s.deviceKey));
+
     await prisma.userSession.upsert({
       where: { id: userId },
       update: {
@@ -347,6 +356,8 @@ export async function POST(req: Request) {
         suspendedUntil: null,
       },
     });
+
+    console.log("[LOGIN] ✅ Login successful - session updated");
 
     const redirectTo = profile.role === "admin" ? "/admin" : "/dashboard";
 

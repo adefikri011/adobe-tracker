@@ -82,12 +82,13 @@ export async function POST(req: NextRequest) {
             paidAt: new Date()
           }, 
         }),
-        // Update Profile User ke 'pro' & set planExpiry
+        // Update Profile User ke 'pro' & set planExpiry & deviceLimit
         prisma.profile.update({
           where: { id: transaction.profileId },
           data: { 
             plan: "pro", 
-            planExpiry: expiryDate // Field baru di Profile kamu
+            planExpiry: expiryDate, // Field baru di Profile kamu
+            deviceLimit: transaction.plan.deviceLimit || 1, // Update device limit sesuai plan
           },
         }),
         // Buat record di tabel Subscription

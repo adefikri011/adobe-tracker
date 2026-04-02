@@ -10,6 +10,7 @@ interface Plan {
   finalPrice: number;
   discount: number;
   durationDays: number;
+  deviceLimit: number;
   features: string[];
   isActive: boolean;
 }
@@ -25,7 +26,7 @@ export default function PlansPage() {
   const [currencySettings, setCurrencySettings] = useState<CurrencySettings | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  const [editData, setEditData] = useState({ price: "", discount: "" });
+  const [editData, setEditData] = useState({ price: "", discount: "", deviceLimit: "" });
   const [showAddFeature, setShowAddFeature] = useState<string | null>(null);
   const [newFeature, setNewFeature] = useState("");
 
@@ -36,6 +37,7 @@ export default function PlansPage() {
     price: 0,
     durationDays: 1,
     discount: 0,
+    deviceLimit: 1,
   });
 
   // Fetch currency settings
@@ -78,10 +80,11 @@ export default function PlansPage() {
       if (res.ok) {
         fetchPlans();
         setIsAdding(false);
-        setNewPlanForm({ name: "", slug: "", price: 0, durationDays: 1, discount: 0 });
+        setNewPlanForm({ name: "", slug: "", price: 0, durationDays: 1, discount: 0, deviceLimit: 1 });
+        alert("✅ Plan created successfully");
       }
     } catch (err) {
-      alert("Gagal menambah plan");
+      alert("Failed to add plan");
     }
   };
 
@@ -94,15 +97,19 @@ export default function PlansPage() {
           id,
           price: parseFloat(editData.price),
           discount: parseFloat(editData.discount),
+          deviceLimit: parseInt(editData.deviceLimit),
         }),
       });
       if (res.ok) {
         const data = await res.json();
         setPlans(plans.map(p => p.id === id ? data.plan : p));
         setEditing(null);
+        if (data.syncedProfiles > 0) {
+          alert(`✅ Plan updated and synced to ${data.syncedProfiles} active subscribers!`);
+        }
       }
     } catch (err) {
-      alert("Gagal update");
+      alert("Failed to update plan");
     }
   };
 
@@ -210,6 +217,10 @@ export default function PlansPage() {
                 <input type="number" placeholder="Price" className="w-1/2 border rounded-lg p-2 text-sm" onChange={e => setNewPlanForm({...newPlanForm, price: parseFloat(e.target.value)})} />
                 <input type="number" placeholder="Days" className="w-1/2 border rounded-lg p-2 text-sm" onChange={e => setNewPlanForm({...newPlanForm, durationDays: parseInt(e.target.value)})} />
               </div>
+              <div className="flex gap-4">
+                <input type="number" placeholder="Max Devices" min="1" max="20" className="w-1/2 border rounded-lg p-2 text-sm" onChange={e => setNewPlanForm({...newPlanForm, deviceLimit: parseInt(e.target.value) || 1})} />
+                <input type="number" placeholder="Discount %" className="w-1/2 border rounded-lg p-2 text-sm" onChange={e => setNewPlanForm({...newPlanForm, discount: parseFloat(e.target.value) || 0})} />
+              </div>
               <button onClick={handleAddPlan} className="w-full bg-orange-500 text-white py-2 rounded-lg font-bold">Create Plan</button>
             </div>
           </div>
@@ -228,10 +239,14 @@ export default function PlansPage() {
                     {plan.isActive ? "Active" : "Inactive"}
                   </span>
                   <h3 className="font-bold text-slate-900 mt-2">{plan.name}</h3>
-                  <p className="text-xs text-slate-400">{plan.durationDays} Days</p>
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <span>{plan.durationDays} Days</span>
+                    <span>•</span>
+                    <span>📱 {plan.deviceLimit} Device{plan.deviceLimit !== 1 ? 's' : ''}</span>
+                  </div>
                 </div>
                 <div className="flex gap-1.5">
-                  <button onClick={() => { setEditing(plan.id); setEditData({price: String(plan.price), discount: String(plan.discount)}) }} className="p-1.5 rounded-lg hover:bg-orange-50 text-slate-400 hover:text-orange-500 transition"><Pencil size={14} /></button>
+                  <button onClick={() => { setEditing(plan.id); setEditData({price: String(plan.price), discount: String(plan.discount), deviceLimit: String(plan.deviceLimit)}) }} className="p-1.5 rounded-lg hover:bg-orange-50 text-slate-400 hover:text-orange-500 transition"><Pencil size={14} /></button>
                   <button onClick={() => handleToggleActive(plan.id, plan.isActive)} className={`p-1.5 rounded-lg transition ${plan.isActive ? "hover:bg-red-50 text-slate-400 hover:text-red-500" : "hover:bg-green-50 text-slate-400 hover:text-green-500"}`}>
                     <Trash2 size={14} />
                   </button>
@@ -247,6 +262,11 @@ export default function PlansPage() {
                   <div>
                     <label className="text-xs text-slate-500 block mb-1">Discount %</label>
                     <input type="number" value={editData.discount} onChange={e => setEditData({...editData, discount: e.target.value})} className="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Discount %" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-500 block mb-1">Max Devices 📱</label>
+                    <input type="number" min="1" max="20" value={editData.deviceLimit} onChange={e => setEditData({...editData, deviceLimit: e.target.value})} className="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Max devices" />
+                    <p className="text-xs text-slate-400 mt-1">Subscribers to this plan will get this device limit</p>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => handleSaveEdit(plan.id)} className="flex-1 bg-orange-500 text-white py-1.5 rounded-lg text-sm">Save</button>

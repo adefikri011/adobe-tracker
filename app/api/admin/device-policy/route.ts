@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const GLOBAL_POLICY_ID = "__GLOBAL_DEVICE_POLICY__";
-const DEFAULT_SUSPEND_MINUTES = 5;
+const DEFAULT_SUSPEND_MINUTES = 30; // Should read from AppSettings instead
 
 type PolicyPayload = {
   maxDevices?: number;
@@ -17,7 +17,7 @@ function normalizePolicy(payload: PolicyPayload) {
   const hasSuspendMinutes = typeof payload.suspendMinutes === "number";
   const suspendMinutes = hasSuspendMinutes
     ? Math.max(1, Math.floor(payload.suspendMinutes!))
-    : DEFAULT_SUSPEND_MINUTES;
+    : 30; // Default from AppSettings schema
 
   return {
     maxDevices,

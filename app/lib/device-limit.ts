@@ -2,7 +2,7 @@ import { prisma } from "./prisma";
 
 /**
  * Get the effective device limit for a user
- * Priority: Plan Device Limit > Individual Override > Global Setting
+ * Priority: Active Plan Device Limit > Individual Override > Global Setting
  */
 export async function getUserDeviceLimit(userId: string): Promise<number> {
   try {
@@ -23,19 +23,25 @@ export async function getUserDeviceLimit(userId: string): Promise<number> {
       return 1; // default fallback
     }
 
-    // 2. Check if user has active subscription with plan device limit
+    // 2. Check if user has ACTIVE subscription (not expired) with plan device limit
     if (profile.subscriptions.length > 0) {
-      const activePlan = profile.subscriptions[0].plan;
-      if (activePlan && activePlan.deviceLimit && activePlan.deviceLimit > 0) {
-        // If user has individual override, use whichever is higher
-        if (profile.deviceLimit && profile.deviceLimit > activePlan.deviceLimit) {
-          return profile.deviceLimit;
+      const subscription = profile.subscriptions[0];
+      const now = new Date();
+
+      // Check if subscription is still valid (not expired)
+      if (subscription.endDate > now) {
+        const planLimit = subscription.plan.deviceLimit || 0;
+        if (planLimit > 0) {
+          // Return whichever is higher: plan limit or individual override
+          if (profile.deviceLimit && profile.deviceLimit > planLimit) {
+            return profile.deviceLimit;
+          }
+          return planLimit;
         }
-        return activePlan.deviceLimit;
       }
     }
 
-    // 3. Check individual override
+    // 3. Check individual override (but only if > 0)
     if (profile.deviceLimit && profile.deviceLimit > 0) {
       return profile.deviceLimit;
     }

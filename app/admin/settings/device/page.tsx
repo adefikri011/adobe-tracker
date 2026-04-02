@@ -26,6 +26,8 @@ export default function DeviceLimitPage() {
         }
 
         const data = await res.json();
+        console.log("[Admin] Loaded settings from API:", data);
+        
         if (!isMounted) {
           return;
         }
@@ -60,14 +62,18 @@ export default function DeviceLimitPage() {
     setError("");
     setUpdatedCount(0);
 
+    const payload = {
+      globalMaxDevices: Math.max(1, Math.floor(globalMaxDevices)),
+      suspendDurationMinutes: Math.max(1, Math.floor(suspendDurationMinutes)),
+    };
+
+    console.log("[Admin] Sending to API:", payload);
+
     try {
       const res = await fetch("/api/admin/settings/device", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          globalMaxDevices: Math.max(1, Math.floor(globalMaxDevices)),
-          suspendDurationMinutes: Math.max(1, Math.floor(suspendDurationMinutes)),
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -75,10 +81,12 @@ export default function DeviceLimitPage() {
       }
 
       const data = await res.json();
+      console.log("[Admin] Response from API:", data);
       setUpdatedCount(data.updatedProfileCount || 0);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
+      console.error("[Admin] Error:", err);
       setError(err.message || "Failed to save settings. Please try again.");
     } finally {
       setSaving(false);

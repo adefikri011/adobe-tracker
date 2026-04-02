@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, slug, description, price, discount, durationDays, features } = body;
+    const { name, slug, description, price, discount, durationDays, features, deviceLimit } = body;
 
     // Hitung final price secara otomatis di backend
     const priceNum = Number(price);
@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
         finalPrice: Math.round(finalPrice * 100) / 100,
         durationDays: Number(durationDays),
         features: features || [],
+        deviceLimit: Math.max(1, Number(deviceLimit) || 1),
         isActive: true,
       },
     });
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// 3. PATCH: Update Data Plan (Harga, Diskon, Fitur, atau Status Aktif)
+// 3. PATCH: Update Data Plan (Harga, Diskon, Fitur, Device Limit, atau Status Aktif)
 export async function PATCH(req: NextRequest) {
   try {
     if (!(await isAdmin())) {
@@ -80,18 +81,56 @@ export async function PATCH(req: NextRequest) {
 
     if (!id) return NextResponse.json({ error: "ID wajib ada" }, { status: 400 });
 
+    // Get current plan to check if deviceLimit is changing
+    const currentPlan = await prisma.plan.findUnique({ where: { id } });
+    const oldDeviceLimit = currentPlan?.deviceLimit;
+    const newDeviceLimit = updateData.deviceLimit !== undefined ? Number(updateData.deviceLimit) : oldDeviceLimit;
+
     // Jika harga atau diskon diupdate, hitung ulang finalPrice
     if (updateData.price !== undefined || updateData.discount !== undefined) {
-      const currentPlan = await prisma.plan.findUnique({ where: { id } });
       const price = updateData.price ?? currentPlan?.price ?? 0;
       const discount = updateData.discount ?? currentPlan?.discount ?? 0;
       updateData.finalPrice = Math.round((price - (price * discount) / 100) * 100) / 100;
+    }
+
+    // Ensure deviceLimit is valid
+    if (updateData.deviceLimit !== undefined) {
+      updateData.deviceLimit = Math.max(1, Number(updateData.deviceLimit));
     }
 
     const updatedPlan = await prisma.plan.update({
       where: { id },
       data: updateData,
     });
+
+    // Jika deviceLimit berubah, sinkronisasi semua user dengan subscription aktif ke plan ini
+    if (newDeviceLimit !== oldDeviceLimit && updateData.deviceLimit !== undefined) {
+      const usersWithSubscription = await prisma.subscription.findMany({
+        where: {
+          planId: id,
+          status: "active",
+          endDate: {
+            gt: new Date(), // Hanya yang belum expired
+          },
+        },
+        select: { profileId: true },
+      });
+
+      const profileIds = usersWithSubscription.map(s => s.profileId);
+
+      if (profileIds.length > 0) {
+        await prisma.profile.updateMany({
+          where: { id: { in: profileIds } },
+          data: { deviceLimit: newDeviceLimit },
+        });
+      }
+
+      return NextResponse.json({ 
+        plan: updatedPlan,
+        message: `Plan updated and synced to ${profileIds.length} active subscribers`,
+        syncedProfiles: profileIds.length,
+      });
+    }
 
     return NextResponse.json({ plan: updatedPlan });
   } catch (error: any) {

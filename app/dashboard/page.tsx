@@ -11,7 +11,7 @@ import { ResultsSection } from "./_components/ResultsSection";
 import { PaymentModal } from "./_components/PaymentModal";
 import { Asset } from "./_components/ResultCard";
 
-const SUSPEND_TEST_MINUTES = 5;
+const SUSPEND_TEST_MINUTES = 30; // Default fallback, actual value comes from API
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const [isPro, setIsPro] = useState(false);
   const [planLoading, setPlanLoading] = useState(true);
   const [showPayment, setShowPayment] = useState(false);
+  const [suspendDurationMinutes, setSuspendDurationMinutes] = useState(SUSPEND_TEST_MINUTES);
 
   useEffect(() => {
     fetch("/api/user/plan")
@@ -50,13 +51,28 @@ export default function DashboardPage() {
 
         if (res.status === 401) {
           isRedirecting = true;
-          window.location.href = `/login?error=device_conflict&minutes=${SUSPEND_TEST_MINUTES}`;
+          let minutes = suspendDurationMinutes || SUSPEND_TEST_MINUTES;
+          try {
+            const data = await res.json();
+            if (typeof data?.suspendDurationMinutes === "number") {
+              minutes = data.suspendDurationMinutes;
+              setSuspendDurationMinutes(data.suspendDurationMinutes);
+            }
+          } catch {
+            // Keep fallback if body is empty or invalid JSON.
+          }
+          window.location.href = `/login?error=device_conflict&minutes=${minutes}`;
           return;
         }
 
         if (!res.ok) return;
 
         const data = await res.json();
+
+        // Update suspendDurationMinutes from API if available
+        if (typeof data.suspendDurationMinutes === "number") {
+          setSuspendDurationMinutes(data.suspendDurationMinutes);
+        }
 
         if (data.status === "suspended") {
           isRedirecting = true;
@@ -68,7 +84,9 @@ export default function DashboardPage() {
 
         if (data.status === "session_revoked") {
           isRedirecting = true;
-          window.location.href = `/login?error=device_conflict&minutes=${SUSPEND_TEST_MINUTES}`;
+          // Use suspendDurationMinutes from API response
+          const minutes = data.suspendDurationMinutes || SUSPEND_TEST_MINUTES;
+          window.location.href = `/login?error=device_conflict&minutes=${minutes}`;
         }
       } catch (error) {
         console.error("Session polling failed:", error);

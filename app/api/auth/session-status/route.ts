@@ -45,6 +45,13 @@ export async function GET() {
   const supabase = await createServerSupabaseClient();
 
   try {
+    // Read AppSettings once so every response (including 401) can carry consistent duration.
+    const appSettings = await prisma.appSettings.findUnique({
+      where: { id: "singleton" },
+      select: { suspendDurationMinutes: true },
+    });
+    const suspendDurationMinutes = appSettings?.suspendDurationMinutes || 30;
+
     const [{ data: userData }, { data: sessionData }] = await Promise.all([
       supabase.auth.getUser(),
       supabase.auth.getSession(),
@@ -54,7 +61,10 @@ export async function GET() {
     const accessToken = sessionData.session?.access_token;
 
     if (!user || !accessToken) {
-      return NextResponse.json({ status: "unauthenticated" }, { status: 401 });
+      return NextResponse.json(
+        { status: "unauthenticated", suspendDurationMinutes },
+        { status: 401 }
+      );
     }
 
     const sessionRecord = await prisma.userSession.findUnique({
@@ -75,6 +85,7 @@ export async function GET() {
         secondsLeft,
         minutesLeft,
         suspendedUntil: sessionRecord.suspendedUntil.toISOString(),
+        suspendDurationMinutes,
       });
     }
 
@@ -99,10 +110,14 @@ export async function GET() {
 
       return NextResponse.json({
         status: "session_revoked",
+        suspendDurationMinutes,
       });
     }
 
-    return NextResponse.json({ status: "ok" });
+    return NextResponse.json({ 
+      status: "ok",
+      suspendDurationMinutes,
+    });
   } catch (error) {
     console.error("Session status check error:", error);
     return NextResponse.json({ status: "error" }, { status: 500 });

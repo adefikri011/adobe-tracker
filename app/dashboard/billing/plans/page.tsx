@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Check, Zap, Loader2, ChevronDown } from "lucide-react";
+import { Check, Zap, Loader2, ChevronDown, X } from "lucide-react";
 import { Navbar } from "../../_components/Navbar";
 
 interface Plan {
@@ -32,13 +32,195 @@ const faqs = [
   },
 ];
 
+// Payment Details Modal Component
+interface PaymentDetailsModalProps {
+  plan: Plan;
+  currency: string;
+  exchangeRate: number;
+  selectedPaymentMethod: string;
+  onPaymentMethodChange: (method: string) => void;
+  onConfirm: () => void;
+  onClose: () => void;
+  isLoading: boolean;
+}
+
+const PaymentDetailsModal: React.FC<PaymentDetailsModalProps> = ({
+  plan,
+  currency,
+  exchangeRate,
+  selectedPaymentMethod,
+  onPaymentMethodChange,
+  onConfirm,
+  onClose,
+  isLoading,
+}) => {
+  const formatPrice = (priceUSD: number): string => {
+    if (currency === "IDR") {
+      const idrPrice = priceUSD * exchangeRate;
+      return `Rp ${Math.round(idrPrice).toLocaleString("id-ID")}`;
+    }
+    return `$${priceUSD}`;
+  };
+
+  const paymentMethods = [
+    { id: "credit_card", label: "Credit/Debit Card", icon: "💳" },
+    { id: "bank_transfer", label: "Bank Transfer", icon: "🏦" },
+    { id: "e_wallet", label: "E-Wallet (OVO/DANA)", icon: "📱" },
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 sm:px-8 py-4 sm:py-5 flex items-center justify-between">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900">Order Summary</h2>
+          <button
+            onClick={onClose}
+            disabled={isLoading}
+            className="p-2 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+          >
+            <X size={20} className="text-slate-400" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="px-6 sm:px-8 py-6 sm:py-8 space-y-8">
+          
+          {/* Order Summary Section */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider">Order Details</h3>
+            
+            <div className="bg-slate-50 rounded-xl p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-600">Plan:</span>
+                <span className="font-bold text-slate-900">{plan.name}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-600">Duration:</span>
+                <span className="font-bold text-slate-900">{plan.durationDays} days</span>
+              </div>
+              {plan.discount > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Discount:</span>
+                  <span className="font-bold text-emerald-600">-{plan.discount}%</span>
+                </div>
+              )}
+              <div className="border-t border-slate-200 pt-3 flex items-center justify-between">
+                <span className="font-bold text-slate-900">Total Price:</span>
+                <span className="text-2xl font-black text-orange-500">
+                  {formatPrice(plan.finalPrice)}
+                </span>
+              </div>
+            </div>
+
+            {/* Features List */}
+            {plan.features.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wider">What's Included</h4>
+                <div className="space-y-2">
+                  {plan.features.map((feature, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <Check size={16} className="text-emerald-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Payment Method Selection */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider">Payment Method</h3>
+            
+            <div className="space-y-3">
+              {paymentMethods.map((method) => (
+                <label
+                  key={method.id}
+                  className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                    selectedPaymentMethod === method.id
+                      ? "border-orange-500 bg-orange-50"
+                      : "border-slate-200 hover:border-orange-200 bg-white"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="payment-method"
+                    value={method.id}
+                    checked={selectedPaymentMethod === method.id}
+                    onChange={(e) => onPaymentMethodChange(e.target.value)}
+                    disabled={isLoading}
+                    className="w-5 h-5 text-orange-500 cursor-pointer"
+                  />
+                  <div className="flex items-center gap-3 flex-1">
+                    <span className="text-xl">{method.icon}</span>
+                    <span className="font-bold text-slate-900">{method.label}</span>
+                  </div>
+                  {selectedPaymentMethod === method.id && (
+                    <Check size={20} className="text-orange-500" />
+                  )}
+                </label>
+              ))}
+            </div>
+
+            <p className="text-xs text-slate-500 mt-3">
+              💡 All payments are securely processed through <strong>Midtrans</strong>
+            </p>
+          </div>
+
+          {/* Security Note */}
+          <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
+            <span className="text-lg flex-shrink-0">🔒</span>
+            <p className="text-xs sm:text-sm text-slate-700">
+              Your payment information is <strong>100% secure</strong> and encrypted. No card details are stored on our servers.
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={onClose}
+              disabled={isLoading}
+              className="flex-1 py-3 px-4 rounded-xl border border-slate-200 text-slate-900 font-bold hover:bg-slate-50 transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={isLoading}
+              className="flex-1 py-3 px-4 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin" size={16} />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Zap size={16} fill="currentColor" />
+                  Continue to Payment
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function UserPlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [processId, setProcessId] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [currency, setCurrency] = useState<string>("USD");
   const [exchangeRate, setExchangeRate] = useState<number>(15800);
+  
+  // Payment Details Modal States
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("credit_card");
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   useEffect(() => {
     // Fetch currency settings
@@ -74,24 +256,47 @@ export default function UserPlansPage() {
   }, []);
 
   const handleCheckout = async (planId: string) => {
-    setProcessId(planId);
+    // Find the plan
+    const plan = plans.find(p => p.id === planId);
+    if (!plan) return;
+    
+    // Open payment details modal instead of directly checking out
+    setSelectedPlan(plan);
+    setShowPaymentModal(true);
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!selectedPlan) return;
+    
+    setIsProcessingPayment(true);
     try {
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
-        body: JSON.stringify({ planId }),
+        body: JSON.stringify({ 
+          planId: selectedPlan.id,
+          paymentMethod: selectedPaymentMethod 
+        }),
       });
       const data = await res.json();
       if (data.token) {
+        setShowPaymentModal(false);
         // @ts-ignore
         window.snap.pay(data.token, {
           onSuccess: () => (window.location.href = "/admin/billing/history"),
           onPending: () => alert("Pembayaran tertunda"),
           onError: () => alert("Pembayaran gagal"),
-          onClose: () => setProcessId(null),
+          onClose: () => {
+            setIsProcessingPayment(false);
+            setSelectedPlan(null);
+          },
         });
+      } else {
+        alert("Gagal membuat transaksi");
       }
-    } catch {
-      setProcessId(null);
+    } catch (error) {
+      console.error(error);
+      alert("Error memproses pembayaran");
+      setIsProcessingPayment(false);
     }
   };
 
@@ -265,14 +470,14 @@ export default function UserPlansPage() {
                   {/* CTA */}
                   <button
                     onClick={() => handleCheckout(plan.id)}
-                    disabled={processId === plan.id}
+                    disabled={showPaymentModal || isProcessingPayment}
                     className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 mt-auto disabled:opacity-50 ${
                       isPopular
                         ? "bg-orange-500 hover:bg-orange-400 text-white shadow-lg shadow-orange-500/20"
                         : "bg-slate-900 hover:bg-orange-500 text-white"
                     }`}
                   >
-                    {processId === plan.id ? (
+                    {isProcessingPayment ? (
                       <Loader2 className="animate-spin" size={16} />
                     ) : (
                       <>
@@ -326,6 +531,20 @@ export default function UserPlansPage() {
             </div>
           ))}
         </div>
+
+        {/* Payment Details Modal */}
+        {showPaymentModal && selectedPlan && (
+          <PaymentDetailsModal
+            plan={selectedPlan}
+            currency={currency}
+            exchangeRate={exchangeRate}
+            selectedPaymentMethod={selectedPaymentMethod}
+            onPaymentMethodChange={setSelectedPaymentMethod}
+            onConfirm={handleConfirmPayment}
+            onClose={() => setShowPaymentModal(false)}
+            isLoading={isProcessingPayment}
+          />
+        )}
 
       </main>
     </div>
