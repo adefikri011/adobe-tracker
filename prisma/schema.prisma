@@ -130,7 +130,7 @@ model LoginLog {
   id        String   @id @default(cuid())
   profileId String?
   status    String   @default("success")
-  ipAddress String?
+  ipAddress String? 
   createdAt DateTime @default(now())
   device    String?
   email     String

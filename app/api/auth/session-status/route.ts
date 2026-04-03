@@ -67,9 +67,15 @@ export async function GET() {
       );
     }
 
-    const sessionRecord = await prisma.userSession.findUnique({
-      where: { id: user.id },
-    });
+    const [sessionRecord, profile] = await Promise.all([
+      prisma.userSession.findUnique({
+        where: { id: user.id },
+      }),
+      prisma.profile.findUnique({
+        where: { id: user.id },
+        select: { status: true },
+      }),
+    ]);
 
     const now = new Date();
 
@@ -77,6 +83,13 @@ export async function GET() {
       const diffMs = sessionRecord.suspendedUntil.getTime() - now.getTime();
       const secondsLeft = Math.max(0, Math.ceil(diffMs / 1000));
       const minutesLeft = Math.ceil(diffMs / 60000);
+
+      if (profile?.status !== "suspended") {
+        await prisma.profile.update({
+          where: { id: user.id },
+          data: { status: "suspended" },
+        });
+      }
 
       await supabase.auth.signOut();
 
@@ -106,10 +119,37 @@ export async function GET() {
     const hasCurrentToken = activeSessions.some((session) => session.token === accessToken);
 
     if (!hasCurrentToken) {
+      const suspendedUntil = new Date(Date.now() + suspendDurationMinutes * 60 * 1000);
+      const diffMs = suspendedUntil.getTime() - now.getTime();
+      const secondsLeft = Math.max(0, Math.ceil(diffMs / 1000));
+      const minutesLeft = Math.ceil(diffMs / 60000);
+
+      await Promise.all([
+        prisma.profile.update({
+          where: { id: user.id },
+          data: { status: "suspended" },
+        }),
+        prisma.userSession.upsert({
+          where: { id: user.id },
+          update: {
+            activeSessions: [],
+            suspendedUntil,
+          },
+          create: {
+            id: user.id,
+            activeSessions: [],
+            suspendedUntil,
+          },
+        }),
+      ]);
+
       await supabase.auth.signOut();
 
       return NextResponse.json({
-        status: "session_revoked",
+        status: "suspended",
+        secondsLeft,
+        minutesLeft,
+        suspendedUntil: suspendedUntil.toISOString(),
         suspendDurationMinutes,
       });
     }

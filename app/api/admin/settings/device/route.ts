@@ -92,13 +92,17 @@ export async function POST(req: NextRequest) {
       suspendDurationMinutes: settings.suspendDurationMinutes 
     });
 
-    // After updating global setting, also update all user profiles that don't have paid plans
-    // Get all profiles that don't have active subscriptions with plan device limits
+    const now = new Date();
+
+    // After updating global setting, only update users without an active non-expired plan limit.
     const profilesWithoutPlanLimit = await prisma.profile.findMany({
       where: {
         subscriptions: {
           none: {
             status: "active",
+            endDate: {
+              gt: now,
+            },
             plan: {
               deviceLimit: {
                 gt: 0, // has device limit

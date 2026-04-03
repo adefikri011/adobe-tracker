@@ -135,6 +135,50 @@ export async function POST(req: Request) {
     const { email, password } = await req.json();
     const supabase = await createServerSupabaseClient();
 
+    // Load the account first so we can block suspended users before creating any auth session.
+    const existingProfile = await prisma.profile.findUnique({
+      where: { email },
+      select: { id: true, status: true },
+    });
+
+    const existingSessionBeforeLogin = existingProfile
+      ? await prisma.userSession.findUnique({ where: { id: existingProfile.id } })
+      : null;
+
+    const now = new Date();
+
+    if (existingSessionBeforeLogin?.suspendedUntil && existingSessionBeforeLogin.suspendedUntil > now) {
+      const diffMs = existingSessionBeforeLogin.suspendedUntil.getTime() - now.getTime();
+      const diffMin = Math.max(1, Math.ceil(diffMs / 60000));
+
+      if (existingProfile?.status !== "suspended") {
+        const profileId = existingProfile?.id;
+        if (profileId) {
+        await prisma.profile.update({
+          where: { id: profileId },
+          data: { status: "suspended" },
+        });
+        }
+      }
+
+      console.log("[LOGIN] 🚫 BLOCKED EARLY - Account still suspended, sign-in not attempted");
+      return NextResponse.json({
+        error: "SUSPENDED_BAN",
+        message: `Your account is currently suspended ban. You cannot login until the suspension period ends. Please wait ${diffMin} more minute(s).`,
+        minutesLeft: diffMin,
+        suspendedUntil: existingSessionBeforeLogin.suspendedUntil.toISOString(),
+      }, { status: 403 });
+    }
+
+    if (existingProfile?.status === "suspended") {
+      console.log("[LOGIN] 🚫 BLOCKED EARLY - Profile is suspended, sign-in not attempted");
+      return NextResponse.json({
+        error: "SUSPENDED_BAN",
+        message: "Your account is currently suspended ban. You cannot login until the suspension period ends.",
+        suspendedUntil: existingSessionBeforeLogin?.suspendedUntil?.toISOString(),
+      }, { status: 403 });
+    }
+
     // 1. LOGIN KE SUPABASE AUTH
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
@@ -197,7 +241,23 @@ export async function POST(req: Request) {
 
     console.log("[LOGIN] Using suspendDurationMinutes:", suspendDurationMinutes, "DEFAULT_SUSPEND_MINUTES:", DEFAULT_SUSPEND_MINUTES);
 
-    // 3. CEK APAKAH SUSPENSION TIME SUDAH EXPIRED
+    // SUSPENSION CHECK (FIRST & STRICT): If suspendedUntil > now, REJECT immediately - no exceptions
+    if (sessionRecord?.suspendedUntil && sessionRecord.suspendedUntil > now) {
+      await supabase.auth.signOut();
+
+      const diffMs = sessionRecord.suspendedUntil.getTime() - now.getTime();
+      const diffMin = Math.max(1, Math.ceil(diffMs / 60000));
+
+      console.log("[LOGIN] 🚫 BLOCKED - Account still suspended, cannot login");
+      return NextResponse.json({
+        error: "SUSPENDED_BAN",
+        message: `Your account is currently suspended ban. You cannot login until the suspension period ends. Please wait ${diffMin} more minute(s).`,
+        minutesLeft: diffMin,
+        suspendedUntil: sessionRecord.suspendedUntil.toISOString(),
+      }, { status: 403 });
+    }
+
+    // 3. CEK APAKAH SUSPENSION TIME SUDAH EXPIRED (Auto-clear if safe)
     if (sessionRecord?.suspendedUntil && sessionRecord.suspendedUntil <= new Date()) {
       await Promise.all([
         prisma.profile.update({
@@ -229,7 +289,7 @@ export async function POST(req: Request) {
       sessionRecord = freshSessionRecord;
     }
 
-    // 4. CEK APAKAH USER DALAM STATUS SUSPENDED (Belum Expired)
+    // 4. CEK APAKAH USER DALAM STATUS SUSPENDED (extra safety check)
     if (profile.status === "suspended") {
       await supabase.auth.signOut();
 
@@ -238,25 +298,10 @@ export async function POST(req: Request) {
         : suspendDurationMinutes;
 
       return NextResponse.json({
-        error: "SUSPENDED_ACCOUNT",
-        message: "Your account has been suspended due to unauthorized access attempts. Please contact support for assistance.",
+        error: "SUSPENDED_BAN",
+        message: "Your account is currently suspended ban. You cannot login until the suspension period ends. Please contact support for assistance.",
         minutesLeft: suspendMinutesLeft,
         suspendedUntil: sessionRecord?.suspendedUntil?.toISOString(),
-      }, { status: 403 });
-    }
-
-    // 5. CEK APAKAH SEDANG DALAM MASA SUSPEND (Extra Check)
-    if (sessionRecord?.suspendedUntil && sessionRecord.suspendedUntil > new Date()) {
-      await supabase.auth.signOut();
-
-      const diffMs = sessionRecord.suspendedUntil.getTime() - Date.now();
-      const diffMin = Math.max(1, Math.ceil(diffMs / 60000));
-
-      return NextResponse.json({
-        error: "SUSPENDED",
-        message: `Account is currently suspended due to exceeding device limit. Please wait ${diffMin} more minutes.`,
-        minutesLeft: diffMin,
-        suspendedUntil: sessionRecord.suspendedUntil.toISOString(),
       }, { status: 403 });
     }
 
@@ -270,9 +315,33 @@ export async function POST(req: Request) {
     const uniqueSessions = dedupeByDevice(recentSessions);
     console.log("[LOGIN] Unique Sessions (after dedup):", uniqueSessions.length, uniqueSessions.map(s => s.deviceKey));
 
-    // Gunakan global setting dari admin, atau fallback ke user individual limit
+    const activeSubscription = await prisma.subscription.findFirst({
+      where: {
+        profileId: userId,
+        status: "active",
+        endDate: {
+          gt: now,
+        },
+      },
+      select: {
+        plan: {
+          select: {
+            deviceLimit: true,
+          },
+        },
+      },
+      orderBy: {
+        endDate: "desc",
+      },
+    });
+
     const perUserLimit = Math.max(1, profile.deviceLimit || 1);
-    const deviceLimit = globalMaxDevices ?? perUserLimit;
+    const activePlanLimit = activeSubscription?.plan?.deviceLimit
+      ? Math.max(1, activeSubscription.plan.deviceLimit)
+      : null;
+
+    // Priority: active non-expired plan > global setting > per-user fallback.
+    const deviceLimit = activePlanLimit ?? globalMaxDevices ?? perUserLimit;
 
     const userAgent = req.headers.get("user-agent") || "Unknown Device";
     const currentDeviceKey = normalizeDeviceKey(userAgent);
@@ -344,20 +413,27 @@ export async function POST(req: Request) {
 
     console.log("[LOGIN] Updated Sessions to save:", updatedSessions.length, updatedSessions.map(s => s.deviceKey));
 
-    await prisma.userSession.upsert({
-      where: { id: userId },
-      update: {
-        activeSessions: updatedSessions,
-        suspendedUntil: null,
-      },
-      create: {
-        id: userId,
-        activeSessions: [newSession],
-        suspendedUntil: null,
-      },
-    });
+    // Update both session and profile status to active (if no suspension) to keep db in sync
+    await Promise.all([
+      prisma.userSession.upsert({
+        where: { id: userId },
+        update: {
+          activeSessions: updatedSessions,
+          suspendedUntil: null,
+        },
+        create: {
+          id: userId,
+          activeSessions: [newSession],
+          suspendedUntil: null,
+        },
+      }),
+      prisma.profile.update({
+        where: { id: userId },
+        data: { status: "active" },
+      }),
+    ]);
 
-    console.log("[LOGIN] ✅ Login successful - session updated");
+    console.log("[LOGIN] ✅ Login successful - session updated and status cleared");
 
     const redirectTo = profile.role === "admin" ? "/admin" : "/dashboard";
 

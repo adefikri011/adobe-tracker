@@ -130,8 +130,20 @@ export default function LoginPage() {
     if (errorType === "suspended") {
       const fallbackSeconds = getSecondsFromUntil(until) || (minutes ? parseInt(minutes, 10) * 60 : 1800);
       const msg = minutes
-        ? `Your account is currently suspended. Please wait ${minutes} more minutes.`
-        : "Your account is currently suspended.";
+        ? `Your account is currently under a suspension ban. You CANNOT login until ${minutes} minute(s) have passed. Please wait.`
+        : "Your account is currently under a suspension ban. You cannot login until the suspension period ends.";
+      setSuspendMsg(msg);
+      setSuspendFlowActive(true);
+      setSuspendSecondsLeft(fallbackSeconds);
+      checkAndSetSuspendTime();
+      setShowSuspendModal(true);
+    }
+
+    if (errorType === "suspended_ban") {
+      const fallbackSeconds = getSecondsFromUntil(until) || (minutes ? parseInt(minutes, 10) * 60 : 1800);
+      const msg = minutes
+        ? `Your account is under a suspension ban. You CANNOT login until ${minutes} minute(s) have passed. Please wait.`
+        : "Your account is under a suspension ban. You cannot login until the suspension period ends.";
       setSuspendMsg(msg);
       setSuspendFlowActive(true);
       setSuspendSecondsLeft(fallbackSeconds);

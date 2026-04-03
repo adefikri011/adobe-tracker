@@ -274,6 +274,24 @@ export async function GET(request: Request) {
       where: { id: userId },
     });
 
+    // SUSPENSION CHECK (FIRST & STRICT): If suspendedUntil > now, REJECT immediately - no exceptions
+    const now = new Date();
+    if (existingSession?.suspendedUntil && existingSession.suspendedUntil > now) {
+      if (profile.status !== "suspended") {
+        await prisma.profile.update({
+          where: { id: userId },
+          data: { status: "suspended" },
+        });
+      }
+
+      console.log("[CALLBACK] 🚫 BLOCKED - Account still suspended, cannot login");
+      await supabase.auth.signOut();
+      const diffMs = existingSession.suspendedUntil.getTime() - now.getTime();
+      const diffMin = Math.max(1, Math.ceil(diffMs / 60000));
+      return NextResponse.redirect(`${origin}/login?error=suspended_ban&minutes=${diffMin}`);
+    }
+
+    // Auto-clear suspension if expired
     if (existingSession?.suspendedUntil && existingSession.suspendedUntil <= new Date()) {
         await Promise.all([
           prisma.profile.update({
@@ -300,35 +318,6 @@ export async function GET(request: Request) {
         existingSession = freshSession;
       }
 
-      if (existingSession?.suspendedUntil && existingSession.suspendedUntil > new Date()) {
-        // Log failed login due to suspension
-        try {
-          const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                           request.headers.get('remoteAddress') || 
-                           'unknown';
-          const device = parseDeviceInfo(userAgent);
-          
-          await prisma.loginLog.create({
-            data: {
-              profileId: userId,
-              email: data.user.email || 'unknown',
-              status: 'failed',
-              ipAddress: ipAddress.trim(),
-              device,
-            },
-          }).catch(() => {
-            // Ignore if loginLog creation fails
-          });
-        } catch (logError) {
-          console.error('Failed to create failed login log:', logError);
-        }
-
-        await supabase.auth.signOut();
-        const diffMs = existingSession.suspendedUntil.getTime() - Date.now();
-        const diffMin = Math.max(1, Math.ceil(diffMs / 60000));
-        return NextResponse.redirect(`${origin}/login?error=suspended&minutes=${diffMin}`);
-      }
-
       if (profile.status === "suspended") {
         // Log failed login due to suspension
         try {
@@ -353,7 +342,7 @@ export async function GET(request: Request) {
         }
 
         await supabase.auth.signOut();
-        return NextResponse.redirect(`${origin}/login?error=suspended&minutes=${suspendDurationMinutes}`);
+        return NextResponse.redirect(`${origin}/login?error=suspended_ban&minutes=${suspendDurationMinutes}`);
       }
 
       const parsedSessions = parseSessionEntries(existingSession?.activeSessions);
@@ -364,9 +353,33 @@ export async function GET(request: Request) {
       
       const uniqueSessions = dedupeByDevice(recentSessions);
       console.log("[CALLBACK] Unique Sessions (after dedup):", uniqueSessions.length, uniqueSessions.map(s => s.deviceKey));
+      const activeSubscription = await prisma.subscription.findFirst({
+        where: {
+          profileId: userId,
+          status: "active",
+          endDate: {
+            gt: now,
+          },
+        },
+        select: {
+          plan: {
+            select: {
+              deviceLimit: true,
+            },
+          },
+        },
+        orderBy: {
+          endDate: "desc",
+        },
+      });
 
       const perUserLimit = Math.max(1, profile.deviceLimit || 1);
-      const deviceLimit = globalMaxDevices ?? perUserLimit;
+      const activePlanLimit = activeSubscription?.plan?.deviceLimit
+        ? Math.max(1, activeSubscription.plan.deviceLimit)
+        : null;
+
+      // Priority: active non-expired plan > global setting > per-user fallback.
+      const deviceLimit = activePlanLimit ?? globalMaxDevices ?? perUserLimit;
       const existingDeviceIndex = uniqueSessions.findIndex((session) => session.deviceKey === currentDeviceKey);
 
       // DEBUG: Log untuk troubleshoot
@@ -448,12 +461,19 @@ export async function GET(request: Request) {
       console.log("[CALLBACK] Updated Sessions to save:", updatedSessions.length, updatedSessions.map(s => s.deviceKey));
 
       try {
-        await prisma.userSession.upsert({
-          where: { id: userId },
-          update: { activeSessions: updatedSessions, suspendedUntil: null },
-          create: { id: userId, activeSessions: [newSession], suspendedUntil: null },
-        });
-        console.log("[CALLBACK] ✅ Callback login successful - session updated");
+        // Update both session and profile status to active (if no suspension) to keep db in sync
+        await Promise.all([
+          prisma.userSession.upsert({
+            where: { id: userId },
+            update: { activeSessions: updatedSessions, suspendedUntil: null },
+            create: { id: userId, activeSessions: [newSession], suspendedUntil: null },
+          }),
+          prisma.profile.update({
+            where: { id: userId },
+            data: { status: "active" },
+          }),
+        ]);
+        console.log("[CALLBACK] ✅ Callback login successful - session updated and status cleared");
       } catch (dbError) {
         console.error("Database Error:", dbError);
         return NextResponse.redirect(`${origin}/login?error=database_error`);
