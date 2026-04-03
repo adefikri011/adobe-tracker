@@ -24,9 +24,53 @@ interface UserData {
 
 export default function UserListPage() {
   const [users, setUsers] = useState<UserData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState<"all" | UserRole>("all");
+  
+  // Custom loader component
+  const LoaderSpinner = ({ size = 16 }: { size?: number }) => (
+    <>
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        .loader-spin {
+          animation: spin 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+      `}</style>
+      <svg
+        className="loader-spin"
+        width={size}
+        height={size}
+        viewBox="0 0 56 56"
+        fill="none"
+      >
+        <circle
+          cx="28"
+          cy="28"
+          r="22"
+          stroke="rgba(255,255,255,0.15)"
+          strokeWidth="3"
+        />
+        <circle
+          cx="28"
+          cy="28"
+          r="22"
+          stroke="url(#grad)"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray="54 84"
+          transform="rotate(-90 28 28)"
+        />
+        <defs>
+          <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ff6b00" />
+            <stop offset="100%" stopColor="#ff6b00" stopOpacity="0.2" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </>
+  );
   
   // Edit Modal
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
@@ -75,8 +119,6 @@ export default function UserListPage() {
         setUsers(formattedUsers);
       } catch (error) {
         console.error("Error:", error);
-      } finally {
-        setLoading(false);
       }
     }
 
@@ -221,14 +263,6 @@ export default function UserListPage() {
       setIsCreating(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="p-6 md:p-10 bg-[#FBFCFE] min-h-screen flex items-center justify-center">
-        <Loader className="animate-spin text-[#ff6b00]" size={32} />
-      </div>
-    );
-  }
 
   return (
     <div className="p-6 md:p-10 bg-[#FBFCFE] min-h-screen space-y-10 font-sans">
@@ -552,7 +586,7 @@ export default function UserListPage() {
                 >
                   {isCreating ? (
                     <>
-                      <Loader size={16} className="animate-spin" /> Creating...
+                      <LoaderSpinner size={16} /> Creating...
                     </>
                   ) : (
                     <>
@@ -610,7 +644,7 @@ export default function UserListPage() {
                   >
                     {isBanProcessing ? (
                       <>
-                        <Loader size={14} className="animate-spin" /> Processing...
+                        <LoaderSpinner size={14} /> Processing...
                       </>
                     ) : (
                       "Unlock User"

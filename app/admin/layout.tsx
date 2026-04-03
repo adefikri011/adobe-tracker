@@ -4,6 +4,8 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { SidebarProvider } from "@/components/admin/SidebarContext";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminSidebar from "@/components/admin/Sidebar";
+import NavigationLoader from "@/components/NavigationLoader";
+
 
 export default async function AdminLayout({
   children,
@@ -45,6 +47,7 @@ export default async function AdminLayout({
             }}
           />
           <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+             <NavigationLoader />
             {children}
           </main>
         </div>
