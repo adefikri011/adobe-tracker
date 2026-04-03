@@ -1350,6 +1350,8 @@ export const ProfileScalarFieldEnum = {
   role: 'role',
   status: 'status',
   deviceLimit: 'deviceLimit',
+  timezone: 'timezone',
+  timeFormat: 'timeFormat',
   createdAt: 'createdAt',
   planExpiry: 'planExpiry'
 } as const

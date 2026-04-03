@@ -42,6 +42,8 @@ export type ProfileMinAggregateOutputType = {
   role: $Enums.UserRole | null
   status: $Enums.UserStatus | null
   deviceLimit: number | null
+  timezone: string | null
+  timeFormat: string | null
   createdAt: Date | null
   planExpiry: Date | null
 }
@@ -54,6 +56,8 @@ export type ProfileMaxAggregateOutputType = {
   role: $Enums.UserRole | null
   status: $Enums.UserStatus | null
   deviceLimit: number | null
+  timezone: string | null
+  timeFormat: string | null
   createdAt: Date | null
   planExpiry: Date | null
 }
@@ -66,6 +70,8 @@ export type ProfileCountAggregateOutputType = {
   role: number
   status: number
   deviceLimit: number
+  timezone: number
+  timeFormat: number
   createdAt: number
   planExpiry: number
   _all: number
@@ -88,6 +94,8 @@ export type ProfileMinAggregateInputType = {
   role?: true
   status?: true
   deviceLimit?: true
+  timezone?: true
+  timeFormat?: true
   createdAt?: true
   planExpiry?: true
 }
@@ -100,6 +108,8 @@ export type ProfileMaxAggregateInputType = {
   role?: true
   status?: true
   deviceLimit?: true
+  timezone?: true
+  timeFormat?: true
   createdAt?: true
   planExpiry?: true
 }
@@ -112,6 +122,8 @@ export type ProfileCountAggregateInputType = {
   role?: true
   status?: true
   deviceLimit?: true
+  timezone?: true
+  timeFormat?: true
   createdAt?: true
   planExpiry?: true
   _all?: true
@@ -211,6 +223,8 @@ export type ProfileGroupByOutputType = {
   role: $Enums.UserRole
   status: $Enums.UserStatus
   deviceLimit: number
+  timezone: string
+  timeFormat: string
   createdAt: Date
   planExpiry: Date | null
   _count: ProfileCountAggregateOutputType | null
@@ -246,6 +260,8 @@ export type ProfileWhereInput = {
   role?: Prisma.EnumUserRoleFilter<"Profile"> | $Enums.UserRole
   status?: Prisma.EnumUserStatusFilter<"Profile"> | $Enums.UserStatus
   deviceLimit?: Prisma.IntFilter<"Profile"> | number
+  timezone?: Prisma.StringFilter<"Profile"> | string
+  timeFormat?: Prisma.StringFilter<"Profile"> | string
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   planExpiry?: Prisma.DateTimeNullableFilter<"Profile"> | Date | string | null
   assets?: Prisma.AssetListRelationFilter
@@ -263,6 +279,8 @@ export type ProfileOrderByWithRelationInput = {
   role?: Prisma.SortOrder
   status?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  timeFormat?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   planExpiry?: Prisma.SortOrderInput | Prisma.SortOrder
   assets?: Prisma.AssetOrderByRelationAggregateInput
@@ -283,6 +301,8 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.EnumUserRoleFilter<"Profile"> | $Enums.UserRole
   status?: Prisma.EnumUserStatusFilter<"Profile"> | $Enums.UserStatus
   deviceLimit?: Prisma.IntFilter<"Profile"> | number
+  timezone?: Prisma.StringFilter<"Profile"> | string
+  timeFormat?: Prisma.StringFilter<"Profile"> | string
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   planExpiry?: Prisma.DateTimeNullableFilter<"Profile"> | Date | string | null
   assets?: Prisma.AssetListRelationFilter
@@ -300,6 +320,8 @@ export type ProfileOrderByWithAggregationInput = {
   role?: Prisma.SortOrder
   status?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  timeFormat?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   planExpiry?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ProfileCountOrderByAggregateInput
@@ -320,6 +342,8 @@ export type ProfileScalarWhereWithAggregatesInput = {
   role?: Prisma.EnumUserRoleWithAggregatesFilter<"Profile"> | $Enums.UserRole
   status?: Prisma.EnumUserStatusWithAggregatesFilter<"Profile"> | $Enums.UserStatus
   deviceLimit?: Prisma.IntWithAggregatesFilter<"Profile"> | number
+  timezone?: Prisma.StringWithAggregatesFilter<"Profile"> | string
+  timeFormat?: Prisma.StringWithAggregatesFilter<"Profile"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Profile"> | Date | string
   planExpiry?: Prisma.DateTimeNullableWithAggregatesFilter<"Profile"> | Date | string | null
 }
@@ -332,6 +356,8 @@ export type ProfileCreateInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   assets?: Prisma.AssetCreateNestedManyWithoutProfileInput
@@ -349,6 +375,8 @@ export type ProfileUncheckedCreateInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProfileInput
@@ -366,6 +394,8 @@ export type ProfileUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assets?: Prisma.AssetUpdateManyWithoutProfileNestedInput
@@ -383,6 +413,8 @@ export type ProfileUncheckedUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProfileNestedInput
@@ -400,6 +432,8 @@ export type ProfileCreateManyInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
 }
@@ -412,6 +446,8 @@ export type ProfileUpdateManyMutationInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -424,6 +460,8 @@ export type ProfileUncheckedUpdateManyInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -436,6 +474,8 @@ export type ProfileCountOrderByAggregateInput = {
   role?: Prisma.SortOrder
   status?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  timeFormat?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   planExpiry?: Prisma.SortOrder
 }
@@ -452,6 +492,8 @@ export type ProfileMaxOrderByAggregateInput = {
   role?: Prisma.SortOrder
   status?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  timeFormat?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   planExpiry?: Prisma.SortOrder
 }
@@ -464,6 +506,8 @@ export type ProfileMinOrderByAggregateInput = {
   role?: Prisma.SortOrder
   status?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  timezone?: Prisma.SortOrder
+  timeFormat?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   planExpiry?: Prisma.SortOrder
 }
@@ -594,6 +638,8 @@ export type ProfileCreateWithoutAssetsInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   loginLogs?: Prisma.LoginLogCreateNestedManyWithoutProfileInput
@@ -610,6 +656,8 @@ export type ProfileUncheckedCreateWithoutAssetsInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   loginLogs?: Prisma.LoginLogUncheckedCreateNestedManyWithoutProfileInput
@@ -642,6 +690,8 @@ export type ProfileUpdateWithoutAssetsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   loginLogs?: Prisma.LoginLogUpdateManyWithoutProfileNestedInput
@@ -658,6 +708,8 @@ export type ProfileUncheckedUpdateWithoutAssetsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   loginLogs?: Prisma.LoginLogUncheckedUpdateManyWithoutProfileNestedInput
@@ -674,6 +726,8 @@ export type ProfileCreateWithoutTransactionsInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   assets?: Prisma.AssetCreateNestedManyWithoutProfileInput
@@ -690,6 +744,8 @@ export type ProfileUncheckedCreateWithoutTransactionsInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProfileInput
@@ -722,6 +778,8 @@ export type ProfileUpdateWithoutTransactionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assets?: Prisma.AssetUpdateManyWithoutProfileNestedInput
@@ -738,6 +796,8 @@ export type ProfileUncheckedUpdateWithoutTransactionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProfileNestedInput
@@ -754,6 +814,8 @@ export type ProfileCreateWithoutSubscriptionsInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   assets?: Prisma.AssetCreateNestedManyWithoutProfileInput
@@ -770,6 +832,8 @@ export type ProfileUncheckedCreateWithoutSubscriptionsInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProfileInput
@@ -802,6 +866,8 @@ export type ProfileUpdateWithoutSubscriptionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assets?: Prisma.AssetUpdateManyWithoutProfileNestedInput
@@ -818,6 +884,8 @@ export type ProfileUncheckedUpdateWithoutSubscriptionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProfileNestedInput
@@ -834,6 +902,8 @@ export type ProfileCreateWithoutLoginLogsInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   assets?: Prisma.AssetCreateNestedManyWithoutProfileInput
@@ -850,6 +920,8 @@ export type ProfileUncheckedCreateWithoutLoginLogsInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProfileInput
@@ -882,6 +954,8 @@ export type ProfileUpdateWithoutLoginLogsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assets?: Prisma.AssetUpdateManyWithoutProfileNestedInput
@@ -898,6 +972,8 @@ export type ProfileUncheckedUpdateWithoutLoginLogsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProfileNestedInput
@@ -914,6 +990,8 @@ export type ProfileCreateWithoutSyncLogsInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   assets?: Prisma.AssetCreateNestedManyWithoutProfileInput
@@ -930,6 +1008,8 @@ export type ProfileUncheckedCreateWithoutSyncLogsInput = {
   role?: $Enums.UserRole
   status?: $Enums.UserStatus
   deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
   createdAt?: Date | string
   planExpiry?: Date | string | null
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProfileInput
@@ -962,6 +1042,8 @@ export type ProfileUpdateWithoutSyncLogsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assets?: Prisma.AssetUpdateManyWithoutProfileNestedInput
@@ -978,6 +1060,8 @@ export type ProfileUncheckedUpdateWithoutSyncLogsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assets?: Prisma.AssetUncheckedUpdateManyWithoutProfileNestedInput
@@ -1061,6 +1145,8 @@ export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   role?: boolean
   status?: boolean
   deviceLimit?: boolean
+  timezone?: boolean
+  timeFormat?: boolean
   createdAt?: boolean
   planExpiry?: boolean
   assets?: boolean | Prisma.Profile$assetsArgs<ExtArgs>
@@ -1079,6 +1165,8 @@ export type ProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   role?: boolean
   status?: boolean
   deviceLimit?: boolean
+  timezone?: boolean
+  timeFormat?: boolean
   createdAt?: boolean
   planExpiry?: boolean
 }, ExtArgs["result"]["profile"]>
@@ -1091,6 +1179,8 @@ export type ProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   role?: boolean
   status?: boolean
   deviceLimit?: boolean
+  timezone?: boolean
+  timeFormat?: boolean
   createdAt?: boolean
   planExpiry?: boolean
 }, ExtArgs["result"]["profile"]>
@@ -1103,11 +1193,13 @@ export type ProfileSelectScalar = {
   role?: boolean
   status?: boolean
   deviceLimit?: boolean
+  timezone?: boolean
+  timeFormat?: boolean
   createdAt?: boolean
   planExpiry?: boolean
 }
 
-export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "email" | "plan" | "role" | "status" | "deviceLimit" | "createdAt" | "planExpiry", ExtArgs["result"]["profile"]>
+export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "fullName" | "email" | "plan" | "role" | "status" | "deviceLimit" | "timezone" | "timeFormat" | "createdAt" | "planExpiry", ExtArgs["result"]["profile"]>
 export type ProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assets?: boolean | Prisma.Profile$assetsArgs<ExtArgs>
   loginLogs?: boolean | Prisma.Profile$loginLogsArgs<ExtArgs>
@@ -1136,6 +1228,8 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     role: $Enums.UserRole
     status: $Enums.UserStatus
     deviceLimit: number
+    timezone: string
+    timeFormat: string
     createdAt: Date
     planExpiry: Date | null
   }, ExtArgs["result"]["profile"]>
@@ -1573,6 +1667,8 @@ export interface ProfileFieldRefs {
   readonly role: Prisma.FieldRef<"Profile", 'UserRole'>
   readonly status: Prisma.FieldRef<"Profile", 'UserStatus'>
   readonly deviceLimit: Prisma.FieldRef<"Profile", 'Int'>
+  readonly timezone: Prisma.FieldRef<"Profile", 'String'>
+  readonly timeFormat: Prisma.FieldRef<"Profile", 'String'>
   readonly createdAt: Prisma.FieldRef<"Profile", 'DateTime'>
   readonly planExpiry: Prisma.FieldRef<"Profile", 'DateTime'>
 }
