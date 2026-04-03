@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getGatewayConfig, getEnvFallback } from "@/lib/gateway-config";
+import { getClientIP } from "@/lib/activity-log";
 import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
@@ -100,7 +101,17 @@ export async function POST(req: NextRequest) {
             startDate: new Date(),
             endDate: expiryDate, // Masa berlaku paket
           }
-        })
+        }),
+        // Log activity
+        prisma.activityLog.create({
+          data: {
+            user: transaction.profileId,
+            email: "webhook-system",
+            action: "Payment Successful",
+            detail: `Transaction ${order_id} completed. User upgraded to ${transaction.plan.name} plan. Amount: ${gross_amount}. Valid until: ${expiryDate.toISOString()}`,
+            ipAddress: getClientIP(req),
+          },
+        }),
       ]);
 
       console.log(`✅ SUCCESS: User ${transaction.profileId} upgraded to PRO until ${expiryDate}`);
@@ -108,10 +119,22 @@ export async function POST(req: NextRequest) {
     
     // 5. Logika Jika Pembayaran Gagal/Expired
     else if (transaction_status === "expire" || transaction_status === "cancel") {
-      await prisma.transaction.update({
-        where: { orderId: order_id },
-        data: { status: "failed" },
-      });
+      await prisma.$transaction([
+        prisma.transaction.update({
+          where: { orderId: order_id },
+          data: { status: "failed" },
+        }),
+        // Log activity
+        prisma.activityLog.create({
+          data: {
+            user: transaction.profileId,
+            email: "webhook-system",
+            action: "Payment Failed",
+            detail: `Transaction ${order_id} failed (${transaction_status}). Amount: ${gross_amount}.`,
+            ipAddress: getClientIP(req),
+          },
+        }),
+      ]);
       console.log(`⚠️ FAILED: Transaction ${order_id} marked as failed`);
     }
 

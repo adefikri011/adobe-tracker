@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getClientIP } from "@/lib/activity-log";
 
 export const dynamic = "force-dynamic";
 
@@ -122,6 +123,23 @@ export async function POST(req: NextRequest) {
       });
       console.log(`[Device Settings] Updated ${profileIds.length} profiles to global device limit: ${newGlobalMaxDevices}`);
     }
+
+    // Get admin info for logging
+    const adminProfile = await prisma.profile.findUnique({
+      where: { id: user.id },
+      select: { fullName: true, email: true },
+    });
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        user: adminProfile?.fullName || "Unknown",
+        email: adminProfile?.email || "unknown@email.com",
+        action: "Device Settings Updated",
+        detail: `Updated global device limit to ${newGlobalMaxDevices} and suspend duration to ${newSuspendMinutes} minutes. Applied to ${profilesWithoutPlanLimit.length} profiles.`,
+        ipAddress: getClientIP(req),
+      },
+    }).catch(err => console.error("Failed to log device settings:", err));
 
     return NextResponse.json({
       globalMaxDevices: settings.globalMaxDevices,

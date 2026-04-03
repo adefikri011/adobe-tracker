@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getClientIP } from "@/lib/activity-log";
 
 // Helper untuk cek apakah user adalah admin
 async function isAdmin() {
@@ -14,6 +15,23 @@ async function isAdmin() {
   });
 
   return profile?.role === "admin";
+}
+
+// Get admin info untuk logging
+async function getAdminInfo() {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { email: "unknown@email.com", name: "Unknown" };
+
+  const profile = await prisma.profile.findUnique({
+    where: { id: user.id },
+    select: { fullName: true, email: true },
+  });
+
+  return {
+    name: profile?.fullName || "Unknown",
+    email: user.email || "unknown@email.com",
+  };
 }
 
 // GET: Ambil currency settings (public endpoint)
@@ -87,6 +105,18 @@ export async function POST(req: NextRequest) {
         exchangeRate,
       },
     });
+
+    // Log activity
+    const admin = await getAdminInfo();
+    await prisma.activityLog.create({
+      data: {
+        user: admin.name,
+        email: admin.email,
+        action: "Currency Settings Updated",
+        detail: `Updated currency to ${currency} with exchange rate: ${exchangeRate}`,
+        ipAddress: getClientIP(req),
+      },
+    }).catch(err => console.error("Failed to log currency update:", err));
 
     return NextResponse.json({
       success: true,

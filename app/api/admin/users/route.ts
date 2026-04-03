@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getClientIP } from "../../../lib/activity-log";
 
 type PlanType = "free" | "pro_1d" | "pro_3d" | "pro_7d" | "pro_15d" | "pro_30d" | "lifetime";
 type UserRole = "admin" | "user";
@@ -18,14 +19,18 @@ async function ensureAdmin() {
 
   const profile = await prisma.profile.findUnique({
     where: { id: user.id },
-    select: { role: true },
+    select: { role: true, email: true, fullName: true },
   });
 
   if (profile?.role !== "admin") {
     return { error: NextResponse.json({ message: "Forbidden" }, { status: 403 }) };
   }
 
-  return { userId: user.id };
+  return { 
+    userId: user.id, 
+    adminEmail: profile.email || user.email || "admin@system", 
+    adminName: profile.fullName || "Admin" 
+  };
 }
 
 export async function GET() {
@@ -99,6 +104,17 @@ export async function POST(req: Request) {
       },
     });
 
+    // Log activity - mencatat admin yang melakukan aksi
+    await prisma.activityLog.create({
+      data: {
+        user: `${adminCheck.adminName} (admin)`,
+        email: adminCheck.adminEmail,
+        action: "Created User",
+        detail: `Created new user ${fullName} (${email}) with role: ${body.role === "admin" ? "admin" : "user"}`,
+        ipAddress: getClientIP(req),
+      },
+    });
+
     return NextResponse.json({ user: created }, { status: 201 });
   } catch (error) {
     console.error("Create admin user error:", error);
@@ -153,6 +169,22 @@ export async function PATCH(req: Request) {
         status: true,
         plan: true,
         deviceLimit: true,
+      },
+    });
+
+    // Log activity - mencatat admin yang melakukan aksi
+    const changes = [];
+    if (body.plan) changes.push(`plan: ${body.plan}`);
+    if (body.deviceLimit) changes.push(`deviceLimit: ${body.deviceLimit}`);
+    if (body.status) changes.push(`status: ${body.status}`);
+
+    await prisma.activityLog.create({
+      data: {
+        user: `${adminCheck.adminName} (admin)`,
+        email: adminCheck.adminEmail,
+        action: "Updated User",
+        detail: `Updated user ${updated.fullName} (${updated.email}): ${changes.join(", ")}`,
+        ipAddress: getClientIP(req),
       },
     });
 

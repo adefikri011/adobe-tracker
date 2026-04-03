@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { getClientIP } from "@/lib/activity-log";
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -19,6 +20,17 @@ export async function POST() {
       plan: "pro",
     },
   });
+
+  // Log activity
+  await prisma.activityLog.create({
+    data: {
+      user: profile.fullName || "Unknown",
+      email: user.email || "unknown@email.com",
+      action: "Upgraded to Pro",
+      detail: `User upgraded to Pro plan`,
+      ipAddress: getClientIP(req),
+    },
+  }).catch(err => console.error("Failed to log upgrade activity:", err));
 
   return NextResponse.json({ plan: profile.plan, success: true });
 }

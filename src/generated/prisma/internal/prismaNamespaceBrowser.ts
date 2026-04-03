@@ -61,7 +61,8 @@ export const ModelName = {
   AppSettings: 'AppSettings',
   LoginLog: 'LoginLog',
   SyncLog: 'SyncLog',
-  GatewayConfig: 'GatewayConfig'
+  GatewayConfig: 'GatewayConfig',
+  ActivityLog: 'ActivityLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -249,6 +250,19 @@ export const GatewayConfigScalarFieldEnum = {
 } as const
 
 export type GatewayConfigScalarFieldEnum = (typeof GatewayConfigScalarFieldEnum)[keyof typeof GatewayConfigScalarFieldEnum]
+
+
+export const ActivityLogScalarFieldEnum = {
+  id: 'id',
+  user: 'user',
+  email: 'email',
+  action: 'action',
+  detail: 'detail',
+  ipAddress: 'ipAddress',
+  createdAt: 'createdAt'
+} as const
+
+export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { getClientIP } from "@/lib/activity-log";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -420,6 +421,22 @@ export async function POST(req: Request) {
           },
         });
 
+        // Log activity
+        const userProfile = await prisma.profile.findUnique({
+          where: { id: user.id },
+          select: { fullName: true, email: true },
+        });
+
+        await prisma.activityLog.create({
+          data: {
+            user: userProfile?.fullName || "Unknown",
+            email: userProfile?.email || "unknown@email.com",
+            action: "Manual Sync",
+            detail: `Triggered manual API sync — ${newCreated} new + ${updated} updated = ${itemsToSave.length} total assets processed. Total in database: ${totalInDb}`,
+            ipAddress: getClientIP(req),
+          },
+        }).catch(err => console.error("Failed to log sync activity:", err));
+
         sseEvent(controller, encoder, {
           type: "done",
           count: itemsToSave.length,
@@ -438,6 +455,22 @@ export async function POST(req: Request) {
             errorMessage: error?.message || "Internal server error",
           },
         }).catch(() => {}); // ignore if table doesn't exist yet
+
+        // Log activity for failed sync
+        const userProfile = await prisma.profile.findUnique({
+          where: { id: user.id },
+          select: { fullName: true, email: true },
+        }).catch(() => null);
+
+        await prisma.activityLog.create({
+          data: {
+            user: userProfile?.fullName || "Unknown",
+            email: userProfile?.email || "unknown@email.com",
+            action: "Sync Failed",
+            detail: `Manual API sync failed: ${error?.message || "Unknown error"}`,
+            ipAddress: getClientIP(req),
+          },
+        }).catch(err => console.error("Failed to log sync error activity:", err));
 
         sseEvent(controller, encoder, {
           type: "error",

@@ -194,3 +194,15 @@ enum SubscriptionStatus {
   expired
   cancelled
 }
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  user      String
+  email     String
+  action    String
+  detail    String
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@map("ActivityLog")
+}
