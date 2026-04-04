@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  allowedDevOrigins: ["192.168.1.13"],
+const nextConfig: NextConfig = {
+  // Opsi ini boleh ada, tapi biasanya tidak perlu untuk produksi di Hostinger
+  // allowedDevOrigins: ["192.168.1.13"], 
+  
+  reactStrictMode: true,
 };
 
-module.exports = nextConfig;
+export default nextConfig;
