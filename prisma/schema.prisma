@@ -208,3 +208,34 @@ model ActivityLog {
 
   @@map("ActivityLog")
 }
+
+enum NotificationType {
+  sale
+  error
+  info
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  sent      Boolean          @default(false)
+  sentAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@map("Notification")
+}
+
+model NotificationPreference {
+  id                 String   @id @default("singleton")
+  emailNotif         Boolean  @default(true)
+  saleNotif          Boolean  @default(true)
+  errorNotif         Boolean  @default(true)
+  adminEmail         String   @default("admin@example.com")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("NotificationPreference")
+}

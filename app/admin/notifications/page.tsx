@@ -1,17 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, ShoppingCart, AlertTriangle, Info, Check, Trash2, Filter } from "lucide-react";
-
-const initialNotifications = [
-  { id: 1, type: "sale",    title: "New Sale",          message: "john@example.com upgraded to Pro - 30 Days",     time: "2 minutes ago",  read: false },
-  { id: 2, type: "error",   title: "API Error",         message: "Adobe Stock API rate limit reached. Auto-switched to cache.", time: "15 minutes ago", read: false },
-  { id: 3, type: "sale",    title: "New Sale",          message: "sarah@gmail.com upgraded to Pro - 7 Days",        time: "1 hour ago",     read: false },
-  { id: 4, type: "info",    title: "System Update",     message: "Cache database successfully synced. 756 assets updated.", time: "3 hours ago",    read: true  },
-  { id: 5, type: "error",   title: "API Error",         message: "Failed to connect to Adobe Stock API. Retrying...",time: "5 hours ago",    read: true  },
-  { id: 6, type: "sale",    title: "New Sale",          message: "mike@yahoo.com upgraded to Pro - 1 Day",          time: "Yesterday",      read: true  },
-  { id: 7, type: "info",    title: "New User",          message: "anna@gmail.com registered a new account",         time: "Yesterday",      read: true  },
-  { id: 8, type: "sale",    title: "New Sale",          message: "bob@example.com upgraded to Pro - 15 Days",       time: "2 days ago",     read: true  },
-];
 
 const typeConfig: Record<string, { icon: any; bg: string; iconColor: string; label: string }> = {
   sale:  { icon: ShoppingCart,  bg: "bg-green-50",  iconColor: "text-green-500",  label: "Sale"   },
@@ -19,12 +8,76 @@ const typeConfig: Record<string, { icon: any; bg: string; iconColor: string; lab
   info:  { icon: Info,          bg: "bg-blue-50",   iconColor: "text-blue-500",   label: "Info"   },
 };
 
+interface Notification {
+  id: string;
+  type: "sale" | "error" | "info";
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
+interface Preferences {
+  emailNotif: boolean;
+  saleNotif: boolean;
+  errorNotif: boolean;
+}
+
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [preferences, setPreferences] = useState<Preferences>({
+    emailNotif: true,
+    saleNotif: true,
+    errorNotif: true,
+  });
   const [filter, setFilter] = useState("All");
-  const [emailNotif, setEmailNotif] = useState(true);
-  const [saleNotif, setSaleNotif] = useState(true);
-  const [errorNotif, setErrorNotif] = useState(true);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch notifications and preferences
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [notifRes, prefRes] = await Promise.all([
+          fetch("/api/admin/notifications"),
+          fetch("/api/admin/notification-preferences"),
+        ]);
+
+        const notifData = await notifRes.json();
+        const prefData = await prefRes.json();
+
+        setNotifications(notifData);
+        setPreferences({
+          emailNotif: prefData.emailNotif,
+          saleNotif: prefData.saleNotif,
+          errorNotif: prefData.errorNotif,
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Format date to relative time
+  const formatTime = (date: string) => {
+    const now = new Date();
+    const notifDate = new Date(date);
+    const diffMs = now.getTime() - notifDate.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return "just now";
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return notifDate.toLocaleDateString();
+  };
 
   const filtered = notifications.filter(n => {
     if (filter === "All") return true;
@@ -32,9 +85,68 @@ export default function NotificationsPage() {
     return n.type === filter.toLowerCase();
   });
 
-  const markAllRead = () => setNotifications(notifications.map(n => ({ ...n, read: true })));
-  const markRead = (id: number) => setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
-  const deleteNotif = (id: number) => setNotifications(notifications.filter(n => n.id !== id));
+  const markAllRead = async () => {
+    try {
+      await Promise.all(
+        notifications
+          .filter(n => !n.read)
+          .map(n =>
+            fetch("/api/admin/notifications", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: n.id }),
+            })
+          )
+      );
+
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
+  };
+
+  const markRead = async (id: string) => {
+    try {
+      await fetch("/api/admin/notifications", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      setNotifications(notifications.map(n => (n.id === id ? { ...n, read: true } : n)));
+    } catch (error) {
+      console.error("Error marking as read:", error);
+    }
+  };
+
+  const deleteNotif = async (id: string) => {
+    try {
+      await fetch("/api/admin/notifications", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      setNotifications(notifications.filter(n => n.id !== id));
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+    }
+  };
+
+  const togglePreference = async (key: "emailNotif" | "saleNotif" | "errorNotif", value: boolean) => {
+    try {
+      await fetch("/api/admin/notification-preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [key]: value }),
+      });
+
+      setPreferences(prev => ({ ...prev, [key]: value }));
+    } catch (error) {
+      console.error("Error updating preferences:", error);
+    }
+  };
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -110,7 +222,7 @@ export default function NotificationsPage() {
                         )}
                       </div>
                       <p className="text-xs text-slate-500 leading-relaxed">{n.message}</p>
-                      <p className="text-[10px] text-slate-400 mt-1">{n.time}</p>
+                      <p className="text-[10px] text-slate-400 mt-1">{formatTime(n.createdAt)}</p>
                     </div>
                     <div className="flex gap-1 flex-shrink-0">
                       {!n.read && (
@@ -143,9 +255,9 @@ export default function NotificationsPage() {
             <h3 className="font-semibold text-slate-900 mb-4 text-sm">Notification Preferences</h3>
             <div className="space-y-4">
               {[
-                { label: "New Sale",       sub: "Get notified on every purchase",   value: saleNotif,  set: setSaleNotif  },
-                { label: "API Errors",     sub: "Alert when API fails or hits limit",value: errorNotif, set: setErrorNotif },
-                { label: "Email Notifications", sub: "Send to admin email",         value: emailNotif, set: setEmailNotif },
+                { label: "New Sale",       sub: "Get notified on every purchase",   key: "saleNotif" as const,  value: preferences.saleNotif },
+                { label: "API Errors",     sub: "Alert when API fails or hits limit", key: "errorNotif" as const, value: preferences.errorNotif },
+                { label: "Email Notifications", sub: "Send to admin email",         key: "emailNotif" as const, value: preferences.emailNotif },
               ].map((item) => (
                 <div key={item.label} className="flex items-center justify-between gap-3">
                   <div>
@@ -153,7 +265,7 @@ export default function NotificationsPage() {
                     <p className="text-xs text-slate-400">{item.sub}</p>
                   </div>
                   <button
-                    onClick={() => item.set(!item.value)}
+                    onClick={() => togglePreference(item.key, !item.value)}
                     className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${
                       item.value ? "bg-orange-500" : "bg-slate-200"
                     }`}

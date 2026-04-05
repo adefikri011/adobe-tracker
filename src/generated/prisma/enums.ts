@@ -43,3 +43,12 @@ export const SubscriptionStatus = {
 } as const
 
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
+
+
+export const NotificationType = {
+  sale: 'sale',
+  error: 'error',
+  info: 'info'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
