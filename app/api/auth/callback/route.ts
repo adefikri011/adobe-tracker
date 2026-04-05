@@ -20,7 +20,7 @@ function normalizeDeviceKey(userAgent: string) {
   // Extract browser name & version
   let browserName = "unknown";
   let browserVersion = "";
-  
+
   if (userAgent.includes("Chrome/")) {
     browserName = "chrome";
     const match = userAgent.match(/Chrome\/(\d+)/);
@@ -41,7 +41,7 @@ function normalizeDeviceKey(userAgent: string) {
 
   // Extract OS (major version only)
   let osName = "unknown-os";
-  
+
   if (userAgent.includes("Windows")) {
     osName = "windows";
   } else if (userAgent.includes("Macintosh")) {
@@ -60,10 +60,10 @@ function normalizeDeviceKey(userAgent: string) {
 
 function parseDeviceInfo(userAgent: string): string {
   if (!userAgent) return 'Unknown Device';
-  
+
   let browser = 'Unknown Browser';
   let os = 'Unknown OS';
-  
+
   // Parse browser
   if (userAgent.includes('Chrome/')) {
     const match = userAgent.match(/Chrome\/(\d+)/);
@@ -78,7 +78,7 @@ function parseDeviceInfo(userAgent: string): string {
     const match = userAgent.match(/Edg\/(\d+)/);
     browser = `Edge ${match?.[1] || ''}`.trim();
   }
-  
+
   // Parse OS
   if (userAgent.includes('Windows')) {
     os = 'Windows';
@@ -93,7 +93,7 @@ function parseDeviceInfo(userAgent: string): string {
   } else if (userAgent.includes('Android')) {
     os = 'Android';
   }
-  
+
   return `${browser} / ${os}`;
 }
 
@@ -106,7 +106,7 @@ function parseSessionEntries(raw: unknown): SessionEntry[] {
       const device = typeof item.device === "string" ? item.device : "Unknown Device";
       const createdAt = typeof item.createdAt === "string" ? item.createdAt : new Date().toISOString();
       const token = typeof item.token === "string" ? item.token : "";
-      
+
       // Use stored deviceKey if it exists and looks normalized (contains "-")
       // Otherwise fallback to normalizing the full device user agent
       let deviceKey = "";
@@ -174,7 +174,7 @@ export async function GET(request: Request) {
   const next = requestUrl.searchParams.get("next") ?? "/dashboard";
 
   // GUNAKAN INI: Ambil origin langsung dari URL yang sedang diakses
-  const origin = requestUrl.origin;
+  const origin = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || requestUrl.origin;
 
   if (code) {
     const supabase = await createServerSupabaseClient();
@@ -184,15 +184,15 @@ export async function GET(request: Request) {
 
     if (error) {
       console.error("Auth Error:", error.message);
-      
+
       // Log failed login attempt
       try {
-        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                         request.headers.get('remoteAddress') || 
-                         'unknown';
+        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+          request.headers.get('remoteAddress') ||
+          'unknown';
         const userAgent = request.headers.get('user-agent') || 'Unknown Device';
         const device = parseDeviceInfo(userAgent);
-        
+
         await prisma.loginLog.create({
           data: {
             email: 'unknown@failed.local',
@@ -206,11 +206,11 @@ export async function GET(request: Request) {
       } catch (logError) {
         console.error('Failed to create failed login log:', logError);
       }
-      
+
       return NextResponse.redirect(`${origin}/login?error=auth_failed`);
     }
 
-      if (data?.user && data?.session) {
+    if (data?.user && data?.session) {
       const userId = data.user.id;
       const token = data.session.access_token;
       const userAgent = request.headers.get("user-agent") || "Unknown Device";
@@ -256,43 +256,43 @@ export async function GET(request: Request) {
       // Read app settings which contains the admin-configured device limits
       const appSettings = await prisma.appSettings.findUnique({
         where: { id: "singleton" },
-        select: { 
+        select: {
           globalMaxDevices: true,
           suspendDurationMinutes: true,
         },
       });
-      
+
       console.log("[CALLBACK] AppSettings from DB:", appSettings);
-      
+
       const globalMaxDevices = appSettings?.globalMaxDevices || null;
       const suspendDurationMinutes = appSettings?.suspendDurationMinutes || DEFAULT_SUSPEND_MINUTES;
 
       console.log("[CALLBACK] Using suspendDurationMinutes:", suspendDurationMinutes, "DEFAULT_SUSPEND_MINUTES:", DEFAULT_SUSPEND_MINUTES);
 
-    // Fetch current user session
-    let existingSession = await prisma.userSession.findUnique({
-      where: { id: userId },
-    });
+      // Fetch current user session
+      let existingSession = await prisma.userSession.findUnique({
+        where: { id: userId },
+      });
 
-    // SUSPENSION CHECK (FIRST & STRICT): If suspendedUntil > now, REJECT immediately - no exceptions
-    const now = new Date();
-    if (existingSession?.suspendedUntil && existingSession.suspendedUntil > now) {
-      if (profile.status !== "suspended") {
-        await prisma.profile.update({
-          where: { id: userId },
-          data: { status: "suspended" },
-        });
+      // SUSPENSION CHECK (FIRST & STRICT): If suspendedUntil > now, REJECT immediately - no exceptions
+      const now = new Date();
+      if (existingSession?.suspendedUntil && existingSession.suspendedUntil > now) {
+        if (profile.status !== "suspended") {
+          await prisma.profile.update({
+            where: { id: userId },
+            data: { status: "suspended" },
+          });
+        }
+
+        console.log("[CALLBACK] 🚫 BLOCKED - Account still suspended, cannot login");
+        await supabase.auth.signOut();
+        const diffMs = existingSession.suspendedUntil.getTime() - now.getTime();
+        const diffMin = Math.max(1, Math.ceil(diffMs / 60000));
+        return NextResponse.redirect(`${origin}/login?error=suspended_ban&minutes=${diffMin}`);
       }
 
-      console.log("[CALLBACK] 🚫 BLOCKED - Account still suspended, cannot login");
-      await supabase.auth.signOut();
-      const diffMs = existingSession.suspendedUntil.getTime() - now.getTime();
-      const diffMin = Math.max(1, Math.ceil(diffMs / 60000));
-      return NextResponse.redirect(`${origin}/login?error=suspended_ban&minutes=${diffMin}`);
-    }
-
-    // Auto-clear suspension if expired
-    if (existingSession?.suspendedUntil && existingSession.suspendedUntil <= new Date()) {
+      // Auto-clear suspension if expired
+      if (existingSession?.suspendedUntil && existingSession.suspendedUntil <= new Date()) {
         await Promise.all([
           prisma.profile.update({
             where: { id: userId },
@@ -321,11 +321,11 @@ export async function GET(request: Request) {
       if (profile.status === "suspended") {
         // Log failed login due to suspension
         try {
-          const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                           request.headers.get('remoteAddress') || 
-                           'unknown';
+          const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+            request.headers.get('remoteAddress') ||
+            'unknown';
           const device = parseDeviceInfo(userAgent);
-          
+
           await prisma.loginLog.create({
             data: {
               profileId: userId,
@@ -347,10 +347,10 @@ export async function GET(request: Request) {
 
       const parsedSessions = parseSessionEntries(existingSession?.activeSessions);
       console.log("[CALLBACK] Parsed Sessions:", parsedSessions.length, parsedSessions.map(s => s.deviceKey));
-      
+
       const recentSessions = keepRecentSessions(parsedSessions);
       console.log("[CALLBACK] Recent Sessions (30 days):", recentSessions.length, recentSessions.map(s => s.deviceKey));
-      
+
       const uniqueSessions = dedupeByDevice(recentSessions);
       console.log("[CALLBACK] Unique Sessions (after dedup):", uniqueSessions.length, uniqueSessions.map(s => s.deviceKey));
       const activeSubscription = await prisma.subscription.findFirst({
@@ -420,11 +420,11 @@ export async function GET(request: Request) {
 
         // Log failed login due to multiple devices
         try {
-          const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                           request.headers.get('remoteAddress') || 
-                           'unknown';
+          const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+            request.headers.get('remoteAddress') ||
+            'unknown';
           const device = parseDeviceInfo(userAgent);
-          
+
           await prisma.loginLog.create({
             data: {
               profileId: userId,
@@ -481,11 +481,11 @@ export async function GET(request: Request) {
 
       // Log successful login
       try {
-        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                         request.headers.get('remoteAddress') || 
-                         'unknown';
+        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+          request.headers.get('remoteAddress') ||
+          'unknown';
         const device = parseDeviceInfo(userAgent);
-        
+
         await prisma.loginLog.create({
           data: {
             profileId: userId,
