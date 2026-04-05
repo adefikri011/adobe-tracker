@@ -1,14 +1,43 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../lib/prisma';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { validateAndUpdateUserPlan } from '@/lib/access-control/subscription-manager';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    const { adobeId, profileId } = await request.json(); // Pastikan profileId juga dikirim dari frontend
+    // Check user authentication first
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { message: 'Unauthorized - login required' },
+        { status: 401 }
+      );
+    }
+
+    const { adobeId, profileId } = await request.json();
     
     if (!adobeId) return NextResponse.json({ message: 'ID Adobe diperlukan' }, { status: 400 });
     if (!profileId) return NextResponse.json({ message: 'Profile ID diperlukan untuk relasi' }, { status: 400 });
+
+    // Validate that profileId matches authenticated user
+    if (profileId !== user.id) {
+      return NextResponse.json(
+        { message: 'Unauthorized - cannot track for other users' },
+        { status: 403 }
+      );
+    }
+
+    // Validate user's subscription status
+    try {
+      await validateAndUpdateUserPlan(user.id);
+    } catch (error) {
+      console.error("[Track] Plan validation error:", error);
+      // Silent fail — lanjut dengan tracking
+    }
 
     // 1. Cek Database (Caching)
     // Gunakan 'assetId' sesuai dengan yang ada di schema.prisma

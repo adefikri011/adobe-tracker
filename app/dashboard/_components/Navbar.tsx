@@ -82,7 +82,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
         WebkitBackdropFilter: "blur(20px)",
       }}
     >
-      <Link href="/" className="flex items-center gap-3 z-[110] group">
+      <Link href="/dashboard" className="flex items-center gap-3 z-[110] group">
         <div className="relative">
           <div className="absolute inset-0 bg-orange-500/20 blur-lg rounded-2xl group-hover:bg-orange-500/40 transition-all duration-500" />
           <TrackStockLogo />

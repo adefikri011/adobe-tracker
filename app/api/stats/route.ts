@@ -1,10 +1,41 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { checkFeatureAccess } from "@/lib/access-control/permission";
+import { FEATURES } from "@/lib/access-control/features";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    // Check user authentication & feature access
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized - login required" },
+        { status: 401 }
+      );
+    }
+
+    // Check if user has PERFORMANCE_ANALYTICS feature
+    const permission = await checkFeatureAccess(
+      user.id,
+      FEATURES.PERFORMANCE_ANALYTICS
+    );
+
+    if (!permission.allowed) {
+      return NextResponse.json(
+        { 
+          error: "Feature tidak tersedia untuk plan Anda",
+          requiredFeature: "Performance Analytics",
+          currentPlan: permission.plan,
+        },
+        { status: 403 }
+      );
+    }
+
     // Ambil semua cache entries
     const allCaches = await prisma.searchCache.findMany({
       orderBy: { createdAt: "desc" },

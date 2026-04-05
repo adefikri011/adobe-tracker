@@ -10,6 +10,7 @@ import { KeywordStats } from "./_components/KeywordStats";
 import { ResultsSection } from "./_components/ResultsSection";
 import { PaymentModal } from "./_components/PaymentModal";
 import { Asset } from "./_components/ResultCard";
+import QuotaExceededModal from "../components/QuotaExceededModal";
 
 const SUSPEND_TEST_MINUTES = 30; // Default fallback, actual value comes from API
 
@@ -26,15 +27,23 @@ export default function DashboardPage() {
   const [planLoading, setPlanLoading] = useState(true);
   const [showPayment, setShowPayment] = useState(false);
   const [suspendDurationMinutes, setSuspendDurationMinutes] = useState(SUSPEND_TEST_MINUTES);
+  const [showQuotaModal, setShowQuotaModal] = useState(false);
+  const [quotaData, setQuotaData] = useState<any>(null);
 
   useEffect(() => {
     fetch("/api/user/plan")
       .then((r) => r.json())
       .then((d) => {
-        setIsPro(d.plan === "pro");
+        // Support both old format (just plan string) dan new format (with isPremium)
+        const isProPlan = d.isPremium !== undefined ? d.isPremium : d.plan === "pro";
+        setIsPro(isProPlan);
+        console.log("[Dashboard] Plan status:", d.plan, "isPremium:", isProPlan);
         setPlanLoading(false);
       })
-      .catch(() => setPlanLoading(false));
+      .catch((err) => {
+        console.error("[Dashboard] Failed to fetch plan:", err);
+        setPlanLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -84,7 +93,6 @@ export default function DashboardPage() {
 
         if (data.status === "session_revoked") {
           isRedirecting = true;
-          // Use suspendDurationMinutes from API response
           const minutes = data.suspendDurationMinutes || SUSPEND_TEST_MINUTES;
           window.location.href = `/login?error=device_conflict&minutes=${minutes}`;
         }
@@ -107,11 +115,22 @@ export default function DashboardPage() {
       window.removeEventListener("focus", handleVisibilityOrFocus);
       document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
     };
-  }, [router]);
+  }, [router, suspendDurationMinutes]);
 
   const handleUpgradeSuccess = async () => {
     await fetch("/api/user/upgrade", { method: "POST" });
-    setIsPro(true);
+    
+    // Refetch plan status dari server untuk ensure data terbaru
+    try {
+      const res = await fetch("/api/user/plan");
+      const data = await res.json();
+      const isProPlan = data.isPremium !== undefined ? data.isPremium : data.plan === "pro";
+      setIsPro(isProPlan);
+      console.log("[Dashboard] Plan updated after upgrade:", data.plan, "isPremium:", isProPlan);
+    } catch (error) {
+      console.error("[Dashboard] Failed to refetch plan after upgrade:", error);
+      setIsPro(true);
+    }
   };
 
   const handleSearch = async () => {
@@ -119,39 +138,82 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      
+      // Handle quota exceeded (429)
+      if (res.status === 429) {
+        try {
+          const text = await res.text();
+          const data = text ? JSON.parse(text) : {};
+          setQuotaData(data);
+          setShowQuotaModal(true);
+        } catch (error) {
+          // If parsing fails, still show modal with default data
+          setQuotaData({ error: "Daily search limit reached" });
+          setShowQuotaModal(true);
+        }
+        setLoading(false);
+        return;
+      }
+      
+      if (!res.ok) {
+        console.error(`[Search] Error ${res.status}`);
+        try {
+          const errorData = await res.json();
+          console.error("[Search] Error details:", errorData);
+          alert(`Search error: ${errorData.error || "Unknown error"}`);
+        } catch {
+          alert(`Search error: HTTP ${res.status}`);
+        }
+        setLoading(false);
+        return;
+      }
+      
       const data = await res.json();
       setResults(data.results ?? []);
       setFromCache(data.fromCache ?? false);
       setCachedAt(data.cachedAt ?? null);
       setTotal(data.total ?? data.results?.length ?? 0);
       setSearched(true);
-    } catch {
-      console.error("Search failed");
+    } catch (error) {
+      console.error("Search failed:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const handleExportCSV = () => {
-    const exportData = isPro ? results : results.slice(0, 6);
-    const headers = ["Title", "Creator", "Category", "Type", "Downloads", "Trend", "Revenue", "Upload Date"];
-    const rows = exportData.map((a) => [
-      `"${a.title}"`,
-      `"${a.creator}"`,
-      `"${a.category}"`,
-      a.type,
-      a.downloads,
-      a.trend,
-      `"${a.revenue}"`,
-      `"${a.uploadDate ?? "-"}"`,
-    ]);
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `trackstock-${query}-${Date.now()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleExportCSV = async () => {
+    // Check if user has export feature
+    if (!isPro) {
+      alert("CSV export is only available for Pro users. Upgrade your plan to unlock this feature!");
+      return;
+    }
+
+    try {
+      const exportData = results;
+      const headers = ["Title", "Creator", "Category", "Type", "Downloads", "Trend", "Revenue", "Upload Date"];
+      const rows = exportData.map((a) => [
+        `"${a.title}"`,
+        `"${a.creator}"`,
+        `"${a.category}"`,
+        a.type,
+        a.downloads,
+        a.trend,
+        `"${a.revenue}"`,
+        `"${a.uploadDate ?? "-"}"`,
+      ]);
+      const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `trackstock-${query}-${Date.now()}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      console.log("[Dashboard] CSV exported successfully");
+    } catch (error) {
+      console.error("[Dashboard] CSV export error:", error);
+      alert("Failed to export CSV. Please try again.");
+    }
   };
 
   return (
@@ -160,6 +222,19 @@ export default function DashboardPage() {
         <PaymentModal
           onClose={() => setShowPayment(false)}
           onSuccess={handleUpgradeSuccess}
+        />
+      )}
+      
+      {showQuotaModal && quotaData && (
+        <QuotaExceededModal
+          isOpen={showQuotaModal}
+          searchesUsed={quotaData.searchesUsed || 0}
+          limit={quotaData.limit || 0}
+          resetInMinutes={quotaData.resetInMinutes || 0}
+          onClose={() => {
+            setShowQuotaModal(false);
+            setQuotaData(null);
+          }}
         />
       )}
 
@@ -182,13 +257,8 @@ export default function DashboardPage() {
 
           {searched && (
             <div>
-              {/* Charts — bar + pie */}
               <SearchCharts results={results} query={query} />
-
-              {/* Keyword stats bar — di bawah grafik, di atas results */}
               <KeywordStats results={results} query={query} total={total} />
-
-              {/* Results grid */}
               <ResultsSection
                 results={results}
                 query={query}

@@ -62,9 +62,15 @@ export function ResultsSection({
 
         <div className="flex items-center gap-2 flex-wrap">
           <button onClick={onExportCSV}
-            className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 transition px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:text-gray-800">
+            disabled={!isPro}
+            className={`flex items-center gap-2 border transition px-3 py-2 rounded-lg text-xs font-medium ${
+              isPro 
+                ? "bg-gray-50 hover:bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-800 cursor-pointer" 
+                : "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed"
+            }`}
+            title={!isPro ? "CSV export available for Pro users only" : "Export search results to CSV"}>
             ⬇ Export CSV
-            {!isPro && <span className="text-gray-400">(6 rows)</span>}
+            {!isPro && <span className="text-gray-400">(Pro only)</span>}
           </button>
           {!isPro && (
             <div className="bg-orange-50 border border-orange-200 px-3 py-2 rounded-lg text-xs text-orange-600">

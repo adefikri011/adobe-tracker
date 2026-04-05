@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getUserPlanInfo } from "@/lib/access-control/permission";
+import { checkSearchQuota, logSearchAction, getMinutesUntilReset } from "../../lib/access-control/search-quota";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -156,26 +158,84 @@ export async function GET(req: NextRequest) {
 
   if (!query) return NextResponse.json({ results: [] });
 
-  // Cek plan user — default free kalau gagal
+  // Cek plan user dengan validation subscription — default free kalau gagal
   let isPro = false;
   let userId: string | null = null;
+  let userEmail = "unknown@system.local";
+  let limit = FREE_LIMIT;
+  let planName = "free";
   try {
     const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user?.id) {
       userId = user.id;
-      const profile = await prisma.profile.findUnique({
-        where: { id: user.id },
-        select: { plan: true },
-      });
-      isPro = profile?.plan === "pro";
+      userEmail = user.email || `user-${user.id}@system.local`;
+      const planInfo = await getUserPlanInfo(user.id);
+      isPro = planInfo.isPremium;
+      limit = planInfo.searchQuotaLimit;
+      planName = planInfo.planSlug;
+      
+      // Ensure limit adalah valid positive number (Prisma take parameter validation)
+      if (typeof limit !== "number" || limit <= 0 || !isFinite(limit)) {
+        limit = FREE_LIMIT;
+        console.log(`[Search] Invalid limit value, resetting to FREE_LIMIT`);
+      }
     }
   } catch {
     // silent fail — tetap lanjut sebagai free
   }
 
-  const limit = isPro ? PRO_LIMIT : FREE_LIMIT;
   console.log(`[Search] "${query}" | plan: ${isPro ? "pro" : "free"} | limit: ${limit}`);
+
+  // ── CHECK SEARCH QUOTA ─────────────────────────────────────────────────────
+  // Enforce daily search limit untuk free users
+  if (userId && !isPro) {
+    console.log(`[SearchQuota] Checking quota for user ${userId} | plan: ${planName} | isPro: ${isPro}`);
+    const quotaStatus = await checkSearchQuota(userId, planName);
+    console.log(`[SearchQuota] Status:`, quotaStatus);
+    
+    if (!quotaStatus.canSearch) {
+      console.log(`[Search] Quota exceeded for user ${userId}: ${quotaStatus.searchesUsedToday}/${quotaStatus.quotaLimit}`);
+      
+      // Fetch available plans untuk upsell
+      let availablePlans = [];
+      try {
+        const plansRes = await fetch(
+          new URL("/api/billing/plans/available", process.env.NEXTAUTH_URL || "http://localhost:3000").toString()
+        );
+        if (plansRes.ok) {
+          const plansData = await plansRes.json();
+          availablePlans = plansData.plans || [];
+        }
+      } catch (error) {
+        console.error("[Search] Error fetching available plans:", error);
+        // Silent fail — return response tanpa plans
+      }
+
+      return NextResponse.json(
+        {
+          error: "Daily search limit reached",
+          reason: quotaStatus.reason,
+          searchesUsed: quotaStatus.searchesUsedToday,
+          limit: quotaStatus.quotaLimit,
+          resetInMinutes: getMinutesUntilReset(),
+          nextAction: {
+            type: "redirect",
+            url: "/dashboard/billing/plans?upgrade=quota_exceeded",
+            message: "Upgrade ke Pro untuk unlimited searches!",
+          },
+          upgrade: {
+            message: "Upgrade to Pro plan for unlimited searches!",
+            pricingPageUrl: "/dashboard/billing/plans",
+            availablePlans: availablePlans.slice(0, 3), // Top 3 plans
+          },
+        },
+        { status: 429 } // Too Many Requests
+      );
+    } else {
+      console.log(`[SearchQuota] OK - remaining searches: ${quotaStatus.remainingSearches}`);
+    }
+  }
 
   try {
     // ── PRIORITAS 1: Cari dari asset DB milik user ──────────────────────────
@@ -220,6 +280,18 @@ export async function GET(req: NextRequest) {
             keywords: a.keywords || [],
             fromDb: true,
           }));
+          // Log search action untuk quota tracking
+          if (userId) {
+            console.log(`[SearchLog] Logging search from DB - user: ${userId}, query: ${query}`);
+            try {
+              await logSearchAction(userId, query, userEmail);
+            } catch (logError) {
+              console.error(`[SearchLog] Error logging search:`, logError);
+              // Don't fail the entire search if logging fails
+            }
+          } else {
+            console.log(`[SearchLog] userId is null, skip logging`);
+          }
           return NextResponse.json({ results, fromCache: false, fromDb: true, total: results.length, isPro });
         }
       } else {
@@ -244,6 +316,18 @@ export async function GET(req: NextRequest) {
         return title.includes(query.toLowerCase()) || category.includes(query.toLowerCase());
       });
       console.log(`[Search] Cache hit: ${relevantResults.length}/${allResults.length} hasil relevan`);
+      // Log search action untuk quota tracking
+      if (userId) {
+        console.log(`[SearchLog] Logging search from cache - user: ${userId}, query: ${query}`);
+        try {
+          await logSearchAction(userId, query, userEmail);
+        } catch (logError) {
+          console.error(`[SearchLog] Error logging search:`, logError);
+          // Don't fail the entire search if logging fails
+        }
+      } else {
+        console.log(`[SearchLog] userId is null, skip logging`);
+      }
       return NextResponse.json({
         results: relevantResults.slice(0, limit),
         fromCache: true,
@@ -312,6 +396,19 @@ export async function GET(req: NextRequest) {
       data: { query: query.toLowerCase(), results: results as any },
     });
 
+    // Log search action untuk quota tracking
+    if (userId) {
+      console.log(`[SearchLog] Logging search from Apify - user: ${userId}, query: ${query}`);
+      try {
+        await logSearchAction(userId, query, userEmail);
+      } catch (logError) {
+        console.error(`[SearchLog] Error logging search:`, logError);
+        // Don't fail the entire search if logging fails
+      }
+    } else {
+      console.log(`[SearchLog] userId is null, skip logging`);
+    }
+
     return NextResponse.json({
       results: results.slice(0, limit),
       fromCache: false,
@@ -321,8 +418,9 @@ export async function GET(req: NextRequest) {
 
   } catch (error: any) {
     console.error("[Search Error]", error);
+    console.error("[Search Error Stack]", error?.stack);
     return NextResponse.json(
-      { results: [], error: error?.message || "Search failed" },
+      { results: [], error: error?.message || "Search failed", details: String(error) },
       { status: 500 }
     );
   }

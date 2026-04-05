@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { validateAndUpdateUserPlan } from "@/lib/access-control/subscription-manager";
+import { getUserPlanInfo } from "@/lib/access-control/permission";
 
 export async function GET() {
   const supabase = await createServerSupabaseClient();
@@ -27,5 +29,27 @@ export async function GET() {
     return NextResponse.json({ plan: newProfile.plan });
   }
 
-  return NextResponse.json({ plan: profile.plan });
+  // Validate dan update plan jika subscription expired
+  try {
+    await validateAndUpdateUserPlan(user.id);
+  } catch (error) {
+    console.error("[Plan validation error]", error);
+    // Silent fail — lanjut dengan plan yang sudah ada
+  }
+
+  // Get lengkap plan info dari getUserPlanInfo untuk accurate status
+  try {
+    const planInfo = await getUserPlanInfo(user.id);
+    console.log("[Plan API] User plan:", planInfo.planSlug, "isPremium:", planInfo.isPremium);
+    return NextResponse.json({ 
+      plan: planInfo.planSlug,
+      isPremium: planInfo.isPremium,
+      planName: planInfo.planName,
+      searchQuotaLimit: planInfo.searchQuotaLimit,
+    });
+  } catch (error) {
+    console.error("[Plan API] Error getting plan info:", error);
+    // Fallback ke profile.plan
+    return NextResponse.json({ plan: profile.plan });
+  }
 }
