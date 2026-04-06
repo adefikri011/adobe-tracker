@@ -397,7 +397,9 @@ export const ModelName = {
   GatewayConfig: 'GatewayConfig',
   ActivityLog: 'ActivityLog',
   Notification: 'Notification',
-  NotificationPreference: 'NotificationPreference'
+  NotificationPreference: 'NotificationPreference',
+  Logo: 'Logo',
+  Favicon: 'Favicon'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -413,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "searchCache" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog" | "syncLog" | "gatewayConfig" | "activityLog" | "notification" | "notificationPreference"
+    modelProps: "profile" | "searchCache" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog" | "syncLog" | "gatewayConfig" | "activityLog" | "notification" | "notificationPreference" | "logo" | "favicon"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1453,6 +1455,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Logo: {
+      payload: Prisma.$LogoPayload<ExtArgs>
+      fields: Prisma.LogoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LogoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LogoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogoPayload>
+        }
+        findFirst: {
+          args: Prisma.LogoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LogoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogoPayload>
+        }
+        findMany: {
+          args: Prisma.LogoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogoPayload>[]
+        }
+        create: {
+          args: Prisma.LogoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogoPayload>
+        }
+        createMany: {
+          args: Prisma.LogoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LogoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogoPayload>[]
+        }
+        delete: {
+          args: Prisma.LogoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogoPayload>
+        }
+        update: {
+          args: Prisma.LogoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogoPayload>
+        }
+        deleteMany: {
+          args: Prisma.LogoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LogoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LogoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogoPayload>[]
+        }
+        upsert: {
+          args: Prisma.LogoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LogoPayload>
+        }
+        aggregate: {
+          args: Prisma.LogoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLogo>
+        }
+        groupBy: {
+          args: Prisma.LogoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LogoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LogoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LogoCountAggregateOutputType> | number
+        }
+      }
+    }
+    Favicon: {
+      payload: Prisma.$FaviconPayload<ExtArgs>
+      fields: Prisma.FaviconFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FaviconFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FaviconPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FaviconFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FaviconPayload>
+        }
+        findFirst: {
+          args: Prisma.FaviconFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FaviconPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FaviconFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FaviconPayload>
+        }
+        findMany: {
+          args: Prisma.FaviconFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FaviconPayload>[]
+        }
+        create: {
+          args: Prisma.FaviconCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FaviconPayload>
+        }
+        createMany: {
+          args: Prisma.FaviconCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FaviconCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FaviconPayload>[]
+        }
+        delete: {
+          args: Prisma.FaviconDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FaviconPayload>
+        }
+        update: {
+          args: Prisma.FaviconUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FaviconPayload>
+        }
+        deleteMany: {
+          args: Prisma.FaviconDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FaviconUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FaviconUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FaviconPayload>[]
+        }
+        upsert: {
+          args: Prisma.FaviconUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FaviconPayload>
+        }
+        aggregate: {
+          args: Prisma.FaviconAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFavicon>
+        }
+        groupBy: {
+          args: Prisma.FaviconGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FaviconGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FaviconCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FaviconCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1703,6 +1853,36 @@ export const NotificationPreferenceScalarFieldEnum = {
 } as const
 
 export type NotificationPreferenceScalarFieldEnum = (typeof NotificationPreferenceScalarFieldEnum)[keyof typeof NotificationPreferenceScalarFieldEnum]
+
+
+export const LogoScalarFieldEnum = {
+  id: 'id',
+  sectionType: 'sectionType',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  uploadedAt: 'uploadedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LogoScalarFieldEnum = (typeof LogoScalarFieldEnum)[keyof typeof LogoScalarFieldEnum]
+
+
+export const FaviconScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  pageTitle: 'pageTitle',
+  description: 'description',
+  uploadedAt: 'uploadedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FaviconScalarFieldEnum = (typeof FaviconScalarFieldEnum)[keyof typeof FaviconScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2014,6 +2194,8 @@ export type GlobalOmitConfig = {
   activityLog?: Prisma.ActivityLogOmit
   notification?: Prisma.NotificationOmit
   notificationPreference?: Prisma.NotificationPreferenceOmit
+  logo?: Prisma.LogoOmit
+  favicon?: Prisma.FaviconOmit
 }
 
 /* Types for Logging */

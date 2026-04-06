@@ -239,3 +239,31 @@ model NotificationPreference {
 
   @@map("NotificationPreference")
 }
+
+model Logo {
+  id            String   @id @default(cuid())
+  sectionType   String   @unique // admin, user, land
+  fileName      String
+  fileUrl       String
+  fileSize      Int?
+  mimeType      String?
+  uploadedAt    DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("Logo")
+}
+
+model Favicon {
+  id            String   @id @default(cuid())
+  type          String   @unique // admin, user, land
+  fileName      String
+  fileUrl       String
+  fileSize      Int?
+  mimeType      String?
+  pageTitle     String?
+  description   String?
+  uploadedAt    DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("Favicon")
+}

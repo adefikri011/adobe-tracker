@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { getGatewayConfig, getEnvFallback } from "@/lib/gateway-config";
+import { prisma } from "@/lib/prisma";
+import FaviconUpdater from "./components/FaviconUpdater";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,10 +21,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Adobe Stock Tracker",
-  description: "Track and analyze your Adobe Stock performance",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const favicon = await prisma.favicon.findUnique({
+      where: { type: "admin" },
+    });
+
+    return {
+      title: favicon?.pageTitle || "Adobe Stock Tracker",
+      description: favicon?.description || "Track and analyze your Adobe Stock performance",
+      icons: {
+        icon: favicon?.fileUrl || "/favicon.ico",
+      },
+    };
+  } catch (error) {
+    return {
+      title: "Adobe Stock Tracker",
+      description: "Track and analyze your Adobe Stock performance",
+    };
+  }
+}
 
 export default async function RootLayout({
   children,
@@ -46,7 +64,10 @@ export default async function RootLayout({
           strategy="beforeInteractive"
         />
       </head>
-      <body className="min-h-full flex flex-col font-inter">{children}</body>
+      <body className="min-h-full flex flex-col font-inter">
+        <FaviconUpdater />
+        {children}
+      </body>
     </html>
   );
 }

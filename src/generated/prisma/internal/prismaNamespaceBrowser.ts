@@ -64,7 +64,9 @@ export const ModelName = {
   GatewayConfig: 'GatewayConfig',
   ActivityLog: 'ActivityLog',
   Notification: 'Notification',
-  NotificationPreference: 'NotificationPreference'
+  NotificationPreference: 'NotificationPreference',
+  Logo: 'Logo',
+  Favicon: 'Favicon'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -294,6 +296,36 @@ export const NotificationPreferenceScalarFieldEnum = {
 } as const
 
 export type NotificationPreferenceScalarFieldEnum = (typeof NotificationPreferenceScalarFieldEnum)[keyof typeof NotificationPreferenceScalarFieldEnum]
+
+
+export const LogoScalarFieldEnum = {
+  id: 'id',
+  sectionType: 'sectionType',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  uploadedAt: 'uploadedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LogoScalarFieldEnum = (typeof LogoScalarFieldEnum)[keyof typeof LogoScalarFieldEnum]
+
+
+export const FaviconScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
+  pageTitle: 'pageTitle',
+  description: 'description',
+  uploadedAt: 'uploadedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FaviconScalarFieldEnum = (typeof FaviconScalarFieldEnum)[keyof typeof FaviconScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link"; // Pastikan import link benar
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 interface NavbarProps {
   isPro: boolean;
@@ -44,6 +45,52 @@ const TrackStockLogo = () => (
 export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: NavbarProps) {
   const supabase = createClient();
   const router = useRouter();
+  const [userLogo, setUserLogo] = useState<string | null>(null);
+  const [logoLoading, setLogoLoading] = useState(true);
+
+  // Fetch user logo on mount
+  useEffect(() => {
+    const fetchUserLogo = async () => {
+      try {
+        // Add cache busting with timestamp
+        const res = await fetch(`/api/admin/logos/upload?t=${Date.now()}`, {
+          cache: "no-store",
+        });
+        const { data } = await res.json();
+        
+        const userLogoData = data.find((logo: any) => logo.sectionType === "user");
+        
+        if (userLogoData?.fileUrl) {
+          console.log("✅ User logo found in DB:", userLogoData.fileUrl);
+          
+          // Add timestamp to force image reload
+          const imageUrl = `${userLogoData.fileUrl}?v=${Date.now()}`;
+          
+          // Pre-check if image exists before setting
+          const imgCheck = new Image();
+          imgCheck.onload = () => {
+            console.log("✅ User logo loaded successfully");
+            setUserLogo(imageUrl);
+          };
+          imgCheck.onerror = () => {
+            console.error("❌ User logo failed to load - using default. URL:", imageUrl);
+            setUserLogo(null);
+          };
+          imgCheck.src = imageUrl;
+        } else {
+          console.log("ℹ️ No user logo in database - using default SVG");
+          setUserLogo(null);
+        }
+      } catch (error) {
+        console.error("❌ Failed to fetch user logos from API:", error);
+        setUserLogo(null);
+      } finally {
+        setLogoLoading(false);
+      }
+    };
+
+    fetchUserLogo();
+  }, []);
 
   // --- LOGIC LOGOUT FIX (API + SUPABASE) ---
   const handleInternalSignOut = async () => {
@@ -85,7 +132,15 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut }: Navbar
       <Link href="/dashboard" className="flex items-center gap-3 z-[110] group">
         <div className="relative">
           <div className="absolute inset-0 bg-orange-500/20 blur-lg rounded-2xl group-hover:bg-orange-500/40 transition-all duration-500" />
-          <TrackStockLogo />
+          {userLogo && !logoLoading ? (
+            <img
+              src={userLogo}
+              alt="User Logo"
+              className="w-10 h-10 drop-shadow-sm object-contain"
+            />
+          ) : (
+            <TrackStockLogo />
+          )}
         </div>
 
         <div className="flex flex-col">

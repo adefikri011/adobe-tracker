@@ -2,10 +2,54 @@
 
 import Link from "next/link";
 import TrackStockLogo from "../icons/brand";
+import { useState, useEffect } from "react";
 
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [landingLogo, setLandingLogo] = useState<string | null>(null);
+  const [logoLoading, setLogoLoading] = useState(true);
+
+  // Fetch landing logo on mount
+  useEffect(() => {
+    const fetchLandingLogo = async () => {
+      try {
+        const res = await fetch(`/api/admin/logos/upload?t=${Date.now()}`, {
+          cache: "no-store",
+        });
+        const { data } = await res.json();
+        
+        const landingLogoData = data.find((logo: any) => logo.sectionType === "land");
+        
+        if (landingLogoData?.fileUrl) {
+          console.log("✅ Landing logo found in DB (Footer):", landingLogoData.fileUrl);
+          
+          const imageUrl = `${landingLogoData.fileUrl}?v=${Date.now()}`;
+          
+          const imgCheck = new Image();
+          imgCheck.onload = () => {
+            console.log("✅ Landing logo loaded successfully (Footer)");
+            setLandingLogo(imageUrl);
+          };
+          imgCheck.onerror = () => {
+            console.error("❌ Landing logo failed to load (Footer) - using default. URL:", imageUrl);
+            setLandingLogo(null);
+          };
+          imgCheck.src = imageUrl;
+        } else {
+          console.log("ℹ️ No landing logo in database (Footer) - using default SVG");
+          setLandingLogo(null);
+        }
+      } catch (error) {
+        console.error("❌ Failed to fetch landing logos from API (Footer):", error);
+        setLandingLogo(null);
+      } finally {
+        setLogoLoading(false);
+      }
+    };
+
+    fetchLandingLogo();
+  }, []);
 
   return (
     <footer className="relative border-t border-orange-100/30 bg-gradient-to-b from-white via-orange-50/5 to-white overflow-hidden">
@@ -20,7 +64,15 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-3 mb-3 sm:mb-4"> 
 
-              <TrackStockLogo />
+              {landingLogo && !logoLoading ? (
+                <img
+                  src={landingLogo}
+                  alt="Landing Logo"
+                  className="w-10 h-10 drop-shadow-sm object-contain"
+                />
+              ) : (
+                <TrackStockLogo />
+              )}
 
               <div className="flex flex-col">
                 <span className="font-[950] text-lg sm:text-xl tracking-tighter text-slate-900 leading-none">

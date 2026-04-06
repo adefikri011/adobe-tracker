@@ -10,12 +10,56 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [landingLogo, setLandingLogo] = useState<string | null>(null);
+  const [logoLoading, setLogoLoading] = useState(true);
 
-  // Efek untuk menangani Hydration Error & Scroll
+  // Efek untuk menangani Hydration Error, Scroll & Logo Fetch
   useEffect(() => {
     setMounted(true);
+    
+    // Scroll handler
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
+
+    // Fetch landing logo
+    const fetchLandingLogo = async () => {
+      try {
+        const res = await fetch(`/api/admin/logos/upload?t=${Date.now()}`, {
+          cache: "no-store",
+        });
+        const { data } = await res.json();
+        
+        const landingLogoData = data.find((logo: any) => logo.sectionType === "land");
+        
+        if (landingLogoData?.fileUrl) {
+          console.log("✅ Landing logo found in DB:", landingLogoData.fileUrl);
+          
+          const imageUrl = `${landingLogoData.fileUrl}?v=${Date.now()}`;
+          
+          const imgCheck = new Image();
+          imgCheck.onload = () => {
+            console.log("✅ Landing logo loaded successfully");
+            setLandingLogo(imageUrl);
+          };
+          imgCheck.onerror = () => {
+            console.error("❌ Landing logo failed to load - using default. URL:", imageUrl);
+            setLandingLogo(null);
+          };
+          imgCheck.src = imageUrl;
+        } else {
+          console.log("ℹ️ No landing logo in database - using default SVG");
+          setLandingLogo(null);
+        }
+      } catch (error) {
+        console.error("❌ Failed to fetch landing logos from API:", error);
+        setLandingLogo(null);
+      } finally {
+        setLogoLoading(false);
+      }
+    };
+
+    fetchLandingLogo();
+    
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -54,7 +98,15 @@ export default function Navbar() {
           <button onClick={() => handleSmoothScroll("hero")} className="flex items-center gap-2 md:gap-3 z-[110] group cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0">
             <div className="relative">
               <div className="absolute inset-0 bg-orange-500/20 blur-lg rounded-2xl group-hover:bg-orange-500/40 transition-all duration-500" />
-              <TrackStockLogo />
+              {landingLogo && !logoLoading ? (
+                <img
+                  src={landingLogo}
+                  alt="Landing Logo"
+                  className="w-10 h-10 drop-shadow-sm object-contain"
+                />
+              ) : (
+                <TrackStockLogo />
+              )}
             </div>
 
             <div className="flex flex-col hidden sm:flex text-left">

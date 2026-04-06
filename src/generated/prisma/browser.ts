@@ -87,3 +87,13 @@ export type Notification = Prisma.NotificationModel
  * 
  */
 export type NotificationPreference = Prisma.NotificationPreferenceModel
+/**
+ * Model Logo
+ * 
+ */
+export type Logo = Prisma.LogoModel
+/**
+ * Model Favicon
+ * 
+ */
+export type Favicon = Prisma.FaviconModel

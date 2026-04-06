@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -104,6 +104,57 @@ export default function AdminSidebar() {
   const [settingsOpen, setSettingsOpen] = useState(
     pathname.startsWith("/admin/settings")
   );
+  const [adminLogo, setAdminLogo] = useState<string | null>(null);
+  const [logoLoading, setLogoLoading] = useState(true);
+  const [logoError, setLogoError] = useState(false);
+
+  // Fetch admin logo on mount
+  useEffect(() => {
+    const fetchAdminLogo = async () => {
+      try {
+        // Add cache busting with timestamp
+        const res = await fetch(`/api/admin/logos/upload?t=${Date.now()}`, {
+          cache: "no-store",
+        });
+        const { data } = await res.json();
+        
+        const adminLogoData = data.find((logo: any) => logo.sectionType === "admin");
+        
+        if (adminLogoData?.fileUrl) {
+          console.log("✅ Logo found in DB:", adminLogoData.fileUrl);
+          
+          // Add timestamp to force image reload
+          const imageUrl = `${adminLogoData.fileUrl}?v=${Date.now()}`;
+          
+          // Pre-check if image exists before setting
+          const imgCheck = new Image();
+          imgCheck.onload = () => {
+            console.log("✅ Image loaded successfully");
+            setAdminLogo(imageUrl);
+            setLogoError(false);
+          };
+          imgCheck.onerror = () => {
+            console.error("❌ Image failed to load - using default. URL:", imageUrl);
+            setAdminLogo(null);
+            setLogoError(false);
+          };
+          imgCheck.src = imageUrl;
+        } else {
+          console.log("ℹ️ No logo in database - using default SVG");
+          setAdminLogo(null);
+          setLogoError(false);
+        }
+      } catch (error) {
+        console.error("❌ Failed to fetch logos from API:", error);
+        setAdminLogo(null);
+        setLogoError(false);
+      } finally {
+        setLogoLoading(false);
+      }
+    };
+
+    fetchAdminLogo();
+  }, []);
 
   const allNavItems = navGroups.flatMap((g) => g.items);
   const activeHref = allNavItems.reduce<string | null>((best, item) => {
@@ -126,8 +177,21 @@ export default function AdminSidebar() {
       <div className="flex items-center h-16 px-4 border-b border-orange-50 flex-shrink-0">
         <div className="relative group cursor-pointer flex-shrink-0">
           <div className="absolute inset-0 bg-orange-500/20 blur-lg rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative transform group-hover:scale-105 transition-transform duration-300">
-            <TrackStockLogo />
+          <div className="relative transform group-hover:scale-105 transition-transform duration-300 w-9 h-9 flex items-center justify-center">
+            {adminLogo && !logoLoading && !logoError ? (
+              <img
+                src={adminLogo}
+                alt="Admin Logo"
+                className="w-full h-full object-contain"
+                onError={() => {
+                  console.warn("Failed to load image, using default logo");
+                  setLogoError(true);
+                }}
+              />
+            ) : (
+              // Default SVG - always fallback
+              <TrackStockLogo />
+            )}
           </div>
         </div>
         <AnimatePresence>
