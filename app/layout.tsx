@@ -21,24 +21,40 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const favicon = await prisma.favicon.findUnique({
-      where: { type: "admin" },
-    });
+// Cache metadata for 1 hour to reduce database load
+export const revalidate = 3600;
 
-    return {
-      title: favicon?.pageTitle || "Adobe Stock Tracker",
-      description: favicon?.description || "Track and analyze your Adobe Stock performance",
-      icons: {
-        icon: favicon?.fileUrl || "/favicon.ico",
-      },
-    };
+export async function generateMetadata(): Promise<Metadata> {
+  const fallbackMetadata: Metadata = {
+    title: "Adobe Stock Tracker",
+    description: "Track and analyze your Adobe Stock performance",
+  };
+
+  try {
+    // Use Promise.race with timeout to prevent hanging
+    const favicon = await Promise.race([
+      prisma.favicon.findUnique({
+        where: { type: "admin" },
+      }),
+      new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), 5000)
+      ),
+    ]);
+
+    if (favicon) {
+      return {
+        title: favicon?.pageTitle || "Adobe Stock Tracker",
+        description: favicon?.description || "Track and analyze your Adobe Stock performance",
+        icons: {
+          icon: favicon?.fileUrl || "/favicon.ico",
+        },
+      };
+    }
+
+    return fallbackMetadata;
   } catch (error) {
-    return {
-      title: "Adobe Stock Tracker",
-      description: "Track and analyze your Adobe Stock performance",
-    };
+    console.error("Error generating metadata:", error);
+    return fallbackMetadata;
   }
 }
 

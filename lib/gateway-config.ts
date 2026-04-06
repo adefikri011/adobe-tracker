@@ -2,11 +2,17 @@ import { prisma } from "@/lib/prisma";
 
 export async function getGatewayConfig(gateway: "midtrans" | "stripe") {
   try {
-    const config = await prisma.gatewayConfig.findUnique({
-      where: { gateway },
-    });
+    // Use Promise.race with timeout to prevent hanging connections
+    const config = await Promise.race([
+      prisma.gatewayConfig.findUnique({
+        where: { gateway },
+      }),
+      new Promise<null>((_, reject) =>
+        setTimeout(() => reject(new Error(`Database query timeout for ${gateway} config`)), 5000)
+      ),
+    ]);
 
-    if (!config || !config.enabled) {
+    if (!config || !config?.enabled) {
       return null;
     }
 

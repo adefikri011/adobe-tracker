@@ -13,8 +13,27 @@ export default function CurrencySettingsPage() {
   const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isFetchingRate, setIsFetchingRate] = useState(false);
+  const [rateSource, setRateSource] = useState("");
 
-  // Load settings from API
+  const fetchLiveRate = async () => {
+    setIsFetchingRate(true);
+    try {
+      const res = await fetch("/api/settings/exchange-rate", {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      if (data.success && data.rate) {
+        setUsdToIdr(data.rate.toString());
+        setRateSource(`Live rate · ${new Date().toLocaleDateString("id-ID")}`);
+      }
+    } catch (err) {
+      console.error("Failed to fetch live rate:", err);
+    } finally {
+      setIsFetchingRate(false);
+    }
+  };
+
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -28,6 +47,7 @@ export default function CurrencySettingsPage() {
         console.error("Failed to load settings:", error);
       } finally {
         setLoading(false);
+        fetchLiveRate();
       }
     };
     loadSettings();
@@ -111,18 +131,27 @@ export default function CurrencySettingsPage() {
 
           {/* Exchange Rate */}
           <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm mb-5">
-            <h3 className="font-semibold text-slate-900 mb-1 text-sm">Exchange Rate</h3>
-            <p className="text-xs text-slate-400 mb-4">Used for currency conversion display</p>
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="font-semibold text-slate-900 text-sm">Exchange Rate</h3>
+              <button
+                onClick={fetchLiveRate}
+                disabled={isFetchingRate}
+                className="text-xs text-orange-500 hover:text-orange-600 flex items-center gap-1 disabled:opacity-50"
+              >
+                {isFetchingRate && <Loader2 size={12} className="animate-spin" />}
+                {isFetchingRate ? "Updating..." : "↻ Refresh"}
+              </button>
+            </div>
+            <p className="text-xs text-slate-400 mb-4">
+              {rateSource || "Auto-fetched from market rate"}
+            </p>
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <label className="text-xs text-slate-500 mb-1.5 block">1 USD =</label>
-                <input
-                  type="number"
-                  value={usdToIdr}
-                  onChange={(e) => setUsdToIdr(e.target.value)}
-                  disabled={status === "saving"}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-400 disabled:bg-slate-50"
-                />
+                <div className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 text-slate-700 flex items-center justify-between">
+                  <span>{parseFloat(usdToIdr).toLocaleString("id-ID")}</span>
+                  {isFetchingRate && <Loader2 size={12} className="animate-spin text-orange-400" />}
+                </div>
               </div>
               <div className="flex-1">
                 <label className="text-xs text-slate-500 mb-1.5 block">Currency</label>
@@ -132,7 +161,9 @@ export default function CurrencySettingsPage() {
               </div>
             </div>
             <p className="text-xs text-slate-400 mt-3">
-              Example: Pro 30 Days = ${19.99} USD ≈ {selected === "IDR" ? `Rp ${(19.99 * parseFloat(usdToIdr || "0")).toLocaleString("id-ID")}` : `${currencies.find((c) => c.code === selected)?.symbol}${(19.99).toFixed(2)}`}
+              Example: Pro 30 Days = ${19.99} USD ≈ {selected === "IDR"
+                ? `Rp ${(19.99 * parseFloat(usdToIdr || "0")).toLocaleString("id-ID")}`
+                : `${currencies.find((c) => c.code === selected)?.symbol}${(19.99).toFixed(2)}`}
             </p>
           </div>
 

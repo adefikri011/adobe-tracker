@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getClientIP } from "@/lib/activity-log";
 
-// Helper untuk cek apakah user adalah admin
 async function isAdmin() {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -17,7 +16,6 @@ async function isAdmin() {
   return profile?.role === "admin";
 }
 
-// Get admin info untuk logging
 async function getAdminInfo() {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -34,14 +32,12 @@ async function getAdminInfo() {
   };
 }
 
-// GET: Ambil currency settings (public endpoint)
 export async function GET() {
   try {
     let settings = await prisma.appSettings.findUnique({
       where: { id: "singleton" },
     });
 
-    // Jika belum ada, buat default
     if (!settings) {
       settings = await prisma.appSettings.create({
         data: {
@@ -64,7 +60,6 @@ export async function GET() {
   }
 }
 
-// POST: Update currency settings (admin only)
 export async function POST(req: NextRequest) {
   try {
     if (!(await isAdmin())) {
@@ -77,7 +72,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { currency, exchangeRate } = body;
 
-    // Validasi input
     if (!currency || !["USD", "IDR"].includes(currency)) {
       return NextResponse.json(
         { success: false, error: "Invalid currency. Must be USD or IDR" },
@@ -92,7 +86,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Update atau create
     const settings = await prisma.appSettings.upsert({
       where: { id: "singleton" },
       update: {
@@ -106,7 +99,6 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Log activity
     const admin = await getAdminInfo();
     await prisma.activityLog.create({
       data: {
