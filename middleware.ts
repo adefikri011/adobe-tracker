@@ -37,7 +37,13 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data?.user ?? null;
+  } catch (error) {
+    console.error("[middleware] Failed to get user from Supabase:", error);
+  }
 
   // Kalau belum login dan mau ke /dashboard → redirect ke /login
   if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {

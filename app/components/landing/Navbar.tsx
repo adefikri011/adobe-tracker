@@ -27,7 +27,19 @@ export default function Navbar() {
         const res = await fetch(`/api/admin/logos/upload?t=${Date.now()}`, {
           cache: "no-store",
         });
-        const { data } = await res.json();
+        if (!res.ok) {
+          setLandingLogo(null);
+          return;
+        }
+
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          setLandingLogo(null);
+          return;
+        }
+
+        const payload = await res.json();
+        const data = Array.isArray(payload?.data) ? payload.data : [];
         
         const landingLogoData = data.find((logo: any) => logo.sectionType === "land");
         
@@ -50,8 +62,7 @@ export default function Navbar() {
           console.log("ℹ️ No landing logo in database - using default SVG");
           setLandingLogo(null);
         }
-      } catch (error) {
-        console.error("❌ Failed to fetch landing logos from API:", error);
+      } catch {
         setLandingLogo(null);
       } finally {
         setLogoLoading(false);

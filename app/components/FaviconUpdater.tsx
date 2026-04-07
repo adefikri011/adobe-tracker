@@ -16,7 +16,13 @@ export default function FaviconUpdater() {
     const updateBranding = async () => {
       try {
         const res = await fetch("/api/admin/favicon");
-        const { data } = await res.json();
+        if (!res.ok) return;
+
+        const contentType = res.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) return;
+
+        const payload = await res.json();
+        const data = payload?.data;
 
         if (cancelled) return;
 
