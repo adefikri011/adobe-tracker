@@ -103,6 +103,26 @@ function getInitials(name?: string, email?: string): string {
   return "US";
 }
 
+function getPlanBadge(isPro: boolean, planLoading: boolean): { label: string; tone: string; glow: string; dot: string } | null {
+  if (planLoading) return null;
+
+  if (isPro) {
+    return {
+      label: "PRO",
+      tone: "rgba(16,185,129,0.12)",
+      glow: "rgba(16,185,129,0.18)",
+      dot: "#10b981",
+    };
+  }
+
+  return {
+    label: "FREE",
+    tone: "rgba(249,115,22,0.10)",
+    glow: "rgba(249,115,22,0.18)",
+    dot: "#f97316",
+  };
+}
+
 export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmail, userName, userAvatar }: NavbarProps) {
   const supabase = createClient();
   const router = useRouter();
@@ -200,6 +220,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
   const initials = getInitials(userInfo.name, userInfo.email);
   const displayName = userInfo.name || userInfo.email?.split("@")[0] || "User";
   const displayEmail = userInfo.email || "";
+  const planBadge = getPlanBadge(isPro, planLoading);
 
   return (
     <>
@@ -355,9 +376,11 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                     padding: "14px 16px",
                     borderBottom: "1px solid rgba(0,0,0,0.06)",
                     background: "rgba(249,115,22,0.03)",
+                    position: "relative",
+                    paddingRight: "84px",
                   }}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div
                       style={{
                         width: "38px",
@@ -384,6 +407,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                         <span style={{ color: "white", fontSize: "13px", fontWeight: "800" }}>{initials}</span>
                       )}
                     </div>
+
                     <div style={{ minWidth: 0 }}>
                       <p
                         style={{
@@ -413,6 +437,44 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                     </div>
                   </div>
 
+                  {planBadge && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "12px",
+                        right: "12px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        padding: "4px 9px",
+                        borderRadius: "999px",
+                        background: isPro ? "rgba(16,185,129,0.08)" : "rgba(249,115,22,0.08)",
+                        border: isPro ? "1px solid rgba(16,185,129,0.18)" : "1px solid rgba(249,115,22,0.18)",
+                        zIndex: 2,
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: "6px",
+                          height: "6px",
+                          borderRadius: "999px",
+                          background: planBadge.dot,
+                          flexShrink: 0,
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: "9px",
+                          fontWeight: 900,
+                          letterSpacing: "0.14em",
+                          color: isPro ? "#059669" : "#ea580c",
+                        }}
+                      >
+                        {planBadge.label}
+                      </span>
+                    </div>
+                  )}
+
                 </div>
 
                 {/* Menu items */}
@@ -421,11 +483,6 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                     icon={<IconUser />}
                     label="My Profile"
                     onClick={() => { setProfileOpen(false); router.push("/dashboard/profile"); }}
-                  />
-                  <DropdownItem
-                    icon={<IconSettings />}
-                    label="Settings"
-                    onClick={() => { setProfileOpen(false); router.push("/dashboard/settings"); }}
                   />
                   <DropdownItem
                     icon={<IconBilling />}
