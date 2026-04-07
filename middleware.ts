@@ -1,6 +1,18 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+function applyNoStoreHeaders(response: NextResponse) {
+  // Prevent edge/proxy caches from mixing HTML and RSC variants.
+  response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Expires", "0");
+  response.headers.set(
+    "Vary",
+    "RSC, Next-Router-State-Tree, Next-Router-Prefetch, Accept, Accept-Encoding"
+  );
+  return response;
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -13,7 +25,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({ request });
@@ -43,6 +55,13 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname === "/register"
   )) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (
+    request.nextUrl.pathname === "/login" ||
+    request.nextUrl.pathname === "/register"
+  ) {
+    return applyNoStoreHeaders(supabaseResponse);
   }
 
   return supabaseResponse;
