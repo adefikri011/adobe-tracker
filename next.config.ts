@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Opsi ini boleh ada, tapi biasanya tidak perlu untuk produksi di Hostinger
-  // allowedDevOrigins: ["192.168.1.13"], 
-  
   reactStrictMode: true,
+  experimental: {
+    workerThreads: false,
+    cpus: 4,
+  },
 };
 
 export default nextConfig;
