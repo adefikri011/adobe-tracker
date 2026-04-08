@@ -94,14 +94,20 @@ function parseSessionEntries(raw: unknown): SessionEntry[] {
 
 function keepRecentSessions(sessions: SessionEntry[]) {
   const cutoffMs = 30 * 24 * 60 * 60 * 1000;
-  return sessions.filter((session) => {
+  const filtered = sessions.filter((session) => {
     const createdMs = new Date(session.createdAt).getTime();
     if (Number.isNaN(createdMs)) {
       return false;
     }
 
-    return Date.now() - createdMs < cutoffMs;
+    const isRecent = Date.now() - createdMs < cutoffMs;
+    if (!isRecent) {
+      console.log("[LOGIN] Removing old session from:", new Date(session.createdAt).toISOString());
+    }
+    return isRecent;
   });
+  
+  return filtered;
 }
 
 function dedupeByDevice(sessions: SessionEntry[]) {
@@ -314,6 +320,10 @@ export async function POST(req: Request) {
     
     const uniqueSessions = dedupeByDevice(recentSessions);
     console.log("[LOGIN] Unique Sessions (after dedup):", uniqueSessions.length, uniqueSessions.map(s => s.deviceKey));
+    
+    // Check jika currentToken sudah ada di activeSessions (user login ulang dengan device lama)
+    const tokenAlreadyExists = uniqueSessions.some(session => session.token === currentToken);
+    console.log("[LOGIN] Token already exists in sessions:", tokenAlreadyExists);
 
     const activeSubscription = await prisma.subscription.findFirst({
       where: {
@@ -357,9 +367,19 @@ export async function POST(req: Request) {
     console.log("Device Limit:", deviceLimit);
     console.log("Suspend Duration Minutes:", suspendDurationMinutes);
     console.log("All Session Device Keys:", uniqueSessions.map(s => s.deviceKey));
+    console.log("Token Already Exists:", tokenAlreadyExists);
     console.log("===================");
 
-    if (existingDeviceIndex === -1 && uniqueSessions.length >= deviceLimit) {
+    // Jika token sudah ada di sistem, ini adalah re-login dari device yang sama - JANGAN suspend
+    // Hanya anggap sebagai NEW device jika:
+    // 1. Token TIDAK ada di history
+    // 2. Device key TIDAK ada di history 
+    // 3. Sudah mencapai device limit
+    if (
+      !tokenAlreadyExists && 
+      existingDeviceIndex === -1 && 
+      uniqueSessions.length >= deviceLimit
+    ) {
       const suspendTime = new Date(Date.now() + suspendDurationMinutes * 60 * 1000);
 
       console.log("[LOGIN] 🔒 SUSPENDING - New device beyond limit");

@@ -116,40 +116,32 @@ export async function GET() {
     }
 
     const activeSessions = keepRecentSessions(parseSessionEntries(sessionRecord?.activeSessions));
+    
+    // Jika tidak ada sessions di database, atau token tidak ditemukan,
+    // jangan langsung suspend - cek dulu apakah ini adalah session baru yang valid
+    // User masih punya token valid dari Supabase, jadi tetap allow akses
+    if (activeSessions.length === 0) {
+      // Ini kemungkinan session pertama atau sessions sudah expired dari database
+      // Tapi user masih memiliki token valid dari Supabase, jadi allow akses
+      console.log("[SESSION-STATUS] No active sessions in DB, but user has valid Supabase token - allow access");
+      return NextResponse.json({ 
+        status: "ok",
+        suspendDurationMinutes,
+      });
+    }
+
     const hasCurrentToken = activeSessions.some((session) => session.token === accessToken);
 
     if (!hasCurrentToken) {
-      const suspendedUntil = new Date(Date.now() + suspendDurationMinutes * 60 * 1000);
-      const diffMs = suspendedUntil.getTime() - now.getTime();
-      const secondsLeft = Math.max(0, Math.ceil(diffMs / 1000));
-      const minutesLeft = Math.ceil(diffMs / 60000);
-
-      await Promise.all([
-        prisma.profile.update({
-          where: { id: user.id },
-          data: { status: "suspended" },
-        }),
-        prisma.userSession.upsert({
-          where: { id: user.id },
-          update: {
-            activeSessions: [],
-            suspendedUntil,
-          },
-          create: {
-            id: user.id,
-            activeSessions: [],
-            suspendedUntil,
-          },
-        }),
-      ]);
-
-      await supabase.auth.signOut();
-
-      return NextResponse.json({
-        status: "suspended",
-        secondsLeft,
-        minutesLeft,
-        suspendedUntil: suspendedUntil.toISOString(),
+      // Token tidak ditemukan di db, tapi masih valid di Supabase
+      // Ini bisa berarti: session baru, atau sessions di db sudah cleanup tapi Supabase cookie masih valid
+      // IMPORTANT: Jangan suspend user hanya karena token tidak ada di db
+      // User harus login ulang via /api/auth/login untuk refresh sessions mereka
+      console.log("[SESSION-STATUS] Current token not in DB sessions, checking if user needs refresh");
+      
+      // Silakan tetap allow akses, tapi session perlu refresh pada login berikutnya
+      return NextResponse.json({ 
+        status: "ok",
         suspendDurationMinutes,
       });
     }
