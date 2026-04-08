@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { LogIn, ArrowRight, X } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import TrackStockLogo from "../icons/brand";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,7 +15,7 @@ export default function Navbar() {
   // Efek untuk menangani Hydration Error, Scroll & Logo Fetch
   useEffect(() => {
     setMounted(true);
-    
+
     // Scroll handler
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
@@ -40,14 +39,14 @@ export default function Navbar() {
 
         const payload = await res.json();
         const data = Array.isArray(payload?.data) ? payload.data : [];
-        
+
         const landingLogoData = data.find((logo: any) => logo.sectionType === "land");
-        
+
         if (landingLogoData?.fileUrl) {
           console.log("✅ Landing logo found in DB:", landingLogoData.fileUrl);
-          
+
           const imageUrl = `${landingLogoData.fileUrl}?v=${Date.now()}`;
-          
+
           const imgCheck = new Image();
           imgCheck.onload = () => {
             console.log("✅ Landing logo loaded successfully");
@@ -70,7 +69,7 @@ export default function Navbar() {
     };
 
     fetchLandingLogo();
-    
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -89,11 +88,6 @@ export default function Navbar() {
     { id: "about", label: "About" }
   ];
 
-  
-
-  // Jika belum mounted, jangan render apapun untuk menghindari mismatch HTML server vs client
-  if (!mounted) return null;
-
   return (
     <>
       <motion.nav
@@ -106,27 +100,20 @@ export default function Navbar() {
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* LOGO */}
-          <button onClick={() => handleSmoothScroll("hero")} className="flex items-center gap-2 md:gap-3 z-[110] group cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0">
-            <div className="relative">
-              <div className="absolute inset-0 bg-orange-500/20 blur-lg rounded-2xl group-hover:bg-orange-500/40 transition-all duration-500" />
-              {landingLogo && !logoLoading ? (
+          <button onClick={() => handleSmoothScroll("hero")} className="flex items-center z-[110] group cursor-pointer flex-shrink-0">
+            <div className="relative flex-shrink-0">
+              {/* Glow */}
+              <div className="absolute inset-0 bg-orange-500/25 blur-xl rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 scale-150" />
+
+              {logoLoading ? (
+                <div className="w-32 h-16 md:w-36 md:h-[4.5rem] bg-slate-200 rounded-lg animate-pulse" />
+              ) : landingLogo ? (
                 <img
                   src={landingLogo}
                   alt="Landing Logo"
-                  className="w-10 h-10 drop-shadow-sm object-contain"
+                  className="relative w-32 h-16 md:w-36 md:h-[4.5rem] drop-shadow-md object-contain object-left transition-transform duration-300 group-hover:scale-105"
                 />
-              ) : (
-                <TrackStockLogo />
-              )}
-            </div>
-
-            <div className="flex flex-col hidden sm:flex text-left">
-              <span className="font-[950] text-base md:text-lg lg:text-xl tracking-tighter text-slate-900 leading-none">
-                Track<span className="text-orange-500">Stock</span>
-              </span>
-              <span className="text-[7px] md:hidden lg:block font-black uppercase tracking-[0.3em] text-slate-400 leading-none mt-1">
-                Analytics Pro
-              </span>
+              ) : null}
             </div>
           </button>
 
@@ -149,7 +136,7 @@ export default function Navbar() {
             <Link
               href="/login"
               className="hidden lg:flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-orange-600 transition-colors">
-              <LogIn className="w-4 h-4"/>
+              <LogIn className="w-4 h-4" />
               Login
             </Link>
 
@@ -157,7 +144,7 @@ export default function Navbar() {
               href="/register"
               className="hidden lg:flex items-center gap-2 text-sm bg-orange-500 hover:bg-orange-600 transition-all px-4 sm:px-5 py-2.5 rounded-2xl font-black text-white shadow-lg shadow-orange-500/25 active:scale-95">
               <span className="text-[12px] sm:text-[13px]">Get Started</span>
-              <ArrowRight className="w-4 h-4"/>
+              <ArrowRight className="w-4 h-4" />
             </Link>
 
             {/* MOBILE MENU BUTTON */}
@@ -190,7 +177,7 @@ export default function Navbar() {
                 onClick={() => setIsOpen(false)}
                 className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[90] lg:hidden"
               />
-              
+
               {/* Menu Slide */}
               <motion.div
                 initial={{ opacity: 0, y: -20 }}

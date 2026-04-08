@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -12,9 +13,25 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  // ✅ ALLOW: /dashboard/billing/plans untuk guest users tanpa redirect
+  const headersList = await headers();
+  const isBillingPlansRoute = headersList.get("x-billing-plans") === "true";
+  
+  // Jika tidak ada user dan bukan billing/plans route, redirect ke login
+  if (!user && !isBillingPlansRoute) {
+    redirect("/login");
+  }
 
-  // 1. Ambil data lengkap: role, plan, dan planExpiry
+  // ✅ If guest user accessing billing/plans, skip prisma queries
+  if (!user) {
+    return (
+      <div className="min-h-screen">
+        {children}
+      </div>
+    );
+  }
+
+  // 1. Ambil data lengkap: role, plan, dan planExpiry (hanya jika user ada)
   const profile = await prisma.profile.findUnique({
     where: { id: user.id },
     select: { 

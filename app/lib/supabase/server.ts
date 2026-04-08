@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+const SUPABASE_AUTH_STORAGE_KEY = "sb-adobe-tracker-auth-token";
+
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
 
@@ -8,6 +10,15 @@ export async function createServerSupabaseClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      auth: {
+        flowType: "pkce",
+        storageKey: SUPABASE_AUTH_STORAGE_KEY,
+      },
+      cookieOptions: {
+        path: "/",
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      },
       cookies: {
         getAll() {
           return cookieStore.getAll();
@@ -15,13 +26,11 @@ export async function createServerSupabaseClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              // Set cookies dengan maxAge 30 hari untuk consistency
               cookieStore.set(name, value, {
                 ...options,
-                maxAge: options?.maxAge || 30 * 24 * 60 * 60, // 30 days default
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "lax" as const,
+                path: options?.path ?? "/",
+                sameSite: options?.sameSite ?? "lax",
+                secure: options?.secure ?? process.env.NODE_ENV === "production",
               })
             );
           } catch (e) {

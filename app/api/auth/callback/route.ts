@@ -185,6 +185,29 @@ export async function GET(request: Request) {
     if (error) {
       console.error("Auth Error:", error.message);
 
+      const cookieHeader = request.headers.get("cookie") || "";
+      const cookieKeys = cookieHeader
+        .split(";")
+        .map((part) => part.trim().split("=")[0])
+        .filter(Boolean);
+      const relevantCookieKeys = cookieKeys.filter(
+        (key) => key.includes("sb-") || key.includes("code-verifier")
+      );
+
+      console.error("[CALLBACK] PKCE diagnostics:", {
+        hasCookieHeader: cookieHeader.length > 0,
+        hasCodeVerifierCookie: relevantCookieKeys.some((key) => key.includes("code-verifier")),
+        relevantCookieKeys,
+      });
+
+      // OAuth callback can be requested more than once (reload/back/prefetch).
+      // If session is already established, treat it as success instead of auth_failed.
+      const { data: existingSessionData } = await supabase.auth.getSession();
+      if (existingSessionData.session?.user) {
+        const redirectPath = next.startsWith("/") ? next : "/dashboard";
+        return NextResponse.redirect(`${origin}${redirectPath}`);
+      }
+
       // Log failed login attempt
       try {
         const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] ||

@@ -215,6 +215,7 @@ export default function UserPlansPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [currency, setCurrency] = useState<string>("USD");
   const [exchangeRate, setExchangeRate] = useState<number>(15800);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Payment Details Modal States
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -223,25 +224,37 @@ export default function UserPlansPage() {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   useEffect(() => {
+    // Check auth status
+    const fetchAuthStatus = async () => {
+      try {
+        const res = await fetch("/api/auth/session-status", { cache: "no-store" });
+        setIsAuthenticated(res.ok);
+      } catch {
+        setIsAuthenticated(false);
+      }
+    };
+
     // Fetch currency settings
-    fetch("/api/settings/currency")
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/settings/currency");
+        const data = await res.json();
         if (data.success && data.data) {
           setCurrency(data.data.currency);
           setExchangeRate(data.data.exchangeRate);
         }
-      })
-      .catch(() => {
+      } catch {
         // Default to USD if error
         setCurrency("USD");
         setExchangeRate(15800);
-      });
+      }
+    };
 
     // Fetch plans
-    fetch("/api/billing/plans")
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchPlans = async () => {
+      try {
+        const res = await fetch("/api/billing/plans");
+        const data = await res.json();
         if (data && Array.isArray(data.plans)) {
           const activePlans = data.plans.filter(
             (p: any) => p.isActive && p.price > 0
@@ -251,11 +264,23 @@ export default function UserPlansPage() {
           setPlans([]);
         }
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      } catch {
+        setLoading(false);
+      }
+    };
+
+    fetchAuthStatus();
+    fetchSettings();
+    fetchPlans();
   }, []);
 
   const handleCheckout = async (planId: string) => {
+    if (!isAuthenticated) {
+      alert("Silakan login atau daftar dulu untuk melanjutkan pembelian.");
+      window.location.href = "/login";
+      return;
+    }
+
     // Find the plan
     const plan = plans.find(p => p.id === planId);
     if (!plan) return;
@@ -277,6 +302,16 @@ export default function UserPlansPage() {
           paymentMethod: selectedPaymentMethod 
         }),
       });
+
+      if (res.status === 401) {
+        alert("Silakan login atau daftar dulu untuk melanjutkan pembelian.");
+        setShowPaymentModal(false);
+        setSelectedPlan(null);
+        setIsAuthenticated(false);
+        window.location.href = "/login";
+        return;
+      }
+
       const data = await res.json();
       if (data.token) {
         setShowPaymentModal(false);
@@ -292,6 +327,7 @@ export default function UserPlansPage() {
         });
       } else {
         alert("Gagal membuat transaksi");
+        setIsProcessingPayment(false);
       }
     } catch (error) {
       console.error(error);
@@ -317,13 +353,12 @@ export default function UserPlansPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <style jsx global>{`
-        nav button[style*="background: linear-gradient(135deg, #f97316, #ea580c)"] {
+      <style jsx global>{`nav button[style*="background: linear-gradient(135deg, #f97316, #ea580c)"] {
           display: none !important;
         }
       `}</style>
 
-      <Navbar isPro={false} planLoading={false} onUpgradeClick={() => {}} />
+      <Navbar isPro={false} planLoading={false} onUpgradeClick={() => {}} isGuest={!isAuthenticated} />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 pb-16 sm:pb-20 md:pb-24 pt-10 sm:pt-12 md:pt-14">
 
@@ -470,7 +505,7 @@ export default function UserPlansPage() {
                   {/* CTA */}
                   <button
                     onClick={() => handleCheckout(plan.id)}
-                    disabled={showPaymentModal || isProcessingPayment}
+                    disabled={showPaymentModal || isProcessingPayment || !isAuthenticated}
                     className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 mt-auto disabled:opacity-50 ${
                       isPopular
                         ? "bg-orange-500 hover:bg-orange-400 text-white shadow-lg shadow-orange-500/20"
@@ -479,6 +514,8 @@ export default function UserPlansPage() {
                   >
                     {isProcessingPayment ? (
                       <Loader2 className="animate-spin" size={16} />
+                    ) : !isAuthenticated ? (
+                      "Login to Buy"
                     ) : (
                       <>
                         <Zap size={13} className="hidden sm:inline" fill="currentColor" />

@@ -97,16 +97,26 @@ export default function RegisterPage() {
   const handleSocialLogin = async (provider: "google") => {
     setLoading(true);
     setError("");
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: `${window.location.origin}/api/auth/callback`,
+        skipBrowserRedirect: true,
       },
     });
     if (error) {
       setError(error.message);
       setLoading(false);
+      return;
     }
+
+    if (data?.url) {
+      window.location.assign(data.url);
+      return;
+    }
+
+    setError("Failed to start OAuth flow. Please try again.");
+    setLoading(false);
   };
 
   return (

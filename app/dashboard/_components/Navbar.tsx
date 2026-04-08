@@ -13,6 +13,7 @@ interface NavbarProps {
   userEmail?: string;
   userName?: string;
   userAvatar?: string;
+  isGuest?: boolean;
 }
 
 const TrackStockLogo = () => (
@@ -123,7 +124,7 @@ function getPlanBadge(isPro: boolean, planLoading: boolean): { label: string; to
   };
 }
 
-export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmail, userName, userAvatar }: NavbarProps) {
+export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmail, userName, userAvatar, isGuest }: NavbarProps) {
   const supabase = createClient();
   const router = useRouter();
   const [userLogo, setUserLogo] = useState<string | null>(null);
@@ -235,29 +236,23 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
         }}
       >
         {/* Logo */}
-        <Link href="/dashboard" className="flex items-center gap-3 z-[110] group">
-          <div className="relative">
-            <div className="absolute inset-0 bg-orange-500/20 blur-lg rounded-2xl group-hover:bg-orange-500/40 transition-all duration-500" />
-            {userLogo && !logoLoading ? (
-              <img src={userLogo} alt="User Logo" className="w-10 h-10 drop-shadow-sm object-contain" />
-            ) : (
-              <TrackStockLogo />
+        <Link href={isGuest ? "/" : "/dashboard"} className="flex items-center gap-3 z-[110] group flex-shrink-0">
+          <div className="relative flex-shrink-0">
+            <div className="absolute inset-0 bg-orange-500/25 blur-xl rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 scale-150" />
+            {!logoLoading && userLogo && (
+              <img
+                src={userLogo}
+                alt="User Logo"
+                className="relative w-32 h-16 md:w-36 md:h-[4.5rem] drop-shadow-md object-contain object-left transition-transform duration-300 group-hover:scale-105"
+              />
             )}
-          </div>
-          <div className="flex flex-col">
-            <span className="font-[950] text-xl md:text-2xl tracking-tighter text-slate-900 leading-none">
-              Track<span className="text-orange-500">Stock</span>
-            </span>
-            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mt-1">
-              Analytics Pro
-            </span>
           </div>
         </Link>
 
         {/* Right side */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Upgrade button */}
-          {!isPro && (
+          {/* Upgrade button - hide for guests */}
+          {!isPro && !isGuest && (
             <button
               onClick={handleRedirectToPlans}
               disabled={planLoading}
@@ -283,11 +278,12 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
             </button>
           )}
 
-          {/* Divider */}
-          <div className="w-px h-5" style={{ background: "rgba(0,0,0,0.1)" }} />
+          {/* Divider - hide for guests */}
+          {!isGuest && <div className="w-px h-5" style={{ background: "rgba(0,0,0,0.1)" }} />}
 
-          {/* Profile Avatar Button */}
-          <div className="relative" ref={dropdownRef}>
+          {/* Profile Avatar Button - hide for guests */}
+          {!isGuest && (
+            <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setProfileOpen((prev) => !prev)}
               className="flex items-center gap-2 rounded-xl px-2 py-1.5 transition-all duration-150"
@@ -507,6 +503,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
               </div>
             )}
           </div>
+          )}
         </div>
       </nav>
 

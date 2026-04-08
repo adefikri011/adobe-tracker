@@ -33,7 +33,6 @@ import {
   Lock
 } from "lucide-react";
 import { useSidebar } from "@/components/admin/SidebarContext";
-import TrackStockLogo from "../icons/brand";
 
 const SETTINGS_ITEMS = [
   { label: "General", href: "/admin/settings/general", icon: Globe },
@@ -117,15 +116,15 @@ export default function AdminSidebar() {
           cache: "no-store",
         });
         const { data } = await res.json();
-        
+
         const adminLogoData = data.find((logo: any) => logo.sectionType === "admin");
-        
+
         if (adminLogoData?.fileUrl) {
           console.log("✅ Logo found in DB:", adminLogoData.fileUrl);
-          
+
           // Add timestamp to force image reload
           const imageUrl = `${adminLogoData.fileUrl}?v=${Date.now()}`;
-          
+
           // Pre-check if image exists before setting
           const imgCheck = new Image();
           imgCheck.onload = () => {
@@ -134,13 +133,13 @@ export default function AdminSidebar() {
             setLogoError(false);
           };
           imgCheck.onerror = () => {
-            console.error("❌ Image failed to load - using default. URL:", imageUrl);
+            console.error("❌ Image failed to load. URL:", imageUrl);
             setAdminLogo(null);
             setLogoError(false);
           };
           imgCheck.src = imageUrl;
         } else {
-          console.log("ℹ️ No logo in database - using default SVG");
+          console.log("ℹ️ No logo in database");
           setAdminLogo(null);
           setLogoError(false);
         }
@@ -174,44 +173,29 @@ export default function AdminSidebar() {
       className="relative h-screen bg-white border-r border-orange-100/80 flex flex-col flex-shrink-0 overflow-hidden shadow-[2px_0_16px_0_rgba(249,115,22,0.06)]"
     >
       {/* Brand */}
-      <div className="flex items-center h-16 px-4 border-b border-orange-50 flex-shrink-0">
-        <div className="relative group cursor-pointer flex-shrink-0">
-          <div className="absolute inset-0 bg-orange-500/20 blur-lg rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative transform group-hover:scale-105 transition-transform duration-300 w-9 h-9 flex items-center justify-center">
-            {adminLogo && !logoLoading && !logoError ? (
+      <div className="flex items-center justify-center h-24 px-4 border-b border-orange-50 flex-shrink-0 overflow-hidden">
+        <div className="relative group cursor-pointer flex-shrink-0 flex items-center justify-center">
+          {/* Glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-orange-600/10 blur-xl rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
+
+          {/* Logo container — fixed size, no layout shift */}
+          <div className="relative flex items-center justify-center">
+            {logoLoading ? (
+              <div className={`bg-slate-200 rounded-lg animate-pulse ${collapsed ? "w-10 h-10" : "w-44 h-14"}`} />
+            ) : adminLogo && !logoError ? (
               <img
                 src={adminLogo}
                 alt="Admin Logo"
-                className="w-full h-full object-contain"
+                className={`object-contain transition-all duration-300 group-hover:scale-105 ${collapsed ? "w-10 h-10" : "w-44 h-14"
+                  }`}
                 onError={() => {
-                  console.warn("Failed to load image, using default logo");
+                  console.warn("Failed to load image");
                   setLogoError(true);
                 }}
               />
-            ) : (
-              // Default SVG - always fallback
-              <TrackStockLogo />
-            )}
+            ) : null}
           </div>
         </div>
-        <AnimatePresence>
-          {!collapsed && (
-            <motion.div
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
-              transition={{ duration: 0.2 }}
-              className="ml-3 overflow-hidden whitespace-nowrap flex flex-col"
-            >
-              <span className="font-[950] text-lg tracking-tighter text-slate-900 leading-none">
-                Track<span className="text-orange-500">Stock</span>
-              </span>
-              <span className="text-[7px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mt-1">
-                Analytics Pro
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* Nav */}
@@ -263,8 +247,8 @@ export default function AdminSidebar() {
                       <Icon
                         size={17}
                         className={`flex-shrink-0 transition-colors ${active
-                            ? "text-orange-500"
-                            : "text-slate-400 group-hover:text-slate-600"
+                          ? "text-orange-500"
+                          : "text-slate-400 group-hover:text-slate-600"
                           }`}
                       />
                       <AnimatePresence>
@@ -332,8 +316,8 @@ export default function AdminSidebar() {
             <Settings
               size={17}
               className={`flex-shrink-0 ${isSettingsActive
-                  ? "text-orange-500"
-                  : "text-slate-400 group-hover:text-slate-600"
+                ? "text-orange-500"
+                : "text-slate-400 group-hover:text-slate-600"
                 }`}
             />
             <AnimatePresence>

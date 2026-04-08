@@ -262,10 +262,10 @@ export default function HeroSection() {
             <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Link>
           <Link
-            href="/dashboard"
+            href="/dashboard/billing/plans"
             className="flex items-center justify-center w-full sm:w-auto bg-white px-8 py-4 rounded-2xl font-bold text-slate-700 border border-slate-200 hover:border-orange-200 hover:text-orange-600 transition-all shadow-sm"
           >
-            Upgrade to Pro
+            View Pricing Plans
           </Link>
         </motion.div>
 

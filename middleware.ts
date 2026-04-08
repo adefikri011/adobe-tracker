@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const SUPABASE_AUTH_STORAGE_KEY = "sb-adobe-tracker-auth-token";
+
 function applyNoStoreHeaders(response: NextResponse) {
   // Prevent edge/proxy caches from mixing HTML and RSC variants.
   response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
@@ -14,12 +16,33 @@ function applyNoStoreHeaders(response: NextResponse) {
 }
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  
+  // ✅ EARLY RETURN: Allow /dashboard/billing/plans untuk guest users - PALING AWAL!
+  // Gunakan includes untuk handle trailing slash dan query params
+  if (pathname.includes("/dashboard/billing/plans")) {
+    console.log("✅ [Middleware] Allowing guest access ke /dashboard/billing/plans");
+    let response = NextResponse.next({ request });
+    // Set header supaya layout tahu route apa yang di-access
+    response.headers.set("x-billing-plans", "true");
+    return response;
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      auth: {
+        flowType: "pkce",
+        storageKey: SUPABASE_AUTH_STORAGE_KEY,
+      },
+      cookieOptions: {
+        path: "/",
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      },
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -30,13 +53,11 @@ export async function middleware(request: NextRequest) {
           );
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) => {
-            // Ensure cookies have proper maxAge for persistence
             supabaseResponse.cookies.set(name, value, {
               ...options,
-              maxAge: options?.maxAge || 30 * 24 * 60 * 60, // 30 days default
-              httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-              sameSite: "lax" as const,
+              path: options?.path ?? "/",
+              sameSite: options?.sameSite ?? "lax",
+              secure: options?.secure ?? process.env.NODE_ENV === "production",
             });
           });
         },

@@ -73,29 +73,19 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-10 mb-10 sm:mb-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-3 mb-3 sm:mb-4"> 
-
-              {landingLogo && !logoLoading ? (
+            <div className="flex flex-col items-start gap-4 mb-4 sm:mb-6">
+              {logoLoading ? (
+                <div className="w-32 h-16 md:w-36 md:h-[4.5rem] bg-slate-200 rounded-lg animate-pulse" />
+              ) : landingLogo ? (
                 <img
                   src={landingLogo}
                   alt="Landing Logo"
-                  className="w-10 h-10 drop-shadow-sm object-contain"
+                  className="w-32 h-16 md:w-36 md:h-[4.5rem] drop-shadow-md object-contain object-left"
                 />
-              ) : (
-                <TrackStockLogo />
-              )}
-
-              <div className="flex flex-col">
-                <span className="font-[950] text-lg sm:text-xl tracking-tighter text-slate-900 leading-none">
-                  Track<span className="text-orange-500">Stock</span>
-                </span>
-                <span className="text-[7px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mt-1">
-                  Analytics Pro
-                </span>
-              </div>
+              ) : null}
             </div>
 
-            <p className="text-slate-500 text-xs sm:text-sm font-medium leading-relaxed max-w-xs"> {/* Sedikit penyesuaian warna & font-weight agar lebih terbaca */}
+            <p className="text-slate-500 text-xs sm:text-sm font-medium leading-relaxed max-w-xs">
               Real-time analytics and insights designed for Adobe Stock contributors.
             </p>
           </div>
