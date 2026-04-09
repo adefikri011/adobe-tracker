@@ -75,15 +75,49 @@ export const FEATURE_DESCRIPTIONS: Record<FeatureName, string> = {
  * @param planName - nama plan user (contoh: "free", "pro-7day")
  * @returns quota limit (number atau Infinity untuk unlimited)
  */
-export function getSearchQuotaLimit(planName: string): number {
-  const planLower = planName.toLowerCase();
-  
-  // Jika plan mengandung "pro", unlimited searches
-  if (planLower.startsWith("pro")) {
-    return SEARCH_QUOTA.PRO;
+export async function getSearchQuotaLimit(planName: string): Promise<number> {
+  try {
+    // Import prisma locally to avoid circular dependencies
+    const { prisma } = await import("@/lib/prisma");
+    
+    console.log(`[getSearchQuotaLimit] Querying DB for plan slug: "${planName.toLowerCase()}"`);
+    
+    // Query database for plan's maxSearches setting
+    const plan = await prisma.plan.findUnique({
+      where: { slug: planName.toLowerCase() },
+      select: { maxSearches: true, slug: true, name: true },
+    });
+    
+    console.log(`[getSearchQuotaLimit] DB result:`, plan);
+    
+    if (plan?.maxSearches) {
+      console.log(`[getSearchQuotaLimit] Found maxSearches: "${plan.maxSearches}"`);
+      // Handle different maxSearches formats
+      if (plan.maxSearches === "unlimited") {
+        console.log(`[getSearchQuotaLimit] Returning unlimited (${SEARCH_QUOTA.PRO})`);
+        return SEARCH_QUOTA.PRO; // 1000 as max for Prisma compatibility
+      }
+      const parsed = parseInt(plan.maxSearches, 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        console.log(`[getSearchQuotaLimit] Returning parsed value: ${parsed}`);
+        return parsed;
+      }
+    } else {
+      console.log(`[getSearchQuotaLimit] No maxSearches found in DB, using fallback`);
+    }
+  } catch (error) {
+    console.warn(`[getSearchQuotaLimit] Error querying DB for plan "${planName}":`, error);
+    // Fall through to default below
   }
   
-  // Default free limit
+  // Fallback to hardcoded defaults if DB lookup fails
+  const planLower = planName.toLowerCase();
+  console.log(`[getSearchQuotaLimit] Using fallback for plan: "${planLower}"`);
+  if (planLower.startsWith("pro")) {
+    console.log(`[getSearchQuotaLimit] Returning pro default: ${SEARCH_QUOTA.PRO}`);
+    return SEARCH_QUOTA.PRO;
+  }
+  console.log(`[getSearchQuotaLimit] Returning free default: ${SEARCH_QUOTA.FREE}`);
   return SEARCH_QUOTA.FREE;
 }
 

@@ -1714,6 +1714,8 @@ export const PlanScalarFieldEnum = {
   durationDays: 'durationDays',
   deviceLimit: 'deviceLimit',
   suspendDurationMinutes: 'suspendDurationMinutes',
+  dailySearchLimit: 'dailySearchLimit',
+  maxSearches: 'maxSearches',
   features: 'features',
   isActive: 'isActive',
   createdAt: 'createdAt',

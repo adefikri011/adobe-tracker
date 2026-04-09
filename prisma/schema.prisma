@@ -78,6 +78,8 @@ model Plan {
   durationDays            Int
   deviceLimit             Int            @default(1) // Max devices for this plan
   suspendDurationMinutes  Int            @default(30) // Suspend duration if exceeding device limit
+  dailySearchLimit        Int            @default(5) // Batas pencarian per hari (Free: 5, Pro: 999 for unlimited)
+  maxSearches             String         @default("unlimited") // Batas hasil pencarian (5, 50, 100, 150, 200, or unlimited)
   features                String[]       @default([])
   isActive                Boolean        @default(true)
   createdAt               DateTime       @default(now())

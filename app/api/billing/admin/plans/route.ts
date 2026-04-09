@@ -27,9 +27,9 @@ export async function GET() {
       orderBy: { createdAt: "asc" },
     });
     
-    return NextResponse.json({ plans });
+    return NextResponse.json({ success: true, data: plans });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
 
@@ -37,35 +37,48 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     if (!(await isAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized", success: false }, { status: 401 });
     }
 
     const body = await req.json();
-    const { name, slug, description, price, discount, durationDays, features, deviceLimit } = body;
+    const { name, slug, price, finalPrice, discount, durationDays, deviceLimit, suspendDurationMinutes, dailySearchLimit, maxSearches, features, isActive } = body;
 
-    // Hitung final price secara otomatis di backend
-    const priceNum = Number(price);
+    if (!name || !slug) {
+      return NextResponse.json({ success: false, message: "Name and slug are required" }, { status: 400 });
+    }
+
+    // Check if slug already exists
+    const existingSlug = await prisma.plan.findUnique({ where: { slug } });
+    if (existingSlug) {
+      return NextResponse.json({ success: false, message: "Slug already exists" }, { status: 400 });
+    }
+
+    // Hitung final price secara otomatis di backend jika tidak diberikan
+    const priceNum = Number(price) || 0;
     const discountNum = Number(discount) || 0;
-    const finalPrice = priceNum - (priceNum * discountNum) / 100;
+    const calculatedFinalPrice = finalPrice !== undefined ? Number(finalPrice) : priceNum - (priceNum * discountNum) / 100;
 
     const newPlan = await prisma.plan.create({
       data: {
         name,
-        slug,
-        description,
+        slug: slug.toLowerCase(),
         price: priceNum,
         discount: discountNum,
-        finalPrice: Math.round(finalPrice * 100) / 100,
-        durationDays: Number(durationDays),
-        features: features || [],
+        finalPrice: Math.round(calculatedFinalPrice * 100) / 100,
+        durationDays: Number(durationDays) || 1,
         deviceLimit: Math.max(1, Number(deviceLimit) || 1),
-        isActive: true,
+        suspendDurationMinutes: Math.max(1, Number(suspendDurationMinutes) || 30),
+        dailySearchLimit: Math.max(1, Number(dailySearchLimit) || 5),
+        maxSearches: maxSearches || "unlimited",
+        features: features || [],
+        isActive: isActive !== false,
       },
     });
 
-    return NextResponse.json({ plan: newPlan }, { status: 201 });
+    return NextResponse.json({ success: true, data: newPlan }, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[Plans API POST Error]:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
 
@@ -73,24 +86,29 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     if (!(await isAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized", success: false }, { status: 401 });
     }
 
     const body = await req.json();
     const { id, ...updateData } = body;
 
-    if (!id) return NextResponse.json({ error: "ID wajib ada" }, { status: 400 });
+    if (!id) return NextResponse.json({ success: false, message: "Plan ID is required" }, { status: 400 });
 
     // Get current plan to check if deviceLimit is changing
     const currentPlan = await prisma.plan.findUnique({ where: { id } });
-    const oldDeviceLimit = currentPlan?.deviceLimit;
+    if (!currentPlan) {
+      return NextResponse.json({ success: false, message: "Plan not found" }, { status: 404 });
+    }
+
+    const oldDeviceLimit = currentPlan.deviceLimit;
     const newDeviceLimit = updateData.deviceLimit !== undefined ? Number(updateData.deviceLimit) : oldDeviceLimit;
 
     // Jika harga atau diskon diupdate, hitung ulang finalPrice
     if (updateData.price !== undefined || updateData.discount !== undefined) {
-      const price = updateData.price ?? currentPlan?.price ?? 0;
-      const discount = updateData.discount ?? currentPlan?.discount ?? 0;
-      updateData.finalPrice = Math.round((price - (price * discount) / 100) * 100) / 100;
+      const price = updateData.price ?? currentPlan.price ?? 0;
+      const discount = updateData.discount ?? currentPlan.discount ?? 0;
+      const finalPrice = price - (price * discount) / 100;
+      updateData.finalPrice = Math.round(finalPrice * 100) / 100;
     }
 
     // Ensure deviceLimit is valid
@@ -101,6 +119,16 @@ export async function PATCH(req: NextRequest) {
     // Ensure suspendDurationMinutes is valid
     if (updateData.suspendDurationMinutes !== undefined) {
       updateData.suspendDurationMinutes = Math.max(1, Number(updateData.suspendDurationMinutes));
+    }
+
+    // Ensure dailySearchLimit is valid
+    if (updateData.dailySearchLimit !== undefined) {
+      updateData.dailySearchLimit = Math.max(1, Number(updateData.dailySearchLimit));
+    }
+
+    // Convert maxSearches to string if provided
+    if (updateData.maxSearches !== undefined) {
+      updateData.maxSearches = String(updateData.maxSearches);
     }
 
     const updatedPlan = await prisma.plan.update({
@@ -131,15 +159,17 @@ export async function PATCH(req: NextRequest) {
       }
 
       return NextResponse.json({ 
-        plan: updatedPlan,
+        success: true,
+        data: updatedPlan,
         message: `Plan updated and synced to ${profileIds.length} active subscribers`,
         syncedProfiles: profileIds.length,
       });
     }
 
-    return NextResponse.json({ plan: updatedPlan });
+    return NextResponse.json({ success: true, data: updatedPlan });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[Plans API PATCH Error]:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
 
@@ -147,21 +177,22 @@ export async function PATCH(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     if (!(await isAdmin())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized", success: false }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
-    if (!id) return NextResponse.json({ error: "ID wajib ada" }, { status: 400 });
+    if (!id) return NextResponse.json({ success: false, message: "Plan ID is required" }, { status: 400 });
 
     const deletedPlan = await prisma.plan.update({
       where: { id },
       data: { isActive: false },
     });
 
-    return NextResponse.json({ success: true, plan: deletedPlan });
+    return NextResponse.json({ success: true, data: deletedPlan });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[Plans API DELETE Error]:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }

@@ -31,6 +31,10 @@ export interface SearchQuotaStatus {
 /**
  * Check apakah user bisa melakukan search hari ini
  * Merupakan enforcement untuk daily search limit
+ * 
+ * LOGIC:
+ * - FREE plan: Enforce daily limit (maxSearches dari database)
+ * - PRO plans: Unlimited searches per day (result limit via maxSearches only)
  *
  * @param userId - Profile ID
  * @param planName - nama plan user ("free", "pro-7day", etc)
@@ -41,28 +45,59 @@ export async function checkSearchQuota(
   planName: string
 ): Promise<SearchQuotaStatus> {
   try {
-    const quotaLimit = getSearchQuotaLimit(planName);
+    const planLower = planName.toLowerCase();
+    
+    // LANGKAH 1: Ambil plan dari database untuk dapatkan dailySearchLimit
+    const plan = await prisma.plan.findFirst({
+      where: {
+        slug: {
+          contains: planLower,
+          mode: "insensitive",
+        },
+        isActive: true,
+      },
+      select: {
+        dailySearchLimit: true,
+      },
+    });
 
-    // Pro user = unlimited, langsung allow
-    if (quotaLimit === Infinity) {
+    if (!plan) {
+      console.warn(`[checkSearchQuota] Plan ${planName} tidak ditemukan di database`);
+      // Fallback ke default jika plan tidak ditemukan
       return {
         userId,
         plan: planName,
-        quotaLimit,
+        quotaLimit: planLower.startsWith("pro") ? Infinity : 5,
         searchesUsedToday: 0,
         canSearch: true,
         remainingSearches: Infinity,
       };
     }
 
-    // Free user: hitung berapa kali sudah search hari ini
+    // LANGKAH 2: Untuk PRO users, unlimited daily searches
+    if (planLower.startsWith("pro")) {
+      console.log(`[checkSearchQuota] Pro user (${planName}) - unlimited daily searches allowed`);
+      return {
+        userId,
+        plan: planName,
+        quotaLimit: Infinity,
+        searchesUsedToday: 0,
+        canSearch: true,
+        remainingSearches: Infinity,
+      };
+    }
+
+    // LANGKAH 3: Untuk FREE users, enforce daily limit dari database
+    console.log(`[checkSearchQuota] Free user - checking daily search limit`);
+    
     // PENTING: Gunakan UTC untuk consistency dengan database
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
     
-    console.log(`[checkSearchQuota] Counting from ${today.toISOString()} for user ${userId}`);
+    const dailyLimit = plan.dailySearchLimit;
+    console.log(`[checkSearchQuota] Daily limit for ${planName}: ${dailyLimit}`);
 
-    // Count berapa kali user punya record di ActivityLog dengan action "search" hari ini
+    // Count berapa kali user sudah search hari ini
     const searchesUsedToday = await prisma.activityLog.count({
       where: {
         user: userId,
@@ -73,20 +108,20 @@ export async function checkSearchQuota(
       },
     });
     
-    console.log(`[checkSearchQuota] Found ${searchesUsedToday} searches for user ${userId}`);
+    console.log(`[checkSearchQuota] Free user ${userId} - used ${searchesUsedToday}/${dailyLimit} searches today`);
 
-    const remainingSearches = Math.max(0, quotaLimit - searchesUsedToday);
-    const canSearch = searchesUsedToday < quotaLimit;
+    const remainingSearches = Math.max(0, dailyLimit - searchesUsedToday);
+    const canSearch = searchesUsedToday < dailyLimit;
 
     return {
       userId,
       plan: planName,
-      quotaLimit,
+      quotaLimit: dailyLimit,
       searchesUsedToday,
       canSearch,
       remainingSearches,
       reason: !canSearch
-        ? `Daily search limit (${quotaLimit}) reached. Reset at midnight.`
+        ? `Batas pencarian harian (${dailyLimit}) sudah tercapai. Akan reset pada tengah malam.`
         : undefined,
     };
   } catch (error) {
@@ -95,7 +130,7 @@ export async function checkSearchQuota(
     return {
       userId,
       plan: planName,
-      quotaLimit: getSearchQuotaLimit(planName),
+      quotaLimit: Infinity, // Allow on error
       searchesUsedToday: 0,
       canSearch: true,
       remainingSearches: Infinity,

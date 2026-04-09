@@ -314,7 +314,7 @@ export async function getUserPlanInfo(userId: string): Promise<UserPlanInfo> {
 
   const features = (PLAN_FEATURES[planSlug] || PLAN_FEATURES.free) as FeatureName[];
   const isPremium = isPremiumPlan(planSlug);
-  const searchQuotaLimit = getSearchQuotaLimit(planSlug);
+  const searchQuotaLimit = await getSearchQuotaLimit(planSlug);
 
   console.log(`[getUserPlanInfo] Final result: planSlug="${planSlug}", isPremium=${isPremium}, limit=${searchQuotaLimit}`);
 

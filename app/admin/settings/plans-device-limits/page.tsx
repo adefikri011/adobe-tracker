@@ -11,6 +11,8 @@ interface Plan {
   durationDays: number;
   deviceLimit: number;
   suspendDurationMinutes: number;
+  dailySearchLimit: number;
+  maxSearches: string;
   isActive: boolean;
 }
 
@@ -18,14 +20,16 @@ interface EditingState {
   planId: string | null;
   newLimit: number | null;
   newSuspendDuration: number | null;
-  field: 'deviceLimit' | 'suspendDuration' | null;
+  newDailySearchLimit: number | null;
+  newMaxSearches: string | null;
+  field: 'deviceLimit' | 'suspendDuration' | 'dailySearchLimit' | 'maxSearches' | null;
 }
 
 export default function PlansDeviceLimitsPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [editing, setEditing] = useState<EditingState>({ planId: null, newLimit: null, newSuspendDuration: null, field: null });
+  const [editing, setEditing] = useState<EditingState>({ planId: null, newLimit: null, newSuspendDuration: null, newDailySearchLimit: null, newMaxSearches: null, field: null });
   const [syncedCount, setSyncedCount] = useState(0);
   const [messageSaved, setMessageSaved] = useState(false);
 
@@ -38,9 +42,13 @@ export default function PlansDeviceLimitsPage() {
       setLoading(true);
       const res = await fetch("/api/billing/admin/plans");
       const data = await res.json();
-      if (data.plans) {
+      
+      // Support both new and old API response formats
+      const plansList = data.success ? data.data : data.plans;
+      
+      if (plansList && Array.isArray(plansList)) {
         // Filter only active plans
-        setPlans(data.plans.filter((p: Plan) => p.isActive));
+        setPlans(plansList.filter((p: Plan) => p.isActive));
       }
     } catch (err) {
       console.error("Error loading plans:", err);
@@ -49,11 +57,13 @@ export default function PlansDeviceLimitsPage() {
     }
   };
 
-  const handleEditStart = (plan: Plan, field: 'deviceLimit' | 'suspendDuration') => {
+  const handleEditStart = (plan: Plan, field: 'deviceLimit' | 'suspendDuration' | 'dailySearchLimit' | 'maxSearches') => {
     setEditing({
       planId: plan.id,
       newLimit: plan.deviceLimit,
       newSuspendDuration: plan.suspendDurationMinutes,
+      newDailySearchLimit: plan.dailySearchLimit,
+      newMaxSearches: plan.maxSearches,
       field,
     });
   };
@@ -69,6 +79,10 @@ export default function PlansDeviceLimitsPage() {
         payload.deviceLimit = Math.max(1, Math.floor(editing.newLimit));
       } else if (editing.field === 'suspendDuration' && editing.newSuspendDuration !== null) {
         payload.suspendDurationMinutes = Math.max(1, Math.floor(editing.newSuspendDuration));
+      } else if (editing.field === 'dailySearchLimit' && editing.newDailySearchLimit !== null) {
+        payload.dailySearchLimit = Math.max(1, Math.floor(editing.newDailySearchLimit));
+      } else if (editing.field === 'maxSearches' && editing.newMaxSearches !== null) {
+        payload.maxSearches = editing.newMaxSearches;
       }
 
       const res = await fetch("/api/billing/admin/plans", {
@@ -90,12 +104,13 @@ export default function PlansDeviceLimitsPage() {
                   ...p,
                   ...(editing.field === 'deviceLimit' && { deviceLimit: Math.max(1, Math.floor(editing.newLimit!)) }),
                   ...(editing.field === 'suspendDuration' && { suspendDurationMinutes: Math.max(1, Math.floor(editing.newSuspendDuration!)) }),
+                  ...(editing.field === 'maxSearches' && { maxSearches: editing.newMaxSearches! }),
                 }
               : p
           )
         );
 
-        setEditing({ planId: null, newLimit: null, newSuspendDuration: null, field: null });
+        setEditing({ planId: null, newLimit: null, newSuspendDuration: null, newDailySearchLimit: null, newMaxSearches: null, field: null });
         setTimeout(() => setMessageSaved(false), 3000);
       }
     } catch (err) {
@@ -107,7 +122,7 @@ export default function PlansDeviceLimitsPage() {
   };
 
   const handleCancel = () => {
-    setEditing({ planId: null, newLimit: null, newSuspendDuration: null, field: null });
+    setEditing({ planId: null, newLimit: null, newSuspendDuration: null, newDailySearchLimit: null, newMaxSearches: null, field: null });
   };
 
   if (loading) {
@@ -124,9 +139,9 @@ export default function PlansDeviceLimitsPage() {
     <div className="p-8 max-w-6xl">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Device Limits Per Plan</h1>
+        <h1 className="text-3xl font-bold text-slate-900">Pengaturan Batas Per Plan</h1>
         <p className="text-slate-500 mt-2">
-          Set the maximum number of devices each subscription plan allows
+          Atur batas perangkat, batas pencarian, dan hasil pencarian untuk setiap plan
         </p>
       </div>
 
@@ -134,8 +149,8 @@ export default function PlansDeviceLimitsPage() {
       <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-8 flex gap-3">
         <AlertCircle size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-blue-800">
-          <strong>How it works:</strong> When users subscribe to a plan, they automatically get the device limit and suspend duration set here. 
-          When you change either setting, all active subscribers to that plan will be updated automatically.
+          <strong>Cara kerjanya:</strong> Ketika user berlangganan plan, mereka otomatis mendapat semua limit yang diatur di sini. 
+          Ketika Anda mengubah setting, semua subscriber aktif dari plan itu akan terupdate otomatis.
         </div>
       </div>
 
@@ -143,10 +158,10 @@ export default function PlansDeviceLimitsPage() {
       {messageSaved && (
         <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-8 flex gap-3 items-start">
           <div className="w-full">
-            <p className="text-green-800 font-semibold text-sm">✅ Device limit updated successfully!</p>
+            <p className="text-green-800 font-semibold text-sm">✅ Pengaturan berhasil diubah!</p>
             {syncedCount > 0 && (
               <p className="text-green-700 text-xs mt-1">
-                Synced to {syncedCount} active subscriber{syncedCount !== 1 ? 's' : ''}
+                Tersinkronisasi ke {syncedCount} subscriber aktif
               </p>
             )}
           </div>
@@ -161,22 +176,28 @@ export default function PlansDeviceLimitsPage() {
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Plan Name
+                  Nama Plan
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Duration
+                  Durasi
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Price
+                  Harga
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Device Limit
+                  Batas Perangkat
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Suspend Duration
+                  Durasi Suspense
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Batas Pencarian/Hari
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Batas Hasil Pencarian
                 </th>
                 <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Action
+                  Aksi
                 </th>
               </tr>
             </thead>
@@ -186,6 +207,9 @@ export default function PlansDeviceLimitsPage() {
               {plans.map((plan, idx) => {
                 const isEditingDeviceLimit = editing.planId === plan.id && editing.field === 'deviceLimit';
                 const isEditingSuspendDuration = editing.planId === plan.id && editing.field === 'suspendDuration';
+                const isEditingDailySearchLimit = editing.planId === plan.id && editing.field === 'dailySearchLimit';
+                const isEditingMaxSearches = editing.planId === plan.id && editing.field === 'maxSearches';
+                const maxSearchesOptions = ['5', '50', '100', '150', '200', 'unlimited'];
 
                 return (
                   <tr key={plan.id} className={idx !== plans.length - 1 ? "border-b border-slate-100" : ""}>
@@ -261,6 +285,57 @@ export default function PlansDeviceLimitsPage() {
                       )}
                     </td>
 
+                    {/* Batas Pencarian per Hari - Edit or Display */}
+                    <td className="px-6 py-4">
+                      {isEditingDailySearchLimit ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="1"
+                            value={editing.newDailySearchLimit || ""}
+                            onChange={(e) =>
+                              setEditing({ ...editing, newDailySearchLimit: parseInt(e.target.value) || 5 })
+                            }
+                            className="w-16 px-3 py-2 border border-green-300 rounded-lg text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            autoFocus
+                          />
+                          <span className="text-sm text-slate-500">per hari</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-slate-900">
+                            {plan.dailySearchLimit} pencarian
+                          </span>
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Batas Hasil Pencarian - Edit or Display */}
+                    <td className="px-6 py-4">
+                      {isEditingMaxSearches ? (
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={editing.newMaxSearches || ""}
+                            onChange={(e) =>
+                              setEditing({ ...editing, newMaxSearches: e.target.value })
+                            }
+                            className="px-3 py-2 border border-purple-300 rounded-lg text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            autoFocus
+                          >
+                            {maxSearchesOptions.map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-slate-900">
+                            {plan.maxSearches === 'unlimited' ? '∞ Unlimited' : plan.maxSearches}
+                          </span>
+                        </div>
+                      )}
+                    </td>
+
                     {/* Action Buttons */}
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
@@ -297,13 +372,25 @@ export default function PlansDeviceLimitsPage() {
                               onClick={() => handleEditStart(plan, 'deviceLimit')}
                               className="px-2.5 py-1.5 border border-slate-300 hover:border-orange-300 hover:bg-orange-50 text-slate-600 hover:text-orange-600 text-xs font-semibold rounded-lg transition"
                             >
-                              Device
+                              Perangkat
                             </button>
                             <button
                               onClick={() => handleEditStart(plan, 'suspendDuration')}
                               className="px-2.5 py-1.5 border border-slate-300 hover:border-blue-300 hover:bg-blue-50 text-slate-600 hover:text-blue-600 text-xs font-semibold rounded-lg transition"
                             >
-                              Suspend
+                              Suspense
+                            </button>
+                            <button
+                              onClick={() => handleEditStart(plan, 'dailySearchLimit')}
+                              className="px-2.5 py-1.5 border border-slate-300 hover:border-green-300 hover:bg-green-50 text-slate-600 hover:text-green-600 text-xs font-semibold rounded-lg transition"
+                            >
+                              Pencarian
+                            </button>
+                            <button
+                              onClick={() => handleEditStart(plan, 'maxSearches')}
+                              className="px-2.5 py-1.5 border border-slate-300 hover:border-purple-300 hover:bg-purple-50 text-slate-600 hover:text-purple-600 text-xs font-semibold rounded-lg transition"
+                            >
+                              Hasil
                             </button>
                           </div>
                         )}
@@ -319,20 +406,21 @@ export default function PlansDeviceLimitsPage() {
         {/* Empty State */}
         {plans.length === 0 && (
           <div className="p-8 text-center text-slate-500">
-            <p className="text-sm">No active plans found</p>
+            <p className="text-sm">Tidak ada plan aktif ditemukan</p>
           </div>
         )}
       </div>
 
       {/* Help Section */}
       <div className="mt-8 bg-slate-50 rounded-2xl border border-slate-200 p-6">
-        <h3 className="font-semibold text-slate-900 mb-3">💡 Tips</h3>
+        <h3 className="font-semibold text-slate-900 mb-3">💡 Panduan</h3>
         <ul className="space-y-2 text-sm text-slate-600">
-          <li>• <strong>Free users</strong> will get the global device limit and suspend duration from Settings</li>
-          <li>• <strong>Paid users</strong> will automatically get their plan's device limit and suspend duration</li>
-          <li>• Plan settings are prioritized over global and individual profile settings</li>
-          <li>• Changes apply immediately to all active subscribers of that plan</li>
-          <li>• Suspend duration = how many minutes to suspend user when exceeding device limit</li>
+          <li>• <strong>Batas Perangkat:</strong> Berapa banyak perangkat yang bisa terhubung sekaligus</li>
+          <li>• <strong>Durasi Suspense:</strong> Berapa menit user disuspend jika melampaui batas perangkat</li>
+          <li>• <strong>Batas Pencarian/Hari:</strong> Berapa kali user bisa melakukan pencarian dalam 1 hari</li>
+          <li>• <strong>Batas Hasil Pencarian:</strong> Berapa banyak hasil yang ditampilkan per pencarian</li>
+          <li>• Pengaturan plan diprioritaskan dibanding pengaturan global dan individual</li>
+          <li>• Perubahan langsung berlaku ke semua user dengan subscription aktif di plan ini</li>
         </ul>
       </div>
     </div>

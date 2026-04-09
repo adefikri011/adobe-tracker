@@ -15,6 +15,15 @@ interface Plan {
   features: string[];
 }
 
+// Helper function untuk format feature names
+const formatFeatureName = (feature: string): string => {
+  return feature
+    .replace(/_/g, " ")
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
+
 const faqs = [
   {
     q: "Can I switch plans anytime?",
@@ -123,7 +132,7 @@ const PaymentDetailsModal: React.FC<PaymentDetailsModalProps> = ({
                   {plan.features.map((feature, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <Check size={16} className="text-emerald-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-slate-700">{feature}</span>
+                      <span className="text-sm text-slate-700">{formatFeatureName(feature)}</span>
                     </div>
                   ))}
                 </div>
@@ -513,7 +522,7 @@ export default function UserPlansPage() {
                               strokeWidth={3.5}
                             />
                           </span>
-                          {feature}
+                          {formatFeatureName(feature)}
                         </li>
                       ))
                     ) : (

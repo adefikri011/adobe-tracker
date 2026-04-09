@@ -101,7 +101,7 @@ export default function AdminSidebar() {
   const pathname = usePathname();
   const { collapsed, toggle } = useSidebar();
   const [settingsOpen, setSettingsOpen] = useState(
-    pathname.startsWith("/admin/settings")
+    pathname.startsWith("/admin/settings") || pathname.startsWith("/admin/billing")
   );
   const [adminLogo, setAdminLogo] = useState<string | null>(null);
   const [logoLoading, setLogoLoading] = useState(true);
