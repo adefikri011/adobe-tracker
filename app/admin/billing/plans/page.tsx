@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Check, Edit2, Plus, Trash2, X, Loader2, ChevronDown } from "lucide-react";
+import { Check, Edit2, Plus, Trash2, X, Loader2, ChevronDown, AlertCircle } from "lucide-react";
 
 interface Plan {
   id: string;
@@ -36,6 +36,14 @@ interface CurrencySettings {
   exchangeRate: number;
 }
 
+interface DeleteConfirmState {
+  isOpen: boolean;
+  planId: string | null;
+  planName: string;
+  isActive: boolean;
+  isDeleting: boolean;
+}
+
 export default function PlansAdminPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +52,13 @@ export default function PlansAdminPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [currencySettings, setCurrencySettings] = useState<CurrencySettings | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirmState>({
+    isOpen: false,
+    planId: null,
+    planName: "",
+    isActive: false,
+    isDeleting: false,
+  });
 
   // Fetch both plans and currency
   const fetchData = async () => {
@@ -156,28 +171,41 @@ export default function PlansAdminPage() {
     }
   };
 
-  const handleDelete = async (planId: string) => {
+  const handleDelete = (planId: string) => {
     const plan = plans.find(p => p.id === planId);
     if (!plan) return;
 
-    // If plan is still Active, only deactivate first
-    if (plan.isActive) {
-      if (!confirm("This plan is still ACTIVE. Click OK to DEACTIVATE it first before you can delete it permanently.\n\nAfter that, click delete again for permanent delete.")) return;
-    } else {
-      // If plan is Inactive, warning for permanent delete
-      if (!confirm("⚠️ PERMANENTLY DELETE this plan from the database?\n\nThis action CANNOT be undone!\n\nClick OK to continue.")) return;
-    }
+    setDeleteConfirm({
+      isOpen: true,
+      planId,
+      planName: plan.name,
+      isActive: plan.isActive,
+      isDeleting: false,
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm.planId) return;
+
+    setDeleteConfirm(prev => ({ ...prev, isDeleting: true }));
 
     try {
-      const res = await fetch(`/api/billing/admin/plans?id=${planId}`, {
+      const res = await fetch(`/api/billing/admin/plans?id=${deleteConfirm.planId}`, {
         method: "DELETE",
       });
 
       const data = await res.json();
 
       if (data.success) {
-        const msg = data.message || (plan.isActive ? "Plan deactivated" : "Plan deleted");
+        const msg = data.message || (deleteConfirm.isActive ? "Plan deactivated" : "Plan deleted");
         setMessage({ type: "success", text: msg });
+        setDeleteConfirm({
+          isOpen: false,
+          planId: null,
+          planName: "",
+          isActive: false,
+          isDeleting: false,
+        });
         fetchData();
       } else {
         setMessage({ type: "error", text: data.message || "Failed to delete plan" });
@@ -185,6 +213,8 @@ export default function PlansAdminPage() {
     } catch (error) {
       console.error("Error deleting plan:", error);
       setMessage({ type: "error", text: "Error deleting plan" });
+    } finally {
+      setDeleteConfirm(prev => ({ ...prev, isDeleting: false }));
     }
   };
 
@@ -560,6 +590,85 @@ export default function PlansAdminPage() {
                 >
                   {saving && <Loader2 size={16} className="animate-spin" />}
                   {saving ? "Saving..." : "Save Plan"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirm.isOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl max-w-md w-full animate-in fade-in zoom-in-95">
+              <div className={`px-6 py-4 border-b ${deleteConfirm.isActive ? 'border-orange-100 bg-orange-50/50' : 'border-red-100 bg-red-50/50'}`}>
+                <div className="flex items-start gap-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${deleteConfirm.isActive ? 'bg-orange-100' : 'bg-red-100'}`}>
+                    {deleteConfirm.isActive ? (
+                      <AlertCircle className="text-orange-600" size={20} />
+                    ) : (
+                      <Trash2 className="text-red-600" size={20} />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className={`font-bold text-lg ${deleteConfirm.isActive ? 'text-orange-900' : 'text-red-900'}`}>
+                      {deleteConfirm.isActive ? "Deactivate Plan?" : "Permanent Delete?"}
+                    </h3>
+                    <p className={`text-sm mt-1 ${deleteConfirm.isActive ? 'text-orange-800' : 'text-red-800'}`}>
+                      {deleteConfirm.isActive
+                        ? "This plan will be deactivated and hidden from new subscriptions."
+                        : "This will permanently delete the plan from the database. Existing subscribers will not be affected."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 bg-slate-50">
+                <div className="mb-4 p-3 bg-slate-100 rounded-lg">
+                  <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Plan to be affected:</p>
+                  <p className="font-bold text-slate-900 mt-1">{deleteConfirm.planName}</p>
+                </div>
+
+                {!deleteConfirm.isActive && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg flex gap-2">
+                    <AlertCircle size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-red-700">
+                      <strong>This action cannot be undone!</strong> Make sure you really want to delete this plan.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="px-6 py-4 flex gap-3 border-t border-slate-200">
+                <button
+                  onClick={() =>
+                    setDeleteConfirm({
+                      isOpen: false,
+                      planId: null,
+                      planName: "",
+                      isActive: false,
+                      isDeleting: false,
+                    })
+                  }
+                  disabled={deleteConfirm.isDeleting}
+                  className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={deleteConfirm.isDeleting}
+                  className={`flex-1 px-4 py-2 text-white rounded-lg font-medium transition disabled:opacity-50 flex items-center justify-center gap-2 ${
+                    deleteConfirm.isActive
+                      ? "bg-orange-500 hover:bg-orange-600"
+                      : "bg-red-500 hover:bg-red-600"
+                  }`}
+                >
+                  {deleteConfirm.isDeleting && <Loader2 size={16} className="animate-spin" />}
+                  {deleteConfirm.isDeleting
+                    ? "Processing..."
+                    : deleteConfirm.isActive
+                    ? "Yes, Deactivate"
+                    : "Yes, Delete Permanently"}
                 </button>
               </div>
             </div>
