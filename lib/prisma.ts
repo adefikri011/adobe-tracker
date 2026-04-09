@@ -8,12 +8,18 @@ let prisma: PrismaClient;
 
 if (!globalForPrisma.prisma) {
   const pool = new Pool({ 
-    connectionString: process.env.DATABASE_URL 
+    connectionString: process.env.DATABASE_URL,
+    max: 20, // Connection pool size
+    idleTimeoutMillis: 30000, // Keep connections alive 30s
+    connectionTimeoutMillis: 10000, // Timeout 10s untuk connect
   });
 
   const adapter = new PrismaPg(pool as any);
 
-  globalForPrisma.prisma = new PrismaClient({ adapter });
+  globalForPrisma.prisma = new PrismaClient({ 
+    adapter,
+    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+  });
 }
 
 prisma = globalForPrisma.prisma;

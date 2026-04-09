@@ -12,20 +12,16 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function extractCreatorId(contributorUrl: string): string {
+function extractCreatorId(contributorUrl: string): string | null {
   const contributorMatch = contributorUrl.match(/\/contributor\/(\d+)/);
   if (contributorMatch) return contributorMatch[1];
   const decoded = decodeURIComponent(contributorUrl);
   const creatorIdMatch = decoded.match(/filters\[creator_id\]=(\d+)/);
   if (creatorIdMatch) return creatorIdMatch[1];
-  throw new Error(
-    `Tidak bisa ekstrak creator ID dari URL.\nPastikan URL berformat:\n` +
-    `- https://stock.adobe.com/contributor/{ID}/nama\n` +
-    `- atau search URL dengan filters[creator_id]={ID}`
-  );
+  return null; // Return null jika tidak ada creator ID
 }
 
-function buildPageUrl(creatorId: string, page: number): string {
+function buildPageUrl(creatorId: string | null, page: number, query?: string): string {
   const params = new URLSearchParams({
     "filters[content_type:photo]": "1",
     "filters[content_type:illustration]": "1",
@@ -33,11 +29,16 @@ function buildPageUrl(creatorId: string, page: number): string {
     "filters[content_type:video]": "1",
     "filters[content_type:template]": "1",
     "filters[content_type:3d]": "1",
-    k: "",
-    "filters[creator_id]": creatorId,
+    k: query || "",
     order: "relevance",
     search_page: String(page),
   });
+  
+  // Tambahkan creator_id jika ada
+  if (creatorId) {
+    params.set("filters[creator_id]", creatorId);
+  }
+  
   return `https://stock.adobe.com/search?${params.toString()}`;
 }
 
@@ -109,27 +110,56 @@ function normalizeDate(val: any): Date | null {
 }
 
 function normalizeKeywords(item: any): string[] {
-  // Try direct fields first
-  const raw = item?.keywords || item?.tags || item?.keyword_list || [];
-  if (Array.isArray(raw) && raw.length > 0) return raw.map(String).filter(Boolean);
-  if (typeof raw === "string" && raw.trim()) return raw.split(",").map((s: string) => s.trim()).filter(Boolean);
-  
-  // Fallback: Extract keywords from title
-  const title = String(item?.title || "").trim();
-  if (!title) return [];
-  
-  // Split by spaces, filter out common words, keep 3-50 char words
   const commonWords = new Set([
     "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "he", "in", "is",
     "it", "its", "of", "on", "or", "she", "that", "the", "to", "was", "will", "with",
-    "modern", "flat", "vector", "illustration", "white", "background", "concept", "piece"
+    "modern", "flat", "vector", "illustration", "white", "background", "concept", "piece",
+    "image", "photo", "design", "stock", "adobe", "content", "creative", "digital"
   ]);
+
+  // Try multiple keyword sources
+  const sources = [
+    item?.keywords,
+    item?.tags,
+    item?.keyword_list,
+    item?.tag_list,
+    item?.categories,
+  ];
+
+  for (const source of sources) {
+    if (Array.isArray(source) && source.length > 0) {
+      const filtered = source
+        .map(String)
+        .filter(Boolean)
+        .filter((w) => w.length >= 2 && !commonWords.has(w.toLowerCase()))
+        .slice(0, 10);
+      if (filtered.length > 0) return filtered;
+    }
+    if (typeof source === "string" && source.trim()) {
+      const filtered = source
+        .split(/[,;\|\/]+/)
+        .map((s: string) => s.trim())
+        .filter((w) => w.length >= 2 && !commonWords.has(w.toLowerCase()))
+        .slice(0, 10);
+      if (filtered.length > 0) return filtered;
+    }
+  }
+
+  // Fallback: Extract keywords dari title + category
+  const title = String(item?.title || "").trim();
+  const category = String(item?.category?.name || item?.category || "").trim();
   
-  return title
-    .split(/[\s\/\-\.\,]+/)
+  const titleAndCategory = `${title} ${category}`.trim();
+  if (!titleAndCategory) return ["asset", "stock"]; // Minimal fallback
+
+  const keywords = titleAndCategory
+    .split(/[\s\/\-\.\,\(\)]+/)
     .map((w: string) => w.toLowerCase().trim())
-    .filter((w: string) => w.length >= 3 && w.length <= 50 && !commonWords.has(w))
-    .slice(0, 10); // Limit to 10 keywords
+    .filter((w: string) => w.length >= 2 && !commonWords.has(w))
+    .slice(0, 10);
+
+  // Ensure minimum keywords agar search berfungsi
+  return keywords.length > 0 ? keywords : ["asset", "stock"];
 }
 
 // Fisher-Yates shuffle untuk randomize data
@@ -194,23 +224,24 @@ export async function POST(req: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Get limit from query params (default 300)
+  // Get params from query string
   const url = new URL(req.url);
   const limitParam = url.searchParams.get("limit");
-  const LIMIT = limitParam ? Math.min(Math.max(parseInt(limitParam), 10), 1000) : 300; // Min 10, Max 1000
+  const queryParam = url.searchParams.get("query"); // e.g., "nature", "urban", "business"
+  
+  const LIMIT = limitParam ? Math.min(Math.max(parseInt(limitParam), 10), 1000) : 300;
+  const searchQuery = queryParam || "stock"; // Default search query
 
   const token = process.env.APIFY_API_TOKEN;
   const actorId = process.env.APIFY_ACTOR_ID || "cOsM6hOaAbSxqSG1E";
   const contributorUrl = process.env.ADOBE_CONTRIBUTOR_URL;
 
   if (!token) return NextResponse.json({ error: "APIFY_API_TOKEN belum diset" }, { status: 500 });
-  if (!contributorUrl) return NextResponse.json({ error: "ADOBE_CONTRIBUTOR_URL belum diset" }, { status: 500 });
 
-  let creatorId: string;
-  try {
+  // Try extract creator ID, but it's optional
+  let creatorId: string | null = null;
+  if (contributorUrl) {
     creatorId = extractCreatorId(contributorUrl);
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 400 });
   }
 
   // Calculate max pages needed (10 items per page)
@@ -223,7 +254,7 @@ export async function POST(req: Request) {
       try {
         sseEvent(controller, encoder, {
           type: "start",
-          message: "Memulai sinkronisasi...",
+          message: `Memulai sinkronisasi${searchQuery ? ` dengan query "${searchQuery}"` : " untuk semua jenis aset"}...`,
           totalPages: MAX_PAGES,
         });
 
@@ -232,7 +263,7 @@ export async function POST(req: Request) {
         const startTime = Date.now();
 
         for (let page = 1; page <= MAX_PAGES; page++) {
-          const pageUrl = buildPageUrl(creatorId, page);
+          const pageUrl = buildPageUrl(creatorId, page, searchQuery);
 
           sseEvent(controller, encoder, {
             type: "page_start",
@@ -327,96 +358,61 @@ export async function POST(req: Request) {
           })
           .filter((item): item is NormalizedAsset => item !== null);
 
-        // Kategorisasi NEW vs UPDATE dengan check DB
-        const newItems: NormalizedAsset[] = [];
-        const updateItems: NormalizedAsset[] = [];
+        // Shuffle untuk variasi data
+        const shuffledItems = shuffleArray(normalizedItems);
 
-        // Check setiap item di database dalam batch
-        const BATCH_SIZE = 100;
-        for (let i = 0; i < normalizedItems.length; i += BATCH_SIZE) {
-          const batch = normalizedItems.slice(i, i + BATCH_SIZE);
-          const existingAssets = await prisma.asset.findMany({
-            where: {
-              assetId: { in: batch.map((item) => item.assetId) },
-              profileId: user.id,
-            },
-            select: { assetId: true },
-          });
+        // Ambil MAX sampai LIMIT items
+        const itemsToInsert = shuffledItems.slice(0, LIMIT);
 
-          const existingIds = new Set(existingAssets.map((a) => a.assetId));
+        // INSERT dengan skipDuplicates - DATABASE akan handle duplikat detection
+        // Jauh lebih cepat dari pre-check query!
+        let created = 0;
+        const BATCH_SIZE = 100; // Can be larger karena tidak ada pre-check
+        const countBefore = await prisma.asset.count({ where: { profileId: user.id } });
+        
+        if (itemsToInsert.length > 0) {
+          for (let i = 0; i < itemsToInsert.length; i += BATCH_SIZE) {
+            const batch = itemsToInsert.slice(i, i + BATCH_SIZE);
+            
+            const result = await prisma.asset.createMany({
+              data: batch.map((item) => ({
+                assetId: item.assetId,
+                title: item.title,
+                thumbnail: item.thumbnail,
+                previewUrl: item.previewUrl,
+                assetUrl: item.assetUrl,
+                contributor: item.contributor,
+                contributorId: item.contributorId,
+                category: item.category,
+                fileType: item.fileType,
+                keywords: item.keywords,
+                uploadedAt: item.uploadedAt,
+                downloads: item.downloads,
+                earnings: item.earnings,
+                popularity: item.popularity,
+                profileId: user.id,
+              })),
+              skipDuplicates: true,
+            });
 
-          for (const item of batch) {
-            if (existingIds.has(item.assetId)) {
-              updateItems.push(item);
-            } else {
-              newItems.push(item);
-            }
+            // skipDuplicates don't return count, so we add batch length as estimate
+            // Actual created count calculated after
+            created += batch.length;
           }
         }
 
-        // Shuffle NEW items untuk variasi
-        const shuffledNewItems = shuffleArray(newItems);
-        const shuffledUpdateItems = shuffleArray(updateItems);
-
-        // Prioritas: Ambil NEW items dulu (up to LIMIT)
-        // Jika kurang, fill dengan UPDATE items
-        const itemsToSave: NormalizedAsset[] = [];
-        itemsToSave.push(...shuffledNewItems.slice(0, LIMIT));
-
-        if (itemsToSave.length < LIMIT) {
-          const remainingSlots = LIMIT - itemsToSave.length;
-          itemsToSave.push(...shuffledUpdateItems.slice(0, remainingSlots));
-        }
-
-        // Simpan ke DB
-        let newCreated = 0;
-        let updated = 0;
-
-        for (let i = 0; i < itemsToSave.length; i += BATCH_SIZE) {
-          const batch = itemsToSave.slice(i, i + BATCH_SIZE);
-          const results = await Promise.all(
-            batch.map(async (item: NormalizedAsset) => {
-              const existing = await prisma.asset.findUnique({ 
-                where: { assetId: item.assetId },
-                select: { assetId: true },
-              });
-              
-              await prisma.asset.upsert({
-                where: { assetId: item.assetId },
-                update: {
-                  title: item.title, thumbnail: item.thumbnail, previewUrl: item.previewUrl,
-                  assetUrl: item.assetUrl, contributor: item.contributor, contributorId: item.contributorId,
-                  category: item.category, fileType: item.fileType, keywords: item.keywords,
-                  uploadedAt: item.uploadedAt, downloads: item.downloads, earnings: item.earnings,
-                  popularity: item.popularity,
-                },
-                create: {
-                  assetId: item.assetId, title: item.title, thumbnail: item.thumbnail,
-                  previewUrl: item.previewUrl, assetUrl: item.assetUrl, contributor: item.contributor,
-                  contributorId: item.contributorId, category: item.category, fileType: item.fileType,
-                  keywords: item.keywords, uploadedAt: item.uploadedAt, downloads: item.downloads,
-                  earnings: item.earnings, popularity: item.popularity, profileId: user.id,
-                },
-              });
-              
-              return { wasCreated: !existing };
-            })
-          );
-          
-          newCreated += results.filter((r) => r.wasCreated).length;
-          updated += results.filter((r) => !r.wasCreated).length;
-        }
-
         const totalInDb = await prisma.asset.count({ where: { profileId: user.id } });
+        const actualCreated = totalInDb - countBefore; // Actual new items created
+        const duplicateSkipped = itemsToInsert.length - actualCreated; // Items skipped due to duplicate
 
         // Save sync log
         await prisma.syncLog.create({
           data: {
             profileId: user.id,
             status: "success",
-            totalCollected: itemsToSave.length,
-            created: newCreated,
-            updated,
+            totalCollected: itemsToInsert.length,
+            created: actualCreated,
+            updated: 0, // Tidak ada update, hanya insert baru
             totalInDatabase: totalInDb,
           },
         });
@@ -432,18 +428,18 @@ export async function POST(req: Request) {
             user: userProfile?.fullName || "Unknown",
             email: userProfile?.email || "unknown@email.com",
             action: "Manual Sync",
-            detail: `Triggered manual API sync — ${newCreated} new + ${updated} updated = ${itemsToSave.length} total assets processed. Total in database: ${totalInDb}`,
+            detail: `API sync ${searchQuery ? `query "${searchQuery}"` : "semua jenis aset"} — ${actualCreated} asset baru ditambahkan, ${duplicateSkipped} diskip. Total di database: ${totalInDb}`,
             ipAddress: getClientIP(req),
           },
         }).catch(err => console.error("Failed to log sync activity:", err));
 
         sseEvent(controller, encoder, {
           type: "done",
-          count: itemsToSave.length,
-          created: newCreated,
-          updated,
+          created: actualCreated,
+          updated: 0,
+          skipped: duplicateSkipped,
           totalInDatabase: totalInDb,
-          message: "Sinkronisasi selesai!",
+          message: `Sinkronisasi selesai! ${actualCreated} item baru ditambahkan.`,
         });
 
       } catch (error: any) {

@@ -199,11 +199,11 @@ export default function TestNotificationsPage() {
         <div className="bg-slate-800 rounded-lg p-6 mt-6 border border-slate-700">
           <h3 className="text-lg font-semibold text-white mb-3">💡 Tips</h3>
           <ul className="space-y-2 text-sm text-slate-300 list-disc list-inside">
-            <li>Click "Send All Tests" untuk test 3 notifikasi sekaligus</li>
-            <li>Atau gunakan tombol individual untuk test satu per satu</li>
-            <li>Setiap click = 1 notifikasi baru di database</li>
-            <li>Toggle preferences di dashboard untuk aktif/non-aktifkan email</li>
-            <li>Check Notification Preferences untuk email settings</li>
+            <li>Click "Send All Tests" to test 3 notifications at once</li>
+            <li>Or use individual buttons to test one by one</li>
+            <li>Each click = 1 new notification in database</li>
+            <li>Toggle preferences in dashboard to enable/disable email</li>
+            <li>Check Notification Preferences for email settings</li>
           </ul>
         </div>
       </div>

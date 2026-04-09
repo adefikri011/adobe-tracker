@@ -185,12 +185,37 @@ export async function DELETE(req: NextRequest) {
 
     if (!id) return NextResponse.json({ success: false, message: "Plan ID is required" }, { status: 400 });
 
-    const deletedPlan = await prisma.plan.update({
+    // Check if plan exists dan statusnya
+    const existingPlan = await prisma.plan.findUnique({ where: { id } });
+
+    if (!existingPlan) {
+      return NextResponse.json({ success: false, message: "Plan not found" }, { status: 404 });
+    }
+
+    // Jika plan masih Active, hanya deactivate (soft delete)
+    if (existingPlan.isActive) {
+      const deactivatedPlan = await prisma.plan.update({
+        where: { id },
+        data: { isActive: false },
+      });
+
+      return NextResponse.json({ 
+        success: true, 
+        data: deactivatedPlan,
+        message: "Plan deactivated. Click delete again untuk permanent delete." 
+      });
+    }
+
+    // Jika plan sudah Inactive, baru bisa permanent delete (hard delete dari database)
+    const deletedPlan = await prisma.plan.delete({
       where: { id },
-      data: { isActive: false },
     });
 
-    return NextResponse.json({ success: true, data: deletedPlan });
+    return NextResponse.json({ 
+      success: true, 
+      data: deletedPlan,
+      message: "Plan permanently deleted from database" 
+    });
   } catch (error: any) {
     console.error("[Plans API DELETE Error]:", error);
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });

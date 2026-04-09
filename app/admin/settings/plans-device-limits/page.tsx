@@ -139,9 +139,9 @@ export default function PlansDeviceLimitsPage() {
     <div className="p-8 max-w-6xl">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Pengaturan Batas Per Plan</h1>
+        <h1 className="text-3xl font-bold text-slate-900">Per-Plan Limits Settings</h1>
         <p className="text-slate-500 mt-2">
-          Atur batas perangkat, batas pencarian, dan hasil pencarian untuk setiap plan
+          Configure device limits, search limits, and result limits for each plan
         </p>
       </div>
 
@@ -149,8 +149,8 @@ export default function PlansDeviceLimitsPage() {
       <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-8 flex gap-3">
         <AlertCircle size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-blue-800">
-          <strong>Cara kerjanya:</strong> Ketika user berlangganan plan, mereka otomatis mendapat semua limit yang diatur di sini. 
-          Ketika Anda mengubah setting, semua subscriber aktif dari plan itu akan terupdate otomatis.
+          <strong>How it works:</strong> When a user subscribes to a plan, they automatically get all the limits set here. 
+          When you change settings, all active subscribers to that plan will be automatically updated.
         </div>
       </div>
 
@@ -158,10 +158,10 @@ export default function PlansDeviceLimitsPage() {
       {messageSaved && (
         <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-8 flex gap-3 items-start">
           <div className="w-full">
-            <p className="text-green-800 font-semibold text-sm">✅ Pengaturan berhasil diubah!</p>
+            <p className="text-green-800 font-semibold text-sm">✅ Settings updated successfully!</p>
             {syncedCount > 0 && (
               <p className="text-green-700 text-xs mt-1">
-                Tersinkronisasi ke {syncedCount} subscriber aktif
+                Synced to {syncedCount} active subscribers
               </p>
             )}
           </div>
@@ -176,28 +176,28 @@ export default function PlansDeviceLimitsPage() {
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Nama Plan
+                  Plan Name
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Durasi
+                  Duration
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Harga
+                  Price
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Batas Perangkat
+                  Device Limit
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Durasi Suspense
+                  Suspend Duration
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Batas Pencarian/Hari
+                  Daily Search Limit
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Batas Hasil Pencarian
+                  Result Display Limit
                 </th>
                 <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Aksi
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -299,12 +299,12 @@ export default function PlansDeviceLimitsPage() {
                             className="w-16 px-3 py-2 border border-green-300 rounded-lg text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500"
                             autoFocus
                           />
-                          <span className="text-sm text-slate-500">per hari</span>
+                          <span className="text-sm text-slate-500">per day</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-slate-900">
-                            {plan.dailySearchLimit} pencarian
+                            {plan.dailySearchLimit} searches
                           </span>
                         </div>
                       )}
@@ -372,25 +372,25 @@ export default function PlansDeviceLimitsPage() {
                               onClick={() => handleEditStart(plan, 'deviceLimit')}
                               className="px-2.5 py-1.5 border border-slate-300 hover:border-orange-300 hover:bg-orange-50 text-slate-600 hover:text-orange-600 text-xs font-semibold rounded-lg transition"
                             >
-                              Perangkat
+                              Devices
                             </button>
                             <button
                               onClick={() => handleEditStart(plan, 'suspendDuration')}
                               className="px-2.5 py-1.5 border border-slate-300 hover:border-blue-300 hover:bg-blue-50 text-slate-600 hover:text-blue-600 text-xs font-semibold rounded-lg transition"
                             >
-                              Suspense
+                              Suspend
                             </button>
                             <button
                               onClick={() => handleEditStart(plan, 'dailySearchLimit')}
                               className="px-2.5 py-1.5 border border-slate-300 hover:border-green-300 hover:bg-green-50 text-slate-600 hover:text-green-600 text-xs font-semibold rounded-lg transition"
                             >
-                              Pencarian
+                              Search
                             </button>
                             <button
                               onClick={() => handleEditStart(plan, 'maxSearches')}
                               className="px-2.5 py-1.5 border border-slate-300 hover:border-purple-300 hover:bg-purple-50 text-slate-600 hover:text-purple-600 text-xs font-semibold rounded-lg transition"
                             >
-                              Hasil
+                              Results
                             </button>
                           </div>
                         )}
@@ -406,21 +406,21 @@ export default function PlansDeviceLimitsPage() {
         {/* Empty State */}
         {plans.length === 0 && (
           <div className="p-8 text-center text-slate-500">
-            <p className="text-sm">Tidak ada plan aktif ditemukan</p>
+            <p className="text-sm">No active plans found</p>
           </div>
         )}
       </div>
 
       {/* Help Section */}
       <div className="mt-8 bg-slate-50 rounded-2xl border border-slate-200 p-6">
-        <h3 className="font-semibold text-slate-900 mb-3">💡 Panduan</h3>
+        <h3 className="font-semibold text-slate-900 mb-3">💡 Guide</h3>
         <ul className="space-y-2 text-sm text-slate-600">
-          <li>• <strong>Batas Perangkat:</strong> Berapa banyak perangkat yang bisa terhubung sekaligus</li>
-          <li>• <strong>Durasi Suspense:</strong> Berapa menit user disuspend jika melampaui batas perangkat</li>
-          <li>• <strong>Batas Pencarian/Hari:</strong> Berapa kali user bisa melakukan pencarian dalam 1 hari</li>
-          <li>• <strong>Batas Hasil Pencarian:</strong> Berapa banyak hasil yang ditampilkan per pencarian</li>
-          <li>• Pengaturan plan diprioritaskan dibanding pengaturan global dan individual</li>
-          <li>• Perubahan langsung berlaku ke semua user dengan subscription aktif di plan ini</li>
+          <li>• <strong>Device Limit:</strong> Maximum number of devices that can be connected simultaneously</li>
+          <li>• <strong>Suspend Duration:</strong> Minutes to suspend user when exceeding device limit</li>
+          <li>• <strong>Daily Search Limit:</strong> Number of searches allowed per user per day</li>
+          <li>• <strong>Result Display Limit:</strong> Number of results shown per search</li>
+          <li>• Plan settings take priority over global and individual settings</li>
+          <li>• Changes apply immediately to all users with active subscriptions to this plan</li>
         </ul>
       </div>
     </div>

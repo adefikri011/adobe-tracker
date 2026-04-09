@@ -13,6 +13,35 @@ const CACHE_HOURS = 24;
 const FREE_LIMIT = 10;
 const PRO_LIMIT = 100;
 
+// Simple in-memory cache untuk search results (5 menit TTL)
+const SEARCH_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const memoryCache = new Map<string, { data: any; expires: number }>();
+
+function getCacheKey(userId: string, query: string, limit: number): string {
+  return `${userId}:${query}:${limit}`;
+}
+
+function getFromCache(userId: string, query: string, limit: number): any | null {
+  const key = getCacheKey(userId, query, limit);
+  const cached = memoryCache.get(key);
+  
+  if (!cached) return null;
+  if (Date.now() > cached.expires) {
+    memoryCache.delete(key); // Expired, delete
+    return null;
+  }
+  
+  return cached.data;
+}
+
+function setCache(userId: string, query: string, limit: number, data: any): void {
+  const key = getCacheKey(userId, query, limit);
+  memoryCache.set(key, {
+    data,
+    expires: Date.now() + SEARCH_CACHE_TTL,
+  });
+}
+
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -242,6 +271,13 @@ export async function GET(req: NextRequest) {
     // Ini gratis, instant, dan relevan karena dari portfolio sendiri
     // SKIP jika user punya banyak assets (>100) untuk avoid slow query
     if (userId) {
+      // Check memory cache dulu sebelum query DB
+      const cachedResult = getFromCache(userId, query, limit);
+      if (cachedResult) {
+        console.log(`[Search] Memory cache hit for "${query}"`);
+        return NextResponse.json(cachedResult);
+      }
+
       const assetCount = await prisma.asset.count({
         where: { profileId: userId },
       });
@@ -292,7 +328,10 @@ export async function GET(req: NextRequest) {
           } else {
             console.log(`[SearchLog] userId is null, skip logging`);
           }
-          return NextResponse.json({ results, fromCache: false, fromDb: true, total: results.length, isPro });
+          const response = { results, fromCache: false, fromDb: true, total: results.length, isPro };
+          // Cache result for 5 minutes
+          if (userId) setCache(userId, query, limit, response);
+          return NextResponse.json(response);
         }
       } else {
         console.log(`[Search] Skip DB query (${assetCount} assets) — langsung ke Apify`);
@@ -328,13 +367,16 @@ export async function GET(req: NextRequest) {
       } else {
         console.log(`[SearchLog] userId is null, skip logging`);
       }
-      return NextResponse.json({
+      const response = {
         results: relevantResults.slice(0, limit),
         fromCache: true,
         cachedAt: cached.createdAt,
         isPro,
         total: relevantResults.length,
-      });
+      };
+      // Cache in memory too
+      if (userId) setCache(userId, query, limit, response);
+      return NextResponse.json(response);
     }
 
     // ── PRIORITAS 3: Apify scrape multi-halaman ─────────────────────────────

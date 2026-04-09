@@ -29,7 +29,7 @@ export default function GatewayPage() {
       try {
         setLoading(true);
         const response = await fetch("/api/admin/billing/gateway");
-        if (!response.ok) throw new Error("Gagal mengambil konfigurasi");
+        if (!response.ok) throw new Error("Failed to fetch configuration");
         
         const data = await response.json();
         const configs = data.configs;
@@ -59,7 +59,7 @@ export default function GatewayPage() {
         setError("");
       } catch (err: any) {
         console.error("Error fetching configs:", err);
-        setError(err.message || "Gagal mengambil konfigurasi");
+        setError(err.message || "Failed to fetch configuration");
       } finally {
         setLoading(false);
       }
@@ -86,7 +86,7 @@ export default function GatewayPage() {
         }),
       });
 
-      if (!midtransRes.ok) throw new Error("Gagal menyimpan konfigurasi Midtrans");
+      if (!midtransRes.ok) throw new Error("Failed to save Midtrans configuration");
 
       // Save Stripe config
       const stripeRes = await fetch("/api/admin/billing/gateway", {
@@ -101,13 +101,13 @@ export default function GatewayPage() {
         }),
       });
 
-      if (!stripeRes.ok) throw new Error("Gagal menyimpan konfigurasi Stripe");
+      if (!stripeRes.ok) throw new Error("Failed to save Stripe configuration");
 
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
       console.error("Error saving configs:", err);
-      setError(err.message || "Gagal menyimpan konfigurasi");
+      setError(err.message || "Failed to save configuration");
     } finally {
       setSaving(false);
     }
@@ -130,7 +130,7 @@ export default function GatewayPage() {
       {success && (
         <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6 flex items-start gap-3">
           <CheckCircle size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-green-700">Konfigurasi berhasil disimpan!</p>
+          <p className="text-sm text-green-700">Configuration saved successfully!</p>
         </div>
       )}
 
@@ -289,7 +289,7 @@ export default function GatewayPage() {
                 : "bg-orange-500 hover:bg-orange-600 text-white"
             }`}
           >
-            {saving ? "Menyimpan..." : success ? "✓ Tersimpan!" : "Simpan Konfigurasi"}
+            {saving ? "Saving..." : success ? "✓ Saved!" : "Save Configuration"}
           </button>
         </>
       )}

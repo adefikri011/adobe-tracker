@@ -79,7 +79,7 @@ export default function CurrencySettingsPage() {
         setTimeout(() => setStatus("idle"), 2000);
       } else {
         setStatus("error");
-        setErrorMsg(data.error || "Gagal menyimpan");
+        setErrorMsg(data.error || "Failed to save");
       }
     } catch (error: any) {
       setStatus("error");

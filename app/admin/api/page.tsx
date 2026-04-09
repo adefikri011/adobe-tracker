@@ -35,7 +35,8 @@ export default function ApiIntegrationPage() {
   const [totalAssets, setTotalAssets] = useState(0);
   const [estimatedCost, setEstimatedCost] = useState(0);
   const [apifyUsage, setApifyUsage] = useState({ current: 0, limit: 5.0 });
-  const [syncLimit, setSyncLimit] = useState(300); // Default 300 items
+  const [syncLimit, setSyncLimit] = useState(1000); // Default 1000 items for local testing
+  const [searchQuery, setSearchQuery] = useState(""); // Empty = all types of assets
   const [progress, setProgress] = useState<SyncProgress>({
     phase: "idle",
     currentPage: 0,
@@ -96,7 +97,7 @@ export default function ApiIntegrationPage() {
     });
 
     try {
-      const response = await fetch(`/api/adobe/sync?limit=${syncLimit}`, {
+      const response = await fetch(`/api/adobe/sync?limit=${syncLimit}&query=${encodeURIComponent(searchQuery)}`, {
         method: "POST",
         signal: abortRef.current.signal,
       });
@@ -128,7 +129,7 @@ export default function ApiIntegrationPage() {
       setProgress((prev) => ({
         ...prev,
         phase: "error",
-        errorMessage: e?.message || "Koneksi gagal",
+        errorMessage: e?.message || "Connection failed",
       }));
     }
   };
@@ -249,12 +250,12 @@ export default function ApiIntegrationPage() {
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                         {progress.phase === "saving"
-                          ? "Menyimpan ke database..."
+                          ? "Saving to database..."
                           : progress.phase === "done"
-                          ? "Selesai"
+                          ? "Complete"
                           : progress.phase === "error"
                           ? "Error"
-                          : `Halaman ${progress.currentPage}/${progress.totalPages}`}
+                          : `Page ${progress.currentPage}/${progress.totalPages}`}
                       </span>
                       <span className="text-[10px] font-black text-orange-500">{progressPct}%</span>
                     </div>
@@ -278,12 +279,12 @@ export default function ApiIntegrationPage() {
                   {(isSyncing || progress.phase === "done") && (
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                        <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Terkumpul</p>
+                        <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Collected</p>
                         <p className="text-lg font-black text-slate-800">{progress.totalCollected}</p>
                       </div>
                       <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
                         <p className="text-[9px] font-black text-slate-400 uppercase mb-1 flex items-center gap-1">
-                          <Plus size={8} /> Baru
+                          <Plus size={8} /> New
                         </p>
                         <p className="text-lg font-black text-green-600">{progress.created}</p>
                       </div>
@@ -292,7 +293,7 @@ export default function ApiIntegrationPage() {
                         <p className="text-lg font-black text-orange-500">{progress.updated}</p>
                       </div>
                       <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                        <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Est. Sisa</p>
+                        <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Est. Remaining</p>
                         <p className="text-lg font-black text-slate-800">
                           {progress.phase === "done"
                             ? "—"
@@ -315,9 +316,9 @@ export default function ApiIntegrationPage() {
                     <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-100 rounded-2xl">
                       <CheckCircle2 size={16} className="text-green-500 shrink-0" />
                       <p className="text-xs text-green-700 font-medium">
-                        Sinkronisasi selesai! <span className="font-black">{progress.created} baru</span> ditambahkan,{" "}
-                        <span className="font-black">{progress.updated} diperbarui</span>. Total di database:{" "}
-                        <span className="font-black">{progress.totalInDatabase}</span> asset.
+                        Synchronization complete! <span className="font-black">{progress.created} new</span> added,{" "}
+                        <span className="font-black">{progress.updated} updated</span>. Total in database:{" "}
+                        <span className="font-black">{progress.totalInDatabase}</span> assets.
                       </p>
                     </div>
                   )}
@@ -342,6 +343,24 @@ export default function ApiIntegrationPage() {
 
               {/* BUTTON ROW */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 pt-2">
+                {/* Search Query Input */}
+                {progress.phase === "idle" && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                      Search Filter (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Leave empty for all types, or type: nature, urban, business"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value.trim())}
+                      className="px-4 py-2.5 border border-slate-200 rounded-[16px] text-sm font-semibold text-slate-700 focus:outline-none focus:border-orange-400 transition"
+                      disabled={isSyncing}
+                    />
+                    <span className="text-[8px] text-slate-400 font-medium">Empty = 1000 diverse items, or filter specific</span>
+                  </div>
+                )}
+
                 {/* Sync Limit Input */}
                 {progress.phase === "idle" && (
                   <div className="flex flex-col gap-1.5">
@@ -354,7 +373,7 @@ export default function ApiIntegrationPage() {
                       max="1000"
                       step="10"
                       value={syncLimit}
-                      onChange={(e) => setSyncLimit(Math.max(10, Math.min(1000, parseInt(e.target.value) || 300)))}
+                      onChange={(e) => setSyncLimit(Math.max(10, Math.min(1000, parseInt(e.target.value) || 1000)))}
                       className="px-4 py-2.5 border border-slate-200 rounded-[16px] text-sm font-semibold text-slate-700 focus:outline-none focus:border-orange-400 transition"
                       disabled={isSyncing}
                     />

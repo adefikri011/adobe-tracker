@@ -157,7 +157,16 @@ export default function PlansAdminPage() {
   };
 
   const handleDelete = async (planId: string) => {
-    if (!confirm("Are you sure you want to delete this plan?")) return;
+    const plan = plans.find(p => p.id === planId);
+    if (!plan) return;
+
+    // If plan is still Active, only deactivate first
+    if (plan.isActive) {
+      if (!confirm("This plan is still ACTIVE. Click OK to DEACTIVATE it first before you can delete it permanently.\n\nAfter that, click delete again for permanent delete.")) return;
+    } else {
+      // If plan is Inactive, warning for permanent delete
+      if (!confirm("⚠️ PERMANENTLY DELETE this plan from the database?\n\nThis action CANNOT be undone!\n\nClick OK to continue.")) return;
+    }
 
     try {
       const res = await fetch(`/api/billing/admin/plans?id=${planId}`, {
@@ -167,7 +176,8 @@ export default function PlansAdminPage() {
       const data = await res.json();
 
       if (data.success) {
-        setMessage({ type: "success", text: "Plan deleted successfully" });
+        const msg = data.message || (plan.isActive ? "Plan deactivated" : "Plan deleted");
+        setMessage({ type: "success", text: msg });
         fetchData();
       } else {
         setMessage({ type: "error", text: data.message || "Failed to delete plan" });
@@ -238,8 +248,8 @@ export default function PlansAdminPage() {
                 <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Price</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Duration</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Devices</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Batas Pencarian/Hari</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Batas Hasil</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Daily Search Limit</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Result Limit</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Status</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Actions</th>
               </tr>
@@ -261,7 +271,7 @@ export default function PlansAdminPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600">{plan.durationDays} days</td>
                     <td className="px-6 py-4 text-sm text-slate-600">{plan.deviceLimit}</td>
-                    <td className="px-6 py-4 text-sm text-slate-600">{plan.dailySearchLimit} pencarian</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{plan.dailySearchLimit} searches</td>
                     <td className="px-6 py-4 text-sm text-slate-600">
                       {plan.maxSearches === "unlimited" ? "∞ Unlimited" : plan.maxSearches}
                     </td>
@@ -276,7 +286,15 @@ export default function PlansAdminPage() {
                         <button onClick={() => handleEdit(plan)} className="p-2 text-blue-600 hover:bg-blue-50 rounded transition">
                           <Edit2 size={16} />
                         </button>
-                        <button onClick={() => handleDelete(plan.id)} className="p-2 text-red-600 hover:bg-red-50 rounded transition">
+                        <button 
+                          onClick={() => handleDelete(plan.id)} 
+                          className={`p-2 rounded transition ${
+                            plan.isActive 
+                              ? "text-orange-600 hover:bg-orange-50"
+                              : "text-red-600 hover:bg-red-50"
+                          }`}
+                          title={plan.isActive ? "Deactivate first before delete" : "Permanent delete"}
+                        >
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -398,8 +416,8 @@ export default function PlansAdminPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Batas Pencarian per Hari</label>
-                    <p className="text-xs text-slate-500 mb-2">Berapa kali user bisa mencari dalam sehari</p>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Daily Search Limit</label>
+                    <p className="text-xs text-slate-500 mb-2">How many searches per day per user</p>
                     <input
                       type="number"
                       value={editingPlan.dailySearchLimit}
@@ -410,8 +428,8 @@ export default function PlansAdminPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Batas Hasil Pencarian</label>
-                    <p className="text-xs text-slate-500 mb-2">Berapa banyak hasil yang ditampilkan per pencarian</p>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Result Display Limit</label>
+                    <p className="text-xs text-slate-500 mb-2">How many results shown per search</p>
                     <select
                       value={editingPlan.maxSearches}
                       onChange={(e) => setEditingPlan({ ...editingPlan, maxSearches: e.target.value })}
