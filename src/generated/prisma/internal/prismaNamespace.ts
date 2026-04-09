@@ -1713,6 +1713,7 @@ export const PlanScalarFieldEnum = {
   discount: 'discount',
   durationDays: 'durationDays',
   deviceLimit: 'deviceLimit',
+  suspendDurationMinutes: 'suspendDurationMinutes',
   features: 'features',
   isActive: 'isActive',
   createdAt: 'createdAt',

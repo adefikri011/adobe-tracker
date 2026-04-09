@@ -10,6 +10,8 @@ interface Plan {
   finalPrice: number;
   discount: number;
   durationDays: number;
+  deviceLimit: number;
+  suspendDurationMinutes: number;
   features: string[];
 }
 
@@ -69,7 +71,7 @@ const PaymentDetailsModal: React.FC<PaymentDetailsModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-slate-200 px-6 sm:px-8 py-4 sm:py-5 flex items-center justify-between">
@@ -467,6 +469,29 @@ export default function UserPlansPage() {
 
                   {/* Features */}
                   <ul className="space-y-2 sm:space-y-2.5 mb-6 sm:mb-7 md:mb-8 flex-1 min-h-[40px]">
+                    {/* Device Limit */}
+                    <li
+                      className={`flex items-center gap-2 sm:gap-2.5 text-[12px] sm:text-[13px] font-bold ${
+                        isPopular ? "text-slate-300" : "text-slate-600"
+                      }`}
+                    >
+                      <span
+                        className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center ${
+                          isPopular ? "bg-orange-500" : "bg-orange-100"
+                        }`}
+                      >
+                        <Check
+                          size={9}
+                          className={
+                            isPopular ? "text-white" : "text-orange-600"
+                          }
+                          strokeWidth={3.5}
+                        />
+                      </span>
+                      {plan.deviceLimit} Device{plan.deviceLimit !== 1 ? 's' : ''}
+                    </li>
+
+                    {/* Features */}
                     {plan.features.length > 0 ? (
                       plan.features.map((feature, i) => (
                         <li

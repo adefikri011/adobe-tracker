@@ -32,6 +32,7 @@ export type PlanAvgAggregateOutputType = {
   discount: number | null
   durationDays: number | null
   deviceLimit: number | null
+  suspendDurationMinutes: number | null
 }
 
 export type PlanSumAggregateOutputType = {
@@ -40,6 +41,7 @@ export type PlanSumAggregateOutputType = {
   discount: number | null
   durationDays: number | null
   deviceLimit: number | null
+  suspendDurationMinutes: number | null
 }
 
 export type PlanMinAggregateOutputType = {
@@ -52,6 +54,7 @@ export type PlanMinAggregateOutputType = {
   discount: number | null
   durationDays: number | null
   deviceLimit: number | null
+  suspendDurationMinutes: number | null
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -67,6 +70,7 @@ export type PlanMaxAggregateOutputType = {
   discount: number | null
   durationDays: number | null
   deviceLimit: number | null
+  suspendDurationMinutes: number | null
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -82,6 +86,7 @@ export type PlanCountAggregateOutputType = {
   discount: number
   durationDays: number
   deviceLimit: number
+  suspendDurationMinutes: number
   features: number
   isActive: number
   createdAt: number
@@ -96,6 +101,7 @@ export type PlanAvgAggregateInputType = {
   discount?: true
   durationDays?: true
   deviceLimit?: true
+  suspendDurationMinutes?: true
 }
 
 export type PlanSumAggregateInputType = {
@@ -104,6 +110,7 @@ export type PlanSumAggregateInputType = {
   discount?: true
   durationDays?: true
   deviceLimit?: true
+  suspendDurationMinutes?: true
 }
 
 export type PlanMinAggregateInputType = {
@@ -116,6 +123,7 @@ export type PlanMinAggregateInputType = {
   discount?: true
   durationDays?: true
   deviceLimit?: true
+  suspendDurationMinutes?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -131,6 +139,7 @@ export type PlanMaxAggregateInputType = {
   discount?: true
   durationDays?: true
   deviceLimit?: true
+  suspendDurationMinutes?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -146,6 +155,7 @@ export type PlanCountAggregateInputType = {
   discount?: true
   durationDays?: true
   deviceLimit?: true
+  suspendDurationMinutes?: true
   features?: true
   isActive?: true
   createdAt?: true
@@ -249,6 +259,7 @@ export type PlanGroupByOutputType = {
   discount: number
   durationDays: number
   deviceLimit: number
+  suspendDurationMinutes: number
   features: string[]
   isActive: boolean
   createdAt: Date
@@ -288,6 +299,7 @@ export type PlanWhereInput = {
   discount?: Prisma.FloatFilter<"Plan"> | number
   durationDays?: Prisma.IntFilter<"Plan"> | number
   deviceLimit?: Prisma.IntFilter<"Plan"> | number
+  suspendDurationMinutes?: Prisma.IntFilter<"Plan"> | number
   features?: Prisma.StringNullableListFilter<"Plan">
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
@@ -306,6 +318,7 @@ export type PlanOrderByWithRelationInput = {
   discount?: Prisma.SortOrder
   durationDays?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
   features?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -327,6 +340,7 @@ export type PlanWhereUniqueInput = Prisma.AtLeast<{
   discount?: Prisma.FloatFilter<"Plan"> | number
   durationDays?: Prisma.IntFilter<"Plan"> | number
   deviceLimit?: Prisma.IntFilter<"Plan"> | number
+  suspendDurationMinutes?: Prisma.IntFilter<"Plan"> | number
   features?: Prisma.StringNullableListFilter<"Plan">
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
@@ -345,6 +359,7 @@ export type PlanOrderByWithAggregationInput = {
   discount?: Prisma.SortOrder
   durationDays?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
   features?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -369,6 +384,7 @@ export type PlanScalarWhereWithAggregatesInput = {
   discount?: Prisma.FloatWithAggregatesFilter<"Plan"> | number
   durationDays?: Prisma.IntWithAggregatesFilter<"Plan"> | number
   deviceLimit?: Prisma.IntWithAggregatesFilter<"Plan"> | number
+  suspendDurationMinutes?: Prisma.IntWithAggregatesFilter<"Plan"> | number
   features?: Prisma.StringNullableListFilter<"Plan">
   isActive?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
@@ -385,6 +401,7 @@ export type PlanCreateInput = {
   discount?: number
   durationDays: number
   deviceLimit?: number
+  suspendDurationMinutes?: number
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
   createdAt?: Date | string
@@ -403,6 +420,7 @@ export type PlanUncheckedCreateInput = {
   discount?: number
   durationDays: number
   deviceLimit?: number
+  suspendDurationMinutes?: number
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
   createdAt?: Date | string
@@ -421,6 +439,7 @@ export type PlanUpdateInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   durationDays?: Prisma.IntFieldUpdateOperationsInput | number
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -439,6 +458,7 @@ export type PlanUncheckedUpdateInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   durationDays?: Prisma.IntFieldUpdateOperationsInput | number
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -457,6 +477,7 @@ export type PlanCreateManyInput = {
   discount?: number
   durationDays: number
   deviceLimit?: number
+  suspendDurationMinutes?: number
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
   createdAt?: Date | string
@@ -473,6 +494,7 @@ export type PlanUpdateManyMutationInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   durationDays?: Prisma.IntFieldUpdateOperationsInput | number
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -489,6 +511,7 @@ export type PlanUncheckedUpdateManyInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   durationDays?: Prisma.IntFieldUpdateOperationsInput | number
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -505,6 +528,7 @@ export type PlanCountOrderByAggregateInput = {
   discount?: Prisma.SortOrder
   durationDays?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
   features?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -517,6 +541,7 @@ export type PlanAvgOrderByAggregateInput = {
   discount?: Prisma.SortOrder
   durationDays?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
 }
 
 export type PlanMaxOrderByAggregateInput = {
@@ -529,6 +554,7 @@ export type PlanMaxOrderByAggregateInput = {
   discount?: Prisma.SortOrder
   durationDays?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -544,6 +570,7 @@ export type PlanMinOrderByAggregateInput = {
   discount?: Prisma.SortOrder
   durationDays?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -555,6 +582,7 @@ export type PlanSumOrderByAggregateInput = {
   discount?: Prisma.SortOrder
   durationDays?: Prisma.SortOrder
   deviceLimit?: Prisma.SortOrder
+  suspendDurationMinutes?: Prisma.SortOrder
 }
 
 export type PlanScalarRelationFilter = {
@@ -613,6 +641,7 @@ export type PlanCreateWithoutTransactionsInput = {
   discount?: number
   durationDays: number
   deviceLimit?: number
+  suspendDurationMinutes?: number
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
   createdAt?: Date | string
@@ -630,6 +659,7 @@ export type PlanUncheckedCreateWithoutTransactionsInput = {
   discount?: number
   durationDays: number
   deviceLimit?: number
+  suspendDurationMinutes?: number
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
   createdAt?: Date | string
@@ -663,6 +693,7 @@ export type PlanUpdateWithoutTransactionsInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   durationDays?: Prisma.IntFieldUpdateOperationsInput | number
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -680,6 +711,7 @@ export type PlanUncheckedUpdateWithoutTransactionsInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   durationDays?: Prisma.IntFieldUpdateOperationsInput | number
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -697,6 +729,7 @@ export type PlanCreateWithoutSubscriptionsInput = {
   discount?: number
   durationDays: number
   deviceLimit?: number
+  suspendDurationMinutes?: number
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
   createdAt?: Date | string
@@ -714,6 +747,7 @@ export type PlanUncheckedCreateWithoutSubscriptionsInput = {
   discount?: number
   durationDays: number
   deviceLimit?: number
+  suspendDurationMinutes?: number
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
   createdAt?: Date | string
@@ -747,6 +781,7 @@ export type PlanUpdateWithoutSubscriptionsInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   durationDays?: Prisma.IntFieldUpdateOperationsInput | number
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -764,6 +799,7 @@ export type PlanUncheckedUpdateWithoutSubscriptionsInput = {
   discount?: Prisma.FloatFieldUpdateOperationsInput | number
   durationDays?: Prisma.IntFieldUpdateOperationsInput | number
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -821,6 +857,7 @@ export type PlanSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   discount?: boolean
   durationDays?: boolean
   deviceLimit?: boolean
+  suspendDurationMinutes?: boolean
   features?: boolean
   isActive?: boolean
   createdAt?: boolean
@@ -840,6 +877,7 @@ export type PlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   discount?: boolean
   durationDays?: boolean
   deviceLimit?: boolean
+  suspendDurationMinutes?: boolean
   features?: boolean
   isActive?: boolean
   createdAt?: boolean
@@ -856,6 +894,7 @@ export type PlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   discount?: boolean
   durationDays?: boolean
   deviceLimit?: boolean
+  suspendDurationMinutes?: boolean
   features?: boolean
   isActive?: boolean
   createdAt?: boolean
@@ -872,13 +911,14 @@ export type PlanSelectScalar = {
   discount?: boolean
   durationDays?: boolean
   deviceLimit?: boolean
+  suspendDurationMinutes?: boolean
   features?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "price" | "finalPrice" | "discount" | "durationDays" | "deviceLimit" | "features" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "price" | "finalPrice" | "discount" | "durationDays" | "deviceLimit" | "suspendDurationMinutes" | "features" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
 export type PlanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subscriptions?: boolean | Prisma.Plan$subscriptionsArgs<ExtArgs>
   transactions?: boolean | Prisma.Plan$transactionsArgs<ExtArgs>
@@ -903,6 +943,7 @@ export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     discount: number
     durationDays: number
     deviceLimit: number
+    suspendDurationMinutes: number
     features: string[]
     isActive: boolean
     createdAt: Date
@@ -1341,6 +1382,7 @@ export interface PlanFieldRefs {
   readonly discount: Prisma.FieldRef<"Plan", 'Float'>
   readonly durationDays: Prisma.FieldRef<"Plan", 'Int'>
   readonly deviceLimit: Prisma.FieldRef<"Plan", 'Int'>
+  readonly suspendDurationMinutes: Prisma.FieldRef<"Plan", 'Int'>
   readonly features: Prisma.FieldRef<"Plan", 'String[]'>
   readonly isActive: Prisma.FieldRef<"Plan", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Plan", 'DateTime'>

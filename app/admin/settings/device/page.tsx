@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { Loader2, AlertCircle, CheckCircle, ArrowRight } from "lucide-react";
 
 export default function DeviceLimitPage() {
   const [globalMaxDevices, setGlobalMaxDevices] = useState(1);
@@ -106,10 +107,45 @@ export default function DeviceLimitPage() {
 
   return (
     <div className="p-8 max-w-3xl space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Global Device Policy</h1>
-        <p className="text-slate-400 text-sm mt-1">Set max devices and suspend duration applied to all users</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Device Management</h1>
+          <p className="text-slate-400 text-sm mt-1">Configure device limits and policies</p>
+        </div>
       </div>
+
+      {/* Navigation Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Global Device Policy Card */}
+        <div className="bg-white border-2 border-orange-200 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-slate-900">Global Device Policy</h3>
+              <p className="text-xs text-slate-500 mt-1">For free users</p>
+            </div>
+          </div>
+          <p className="text-xs text-slate-600 mt-3">Set max devices and suspend duration for all free plan users.</p>
+          <div className="mt-4 text-xs font-semibold text-orange-600">← You're here</div>
+        </div>
+
+        {/* Per-Plan Device Limits Card */}
+        <Link href="/admin/settings/plans-device-limits">
+          <div className="bg-white border-2 border-slate-200 hover:border-blue-200 rounded-2xl p-5 shadow-sm cursor-pointer transition hover:bg-blue-50">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-slate-900">Per-Plan Device Limits</h3>
+                <p className="text-xs text-slate-500 mt-1">For paid users</p>
+              </div>
+              <ArrowRight size={18} className="text-slate-400" />
+            </div>
+            <p className="text-xs text-slate-600 mt-3">Set device limits for each subscription plan independently.</p>
+            <div className="mt-4 text-xs font-semibold text-blue-600">Click to configure →</div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-slate-200"></div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
@@ -140,12 +176,11 @@ export default function DeviceLimitPage() {
         <div>
           <h3 className="font-semibold text-slate-900 text-base">Max Devices (Global)</h3>
           <p className="text-xs text-slate-400 mt-1">
-            Maximum devices allowed per user. This is the base limit that can be overridden by:
+            Global fallback device limit for free users without an active paid plan.
           </p>
-          <ul className="text-xs text-slate-500 mt-2 ml-4 space-y-1">
-            <li>• Plan device limit (if higher)</li>
-            <li>• Individual user override (if set)</li>
-          </ul>
+          <p className="text-xs text-slate-500 mt-2 bg-blue-50 border border-blue-100 rounded-lg p-2">
+            💡 Paid subscribers will use their plan's device limit instead.
+          </p>
         </div>
 
         <div className="space-y-3">

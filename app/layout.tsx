@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { getEnvFallback } from "@/lib/gateway-config";
 import FaviconUpdater from "./components/FaviconUpdater";
+import AnimatedTitle from "./components/AnimatedTitle"; //
 
 const inter = Inter({
   variable: "--font-inter",
@@ -47,6 +48,7 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col font-inter">
         <FaviconUpdater />
+        <AnimatedTitle /> {/* ← tambah ini */}
         {children}
       </body>
     </html>

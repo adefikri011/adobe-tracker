@@ -68,21 +68,22 @@ model UserSession {
 }
 
 model Plan {
-  id            String         @id @default(cuid())
-  name          String
-  slug          String         @unique
-  description   String?
-  price         Float
-  finalPrice    Float
-  discount      Float          @default(0)
-  durationDays  Int
-  deviceLimit   Int            @default(1) // Max devices for this plan
-  features      String[]       @default([])
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  subscriptions Subscription[]
-  transactions  Transaction[]
+  id                      String         @id @default(cuid())
+  name                    String
+  slug                    String         @unique
+  description             String?
+  price                   Float
+  finalPrice              Float
+  discount                Float          @default(0)
+  durationDays            Int
+  deviceLimit             Int            @default(1) // Max devices for this plan
+  suspendDurationMinutes  Int            @default(30) // Suspend duration if exceeding device limit
+  features                String[]       @default([])
+  isActive                Boolean        @default(true)
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+  subscriptions           Subscription[]
+  transactions            Transaction[]
 }
 
 model Transaction {

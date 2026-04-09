@@ -98,6 +98,11 @@ export async function PATCH(req: NextRequest) {
       updateData.deviceLimit = Math.max(1, Number(updateData.deviceLimit));
     }
 
+    // Ensure suspendDurationMinutes is valid
+    if (updateData.suspendDurationMinutes !== undefined) {
+      updateData.suspendDurationMinutes = Math.max(1, Number(updateData.suspendDurationMinutes));
+    }
+
     const updatedPlan = await prisma.plan.update({
       where: { id },
       data: updateData,

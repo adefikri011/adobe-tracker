@@ -11,6 +11,7 @@ interface Plan {
   discount: number;
   durationDays: number;
   deviceLimit: number;
+  suspendDurationMinutes: number;
   features: string[];
   isActive: boolean;
 }
@@ -26,7 +27,7 @@ export default function PlansPage() {
   const [currencySettings, setCurrencySettings] = useState<CurrencySettings | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  const [editData, setEditData] = useState({ price: "", discount: "", deviceLimit: "" });
+  const [editData, setEditData] = useState({ price: "", discount: "", deviceLimit: "", suspendDurationMinutes: "" });
   const [showAddFeature, setShowAddFeature] = useState<string | null>(null);
   const [newFeature, setNewFeature] = useState("");
 
@@ -38,6 +39,7 @@ export default function PlansPage() {
     durationDays: 1,
     discount: 0,
     deviceLimit: 1,
+    suspendDurationMinutes: 30,
   });
 
   // Fetch currency settings
@@ -80,7 +82,7 @@ export default function PlansPage() {
       if (res.ok) {
         fetchPlans();
         setIsAdding(false);
-        setNewPlanForm({ name: "", slug: "", price: 0, durationDays: 1, discount: 0, deviceLimit: 1 });
+        setNewPlanForm({ name: "", slug: "", price: 0, durationDays: 1, discount: 0, deviceLimit: 1, suspendDurationMinutes: 30 });
         alert("✅ Plan created successfully");
       }
     } catch (err) {
@@ -98,6 +100,7 @@ export default function PlansPage() {
           price: parseFloat(editData.price),
           discount: parseFloat(editData.discount),
           deviceLimit: parseInt(editData.deviceLimit),
+          suspendDurationMinutes: parseInt(editData.suspendDurationMinutes),
         }),
       });
       if (res.ok) {
@@ -221,6 +224,7 @@ export default function PlansPage() {
                 <input type="number" placeholder="Max Devices" min="1" max="20" className="w-1/2 border rounded-lg p-2 text-sm" onChange={e => setNewPlanForm({...newPlanForm, deviceLimit: parseInt(e.target.value) || 1})} />
                 <input type="number" placeholder="Discount %" className="w-1/2 border rounded-lg p-2 text-sm" onChange={e => setNewPlanForm({...newPlanForm, discount: parseFloat(e.target.value) || 0})} />
               </div>
+              <input type="number" placeholder="Suspend Duration (min)" min="1" max="1440" step="5" className="w-full border rounded-lg p-2 text-sm" onChange={e => setNewPlanForm({...newPlanForm, suspendDurationMinutes: parseInt(e.target.value) || 30})} />
               <button onClick={handleAddPlan} className="w-full bg-orange-500 text-white py-2 rounded-lg font-bold">Create Plan</button>
             </div>
           </div>
@@ -246,7 +250,7 @@ export default function PlansPage() {
                   </div>
                 </div>
                 <div className="flex gap-1.5">
-                  <button onClick={() => { setEditing(plan.id); setEditData({price: String(plan.price), discount: String(plan.discount), deviceLimit: String(plan.deviceLimit)}) }} className="p-1.5 rounded-lg hover:bg-orange-50 text-slate-400 hover:text-orange-500 transition"><Pencil size={14} /></button>
+                  <button onClick={() => { setEditing(plan.id); setEditData({price: String(plan.price), discount: String(plan.discount), deviceLimit: String(plan.deviceLimit), suspendDurationMinutes: String(plan.suspendDurationMinutes)}) }} className="p-1.5 rounded-lg hover:bg-orange-50 text-slate-400 hover:text-orange-500 transition"><Pencil size={14} /></button>
                   <button onClick={() => handleToggleActive(plan.id, plan.isActive)} className={`p-1.5 rounded-lg transition ${plan.isActive ? "hover:bg-red-50 text-slate-400 hover:text-red-500" : "hover:bg-green-50 text-slate-400 hover:text-green-500"}`}>
                     <Trash2 size={14} />
                   </button>
@@ -267,6 +271,11 @@ export default function PlansPage() {
                     <label className="text-xs text-slate-500 block mb-1">Max Devices 📱</label>
                     <input type="number" min="1" max="20" value={editData.deviceLimit} onChange={e => setEditData({...editData, deviceLimit: e.target.value})} className="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Max devices" />
                     <p className="text-xs text-slate-400 mt-1">Subscribers to this plan will get this device limit</p>
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-500 block mb-1">Suspend Duration (Minutes) ⏱️</label>
+                    <input type="number" min="1" max="1440" step="5" value={editData.suspendDurationMinutes} onChange={e => setEditData({...editData, suspendDurationMinutes: e.target.value})} className="w-full border rounded-lg px-3 py-1.5 text-sm" placeholder="Suspend duration in minutes" />
+                    <p className="text-xs text-slate-400 mt-1">How long to suspend user when exceeding device limit</p>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => handleSaveEdit(plan.id)} className="flex-1 bg-orange-500 text-white py-1.5 rounded-lg text-sm">Save</button>
