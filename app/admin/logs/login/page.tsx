@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, Download, ShieldCheck, ShieldX } from "lucide-react";
 
 interface LoginLog {
@@ -28,17 +28,38 @@ interface ApiResponse {
 }
 
 export default function LoginLogPage() {
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState(""); // Input yang user ketik
+  const [search, setSearch] = useState(""); // Query yang digunakan untuk fetch
   const [filter, setFilter] = useState("All");
   const [loginLogs, setLoginLogs] = useState<LoginLog[]>([]);
   const [stats, setStats] = useState({ totalAttempts: 0, successCount: 0, failedCount: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Debounce search - wait 500ms after user stops typing
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    debounceTimer.current = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 500);
+
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [searchInput]);
+
+  // Fetch when page changes
   useEffect(() => {
     fetchLoginLogs();
-  }, [page]);
+  }, [page, search, filter]);
 
   const fetchLoginLogs = async () => {
     try {
@@ -78,8 +99,7 @@ export default function LoginLogPage() {
   };
 
   const handleSearch = (value: string) => {
-    setSearch(value);
-    setPage(1);
+    setSearchInput(value); // Update input, debounce will handle setSearch
   };
 
   const handleFilterChange = (newFilter: string) => {
@@ -178,7 +198,7 @@ export default function LoginLogPage() {
         <div className="relative max-w-xs flex-1">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
-            value={search}
+            value={searchInput}
             onChange={e => handleSearch(e.target.value)}
             placeholder="Search email or IP..."
             className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-orange-400"
