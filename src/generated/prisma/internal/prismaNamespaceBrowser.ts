@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Profile: 'Profile',
   SearchCache: 'SearchCache',
+  MarketInsight: 'MarketInsight',
   Asset: 'Asset',
   UserSession: 'UserSession',
   Plan: 'Plan',
@@ -110,6 +111,20 @@ export const SearchCacheScalarFieldEnum = {
 } as const
 
 export type SearchCacheScalarFieldEnum = (typeof SearchCacheScalarFieldEnum)[keyof typeof SearchCacheScalarFieldEnum]
+
+
+export const MarketInsightScalarFieldEnum = {
+  id: 'id',
+  query: 'query',
+  data: 'data',
+  sourceType: 'sourceType',
+  lastSyncedAt: 'lastSyncedAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MarketInsightScalarFieldEnum = (typeof MarketInsightScalarFieldEnum)[keyof typeof MarketInsightScalarFieldEnum]
 
 
 export const AssetScalarFieldEnum = {
@@ -208,6 +223,10 @@ export const AppSettingsScalarFieldEnum = {
   exchangeRate: 'exchangeRate',
   globalMaxDevices: 'globalMaxDevices',
   suspendDurationMinutes: 'suspendDurationMinutes',
+  cleanupFrequencyDays: 'cleanupFrequencyDays',
+  minDownloadThreshold: 'minDownloadThreshold',
+  keepPercentage: 'keepPercentage',
+  lastCleanupAt: 'lastCleanupAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

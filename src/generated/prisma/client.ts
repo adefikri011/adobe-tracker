@@ -52,6 +52,11 @@ export type Profile = Prisma.ProfileModel
  */
 export type SearchCache = Prisma.SearchCacheModel
 /**
+ * Model MarketInsight
+ * 
+ */
+export type MarketInsight = Prisma.MarketInsightModel
+/**
  * Model Asset
  * 
  */

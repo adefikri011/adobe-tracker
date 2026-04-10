@@ -36,6 +36,20 @@ model SearchCache {
   createdAt DateTime @default(now())
 }
 
+model MarketInsight {
+  id            String   @id @default(cuid())
+  query         String   // "trending", "popular", "category-xxx"
+  data          Json     // Cached market data from RapidAPI
+  sourceType    String   @default("rapidapi") // rapidapi, apify, etc
+  lastSyncedAt  DateTime @default(now())
+  expiresAt     DateTime // When this cache expires (for TTL)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([query])
+  @@map("MarketInsight")
+}
+
 model Asset {
   id            String    @id @default(cuid())
   assetId       String    @unique
@@ -126,6 +140,12 @@ model AppSettings {
   exchangeRate            Float    @default(15800)
   globalMaxDevices        Int      @default(1)      // Global device limit for all users
   suspendDurationMinutes  Int      @default(30)     // How long to suspend user when exceeding device limit
+  
+  // Cleanup Strategy Settings
+  cleanupFrequencyDays    Int      @default(7)      // Cleanup every 1=daily, 7=weekly, 14=biweekly, 30=monthly
+  minDownloadThreshold    Int      @default(5)      // Keep assets with >= this many downloads
+  keepPercentage          Int      @default(70)     // Keep top 70% popular assets, delete bottom 30%
+  lastCleanupAt           DateTime?                  // When was last cleanup executed
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 

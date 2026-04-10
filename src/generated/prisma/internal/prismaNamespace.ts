@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Profile: 'Profile',
   SearchCache: 'SearchCache',
+  MarketInsight: 'MarketInsight',
   Asset: 'Asset',
   UserSession: 'UserSession',
   Plan: 'Plan',
@@ -415,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "searchCache" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog" | "syncLog" | "gatewayConfig" | "activityLog" | "notification" | "notificationPreference" | "logo" | "favicon"
+    modelProps: "profile" | "searchCache" | "marketInsight" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog" | "syncLog" | "gatewayConfig" | "activityLog" | "notification" | "notificationPreference" | "logo" | "favicon"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -564,6 +565,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SearchCacheCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SearchCacheCountAggregateOutputType> | number
+        }
+      }
+    }
+    MarketInsight: {
+      payload: Prisma.$MarketInsightPayload<ExtArgs>
+      fields: Prisma.MarketInsightFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MarketInsightFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketInsightPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MarketInsightFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketInsightPayload>
+        }
+        findFirst: {
+          args: Prisma.MarketInsightFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketInsightPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MarketInsightFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketInsightPayload>
+        }
+        findMany: {
+          args: Prisma.MarketInsightFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketInsightPayload>[]
+        }
+        create: {
+          args: Prisma.MarketInsightCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketInsightPayload>
+        }
+        createMany: {
+          args: Prisma.MarketInsightCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MarketInsightCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketInsightPayload>[]
+        }
+        delete: {
+          args: Prisma.MarketInsightDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketInsightPayload>
+        }
+        update: {
+          args: Prisma.MarketInsightUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketInsightPayload>
+        }
+        deleteMany: {
+          args: Prisma.MarketInsightDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MarketInsightUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MarketInsightUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketInsightPayload>[]
+        }
+        upsert: {
+          args: Prisma.MarketInsightUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketInsightPayload>
+        }
+        aggregate: {
+          args: Prisma.MarketInsightAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMarketInsight>
+        }
+        groupBy: {
+          args: Prisma.MarketInsightGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MarketInsightGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MarketInsightCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MarketInsightCountAggregateOutputType> | number
         }
       }
     }
@@ -1669,6 +1744,20 @@ export const SearchCacheScalarFieldEnum = {
 export type SearchCacheScalarFieldEnum = (typeof SearchCacheScalarFieldEnum)[keyof typeof SearchCacheScalarFieldEnum]
 
 
+export const MarketInsightScalarFieldEnum = {
+  id: 'id',
+  query: 'query',
+  data: 'data',
+  sourceType: 'sourceType',
+  lastSyncedAt: 'lastSyncedAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MarketInsightScalarFieldEnum = (typeof MarketInsightScalarFieldEnum)[keyof typeof MarketInsightScalarFieldEnum]
+
+
 export const AssetScalarFieldEnum = {
   id: 'id',
   assetId: 'assetId',
@@ -1765,6 +1854,10 @@ export const AppSettingsScalarFieldEnum = {
   exchangeRate: 'exchangeRate',
   globalMaxDevices: 'globalMaxDevices',
   suspendDurationMinutes: 'suspendDurationMinutes',
+  cleanupFrequencyDays: 'cleanupFrequencyDays',
+  minDownloadThreshold: 'minDownloadThreshold',
+  keepPercentage: 'keepPercentage',
+  lastCleanupAt: 'lastCleanupAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2185,6 +2278,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   profile?: Prisma.ProfileOmit
   searchCache?: Prisma.SearchCacheOmit
+  marketInsight?: Prisma.MarketInsightOmit
   asset?: Prisma.AssetOmit
   userSession?: Prisma.UserSessionOmit
   plan?: Prisma.PlanOmit

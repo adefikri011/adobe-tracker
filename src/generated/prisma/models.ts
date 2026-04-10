@@ -10,6 +10,7 @@
  */
 export type * from './models/Profile'
 export type * from './models/SearchCache'
+export type * from './models/MarketInsight'
 export type * from './models/Asset'
 export type * from './models/UserSession'
 export type * from './models/Plan'

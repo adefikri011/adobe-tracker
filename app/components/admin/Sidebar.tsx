@@ -30,7 +30,8 @@ import {
   Tag,
   Receipt,
   Landmark,
-  Lock
+  Lock,
+  Trash2
 } from "lucide-react";
 import { useSidebar } from "@/components/admin/SidebarContext";
 
@@ -39,6 +40,7 @@ const SETTINGS_ITEMS = [
   { label: "Currency", href: "/admin/settings/currency", icon: CreditCard },
   { label: "Timezone", href: "/admin/settings/timezone", icon: Clock },
   { label: "Device Limit", href: "/admin/settings/device", icon: Smartphone },
+  { label: "Cleanup", href: "/admin/settings/cleanup", icon: Trash2 },
 ];
 
 const navGroups = [

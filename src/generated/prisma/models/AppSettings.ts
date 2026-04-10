@@ -30,12 +30,18 @@ export type AppSettingsAvgAggregateOutputType = {
   exchangeRate: number | null
   globalMaxDevices: number | null
   suspendDurationMinutes: number | null
+  cleanupFrequencyDays: number | null
+  minDownloadThreshold: number | null
+  keepPercentage: number | null
 }
 
 export type AppSettingsSumAggregateOutputType = {
   exchangeRate: number | null
   globalMaxDevices: number | null
   suspendDurationMinutes: number | null
+  cleanupFrequencyDays: number | null
+  minDownloadThreshold: number | null
+  keepPercentage: number | null
 }
 
 export type AppSettingsMinAggregateOutputType = {
@@ -44,6 +50,10 @@ export type AppSettingsMinAggregateOutputType = {
   exchangeRate: number | null
   globalMaxDevices: number | null
   suspendDurationMinutes: number | null
+  cleanupFrequencyDays: number | null
+  minDownloadThreshold: number | null
+  keepPercentage: number | null
+  lastCleanupAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,6 +64,10 @@ export type AppSettingsMaxAggregateOutputType = {
   exchangeRate: number | null
   globalMaxDevices: number | null
   suspendDurationMinutes: number | null
+  cleanupFrequencyDays: number | null
+  minDownloadThreshold: number | null
+  keepPercentage: number | null
+  lastCleanupAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -64,6 +78,10 @@ export type AppSettingsCountAggregateOutputType = {
   exchangeRate: number
   globalMaxDevices: number
   suspendDurationMinutes: number
+  cleanupFrequencyDays: number
+  minDownloadThreshold: number
+  keepPercentage: number
+  lastCleanupAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -74,12 +92,18 @@ export type AppSettingsAvgAggregateInputType = {
   exchangeRate?: true
   globalMaxDevices?: true
   suspendDurationMinutes?: true
+  cleanupFrequencyDays?: true
+  minDownloadThreshold?: true
+  keepPercentage?: true
 }
 
 export type AppSettingsSumAggregateInputType = {
   exchangeRate?: true
   globalMaxDevices?: true
   suspendDurationMinutes?: true
+  cleanupFrequencyDays?: true
+  minDownloadThreshold?: true
+  keepPercentage?: true
 }
 
 export type AppSettingsMinAggregateInputType = {
@@ -88,6 +112,10 @@ export type AppSettingsMinAggregateInputType = {
   exchangeRate?: true
   globalMaxDevices?: true
   suspendDurationMinutes?: true
+  cleanupFrequencyDays?: true
+  minDownloadThreshold?: true
+  keepPercentage?: true
+  lastCleanupAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -98,6 +126,10 @@ export type AppSettingsMaxAggregateInputType = {
   exchangeRate?: true
   globalMaxDevices?: true
   suspendDurationMinutes?: true
+  cleanupFrequencyDays?: true
+  minDownloadThreshold?: true
+  keepPercentage?: true
+  lastCleanupAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -108,6 +140,10 @@ export type AppSettingsCountAggregateInputType = {
   exchangeRate?: true
   globalMaxDevices?: true
   suspendDurationMinutes?: true
+  cleanupFrequencyDays?: true
+  minDownloadThreshold?: true
+  keepPercentage?: true
+  lastCleanupAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -205,6 +241,10 @@ export type AppSettingsGroupByOutputType = {
   exchangeRate: number
   globalMaxDevices: number
   suspendDurationMinutes: number
+  cleanupFrequencyDays: number
+  minDownloadThreshold: number
+  keepPercentage: number
+  lastCleanupAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: AppSettingsCountAggregateOutputType | null
@@ -238,6 +278,10 @@ export type AppSettingsWhereInput = {
   exchangeRate?: Prisma.FloatFilter<"AppSettings"> | number
   globalMaxDevices?: Prisma.IntFilter<"AppSettings"> | number
   suspendDurationMinutes?: Prisma.IntFilter<"AppSettings"> | number
+  cleanupFrequencyDays?: Prisma.IntFilter<"AppSettings"> | number
+  minDownloadThreshold?: Prisma.IntFilter<"AppSettings"> | number
+  keepPercentage?: Prisma.IntFilter<"AppSettings"> | number
+  lastCleanupAt?: Prisma.DateTimeNullableFilter<"AppSettings"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
 }
@@ -248,6 +292,10 @@ export type AppSettingsOrderByWithRelationInput = {
   exchangeRate?: Prisma.SortOrder
   globalMaxDevices?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
+  cleanupFrequencyDays?: Prisma.SortOrder
+  minDownloadThreshold?: Prisma.SortOrder
+  keepPercentage?: Prisma.SortOrder
+  lastCleanupAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -261,6 +309,10 @@ export type AppSettingsWhereUniqueInput = Prisma.AtLeast<{
   exchangeRate?: Prisma.FloatFilter<"AppSettings"> | number
   globalMaxDevices?: Prisma.IntFilter<"AppSettings"> | number
   suspendDurationMinutes?: Prisma.IntFilter<"AppSettings"> | number
+  cleanupFrequencyDays?: Prisma.IntFilter<"AppSettings"> | number
+  minDownloadThreshold?: Prisma.IntFilter<"AppSettings"> | number
+  keepPercentage?: Prisma.IntFilter<"AppSettings"> | number
+  lastCleanupAt?: Prisma.DateTimeNullableFilter<"AppSettings"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AppSettings"> | Date | string
 }, "id">
@@ -271,6 +323,10 @@ export type AppSettingsOrderByWithAggregationInput = {
   exchangeRate?: Prisma.SortOrder
   globalMaxDevices?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
+  cleanupFrequencyDays?: Prisma.SortOrder
+  minDownloadThreshold?: Prisma.SortOrder
+  keepPercentage?: Prisma.SortOrder
+  lastCleanupAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AppSettingsCountOrderByAggregateInput
@@ -289,6 +345,10 @@ export type AppSettingsScalarWhereWithAggregatesInput = {
   exchangeRate?: Prisma.FloatWithAggregatesFilter<"AppSettings"> | number
   globalMaxDevices?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
   suspendDurationMinutes?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
+  cleanupFrequencyDays?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
+  minDownloadThreshold?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
+  keepPercentage?: Prisma.IntWithAggregatesFilter<"AppSettings"> | number
+  lastCleanupAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AppSettings"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AppSettings"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AppSettings"> | Date | string
 }
@@ -299,6 +359,10 @@ export type AppSettingsCreateInput = {
   exchangeRate?: number
   globalMaxDevices?: number
   suspendDurationMinutes?: number
+  cleanupFrequencyDays?: number
+  minDownloadThreshold?: number
+  keepPercentage?: number
+  lastCleanupAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -309,6 +373,10 @@ export type AppSettingsUncheckedCreateInput = {
   exchangeRate?: number
   globalMaxDevices?: number
   suspendDurationMinutes?: number
+  cleanupFrequencyDays?: number
+  minDownloadThreshold?: number
+  keepPercentage?: number
+  lastCleanupAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -319,6 +387,10 @@ export type AppSettingsUpdateInput = {
   exchangeRate?: Prisma.FloatFieldUpdateOperationsInput | number
   globalMaxDevices?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
+  cleanupFrequencyDays?: Prisma.IntFieldUpdateOperationsInput | number
+  minDownloadThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  keepPercentage?: Prisma.IntFieldUpdateOperationsInput | number
+  lastCleanupAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -329,6 +401,10 @@ export type AppSettingsUncheckedUpdateInput = {
   exchangeRate?: Prisma.FloatFieldUpdateOperationsInput | number
   globalMaxDevices?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
+  cleanupFrequencyDays?: Prisma.IntFieldUpdateOperationsInput | number
+  minDownloadThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  keepPercentage?: Prisma.IntFieldUpdateOperationsInput | number
+  lastCleanupAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -339,6 +415,10 @@ export type AppSettingsCreateManyInput = {
   exchangeRate?: number
   globalMaxDevices?: number
   suspendDurationMinutes?: number
+  cleanupFrequencyDays?: number
+  minDownloadThreshold?: number
+  keepPercentage?: number
+  lastCleanupAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -349,6 +429,10 @@ export type AppSettingsUpdateManyMutationInput = {
   exchangeRate?: Prisma.FloatFieldUpdateOperationsInput | number
   globalMaxDevices?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
+  cleanupFrequencyDays?: Prisma.IntFieldUpdateOperationsInput | number
+  minDownloadThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  keepPercentage?: Prisma.IntFieldUpdateOperationsInput | number
+  lastCleanupAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -359,6 +443,10 @@ export type AppSettingsUncheckedUpdateManyInput = {
   exchangeRate?: Prisma.FloatFieldUpdateOperationsInput | number
   globalMaxDevices?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
+  cleanupFrequencyDays?: Prisma.IntFieldUpdateOperationsInput | number
+  minDownloadThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  keepPercentage?: Prisma.IntFieldUpdateOperationsInput | number
+  lastCleanupAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -369,6 +457,10 @@ export type AppSettingsCountOrderByAggregateInput = {
   exchangeRate?: Prisma.SortOrder
   globalMaxDevices?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
+  cleanupFrequencyDays?: Prisma.SortOrder
+  minDownloadThreshold?: Prisma.SortOrder
+  keepPercentage?: Prisma.SortOrder
+  lastCleanupAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -377,6 +469,9 @@ export type AppSettingsAvgOrderByAggregateInput = {
   exchangeRate?: Prisma.SortOrder
   globalMaxDevices?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
+  cleanupFrequencyDays?: Prisma.SortOrder
+  minDownloadThreshold?: Prisma.SortOrder
+  keepPercentage?: Prisma.SortOrder
 }
 
 export type AppSettingsMaxOrderByAggregateInput = {
@@ -385,6 +480,10 @@ export type AppSettingsMaxOrderByAggregateInput = {
   exchangeRate?: Prisma.SortOrder
   globalMaxDevices?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
+  cleanupFrequencyDays?: Prisma.SortOrder
+  minDownloadThreshold?: Prisma.SortOrder
+  keepPercentage?: Prisma.SortOrder
+  lastCleanupAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -395,6 +494,10 @@ export type AppSettingsMinOrderByAggregateInput = {
   exchangeRate?: Prisma.SortOrder
   globalMaxDevices?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
+  cleanupFrequencyDays?: Prisma.SortOrder
+  minDownloadThreshold?: Prisma.SortOrder
+  keepPercentage?: Prisma.SortOrder
+  lastCleanupAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -403,6 +506,9 @@ export type AppSettingsSumOrderByAggregateInput = {
   exchangeRate?: Prisma.SortOrder
   globalMaxDevices?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
+  cleanupFrequencyDays?: Prisma.SortOrder
+  minDownloadThreshold?: Prisma.SortOrder
+  keepPercentage?: Prisma.SortOrder
 }
 
 
@@ -413,6 +519,10 @@ export type AppSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   exchangeRate?: boolean
   globalMaxDevices?: boolean
   suspendDurationMinutes?: boolean
+  cleanupFrequencyDays?: boolean
+  minDownloadThreshold?: boolean
+  keepPercentage?: boolean
+  lastCleanupAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
@@ -423,6 +533,10 @@ export type AppSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   exchangeRate?: boolean
   globalMaxDevices?: boolean
   suspendDurationMinutes?: boolean
+  cleanupFrequencyDays?: boolean
+  minDownloadThreshold?: boolean
+  keepPercentage?: boolean
+  lastCleanupAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
@@ -433,6 +547,10 @@ export type AppSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   exchangeRate?: boolean
   globalMaxDevices?: boolean
   suspendDurationMinutes?: boolean
+  cleanupFrequencyDays?: boolean
+  minDownloadThreshold?: boolean
+  keepPercentage?: boolean
+  lastCleanupAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["appSettings"]>
@@ -443,11 +561,15 @@ export type AppSettingsSelectScalar = {
   exchangeRate?: boolean
   globalMaxDevices?: boolean
   suspendDurationMinutes?: boolean
+  cleanupFrequencyDays?: boolean
+  minDownloadThreshold?: boolean
+  keepPercentage?: boolean
+  lastCleanupAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AppSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "currency" | "exchangeRate" | "globalMaxDevices" | "suspendDurationMinutes" | "createdAt" | "updatedAt", ExtArgs["result"]["appSettings"]>
+export type AppSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "currency" | "exchangeRate" | "globalMaxDevices" | "suspendDurationMinutes" | "cleanupFrequencyDays" | "minDownloadThreshold" | "keepPercentage" | "lastCleanupAt" | "createdAt" | "updatedAt", ExtArgs["result"]["appSettings"]>
 
 export type $AppSettingsPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AppSettings"
@@ -458,6 +580,10 @@ export type $AppSettingsPayload<ExtArgs extends runtime.Types.Extensions.Interna
     exchangeRate: number
     globalMaxDevices: number
     suspendDurationMinutes: number
+    cleanupFrequencyDays: number
+    minDownloadThreshold: number
+    keepPercentage: number
+    lastCleanupAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["appSettings"]>
@@ -888,6 +1014,10 @@ export interface AppSettingsFieldRefs {
   readonly exchangeRate: Prisma.FieldRef<"AppSettings", 'Float'>
   readonly globalMaxDevices: Prisma.FieldRef<"AppSettings", 'Int'>
   readonly suspendDurationMinutes: Prisma.FieldRef<"AppSettings", 'Int'>
+  readonly cleanupFrequencyDays: Prisma.FieldRef<"AppSettings", 'Int'>
+  readonly minDownloadThreshold: Prisma.FieldRef<"AppSettings", 'Int'>
+  readonly keepPercentage: Prisma.FieldRef<"AppSettings", 'Int'>
+  readonly lastCleanupAt: Prisma.FieldRef<"AppSettings", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"AppSettings", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AppSettings", 'DateTime'>
 }
