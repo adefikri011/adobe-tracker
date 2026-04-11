@@ -33,12 +33,12 @@ function buildPageUrl(creatorId: string | null, page: number, query?: string): s
     order: "relevance",
     search_page: String(page),
   });
-  
+
   // Tambahkan creator_id jika ada
   if (creatorId) {
     params.set("filters[creator_id]", creatorId);
   }
-  
+
   return `https://stock.adobe.com/search?${params.toString()}`;
 }
 
@@ -148,7 +148,7 @@ function normalizeKeywords(item: any): string[] {
   // Fallback: Extract keywords dari title + category
   const title = String(item?.title || "").trim();
   const category = String(item?.category?.name || item?.category || "").trim();
-  
+
   const titleAndCategory = `${title} ${category}`.trim();
   if (!titleAndCategory) return ["asset", "stock"]; // Minimal fallback
 
@@ -228,7 +228,7 @@ export async function POST(req: Request) {
   const url = new URL(req.url);
   const limitParam = url.searchParams.get("limit");
   const queryParam = url.searchParams.get("query"); // e.g., "nature", "urban", "business"
-  
+
   const LIMIT = limitParam ? Math.min(Math.max(parseInt(limitParam), 10), 1000) : 300;
   const searchQuery = queryParam || "stock"; // Default search query
 
@@ -331,6 +331,18 @@ export async function POST(req: Request) {
           totalCollected: allRawItems.length,
         });
 
+        if (allRawItems.length > 0) {
+          const sample = allRawItems[0];
+          console.log("[Sync Debug] Sample item keys:", Object.keys(sample));
+          console.log("[Sync Debug] Date fields:", {
+            creation_date: sample?.creation_date,
+            upload_date: sample?.upload_date,
+            created_at: sample?.created_at,
+            date: sample?.date,
+            publish_date: sample?.publish_date,
+          });
+        }
+
         const normalizedItems: NormalizedAsset[] = allRawItems
           .map((item: any): NormalizedAsset | null => {
             const rawId = item?.content_id || item?.id || item?.assetId || item?.asset_id || "";
@@ -350,7 +362,18 @@ export async function POST(req: Request) {
               category: normalizeCategory(item),
               fileType: normalizeFileType(item),
               keywords: normalizeKeywords(item),
-              uploadedAt: normalizeDate(item?.creation_date || item?.upload_date || item?.created_at),
+              uploadedAt: normalizeDate(
+                item?.creation_date ||
+                item?.upload_date ||
+                item?.created_at ||
+                item?.createdAt ||
+                item?.date ||
+                item?.publish_date ||
+                item?.published_at ||
+                item?.uploadDate ||
+                item?.uploaded_at ||
+                item?.asset_creation_date
+              ),
               downloads: isNaN(downloads) ? 0 : downloads,
               earnings: isNaN(earnings) ? 0 : earnings,
               popularity: isNaN(popularity) ? 0 : popularity,
@@ -369,11 +392,11 @@ export async function POST(req: Request) {
         let created = 0;
         const BATCH_SIZE = 100; // Can be larger karena tidak ada pre-check
         const countBefore = await prisma.asset.count({ where: { profileId: user.id } });
-        
+
         if (itemsToInsert.length > 0) {
           for (let i = 0; i < itemsToInsert.length; i += BATCH_SIZE) {
             const batch = itemsToInsert.slice(i, i + BATCH_SIZE);
-            
+
             const result = await prisma.asset.createMany({
               data: batch.map((item) => ({
                 assetId: item.assetId,
@@ -450,7 +473,7 @@ export async function POST(req: Request) {
             status: "failed",
             errorMessage: error?.message || "Internal server error",
           },
-        }).catch(() => {}); // ignore if table doesn't exist yet
+        }).catch(() => { }); // ignore if table doesn't exist yet
 
         // Log activity for failed sync
         const userProfile = await prisma.profile.findUnique({

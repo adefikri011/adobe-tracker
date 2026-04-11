@@ -93,7 +93,8 @@ async function runApifyPage(
   if (!runId) throw new Error("Run ID tidak ditemukan");
 
   let datasetId: string | undefined;
-  for (let i = 0; i < 40; i++) {
+  // Reduce polling: max 20 iterations x 1 second = 20 seconds timeout
+  for (let i = 0; i < 20; i++) {
     const statusPayload = await fetch(
       `${APIFY_BASE_URL}/actor-runs/${encodeURIComponent(runId)}?token=${encodeURIComponent(token)}`,
       { cache: "no-store" }
@@ -104,7 +105,8 @@ async function runApifyPage(
 
     if (status === "SUCCEEDED") break;
     if (["FAILED", "ABORTED", "TIMED-OUT"].includes(status)) throw new Error(`Run gagal: ${status}`);
-    await sleep(3000);
+    // Reduced dari 3000ms → 1000ms (1 detik)
+    await sleep(1000);
   }
 
   if (!datasetId) throw new Error("Dataset tidak ditemukan");
@@ -156,9 +158,11 @@ function formatItem(item: any) {
   };
 }
 
-// Fungsi untuk filter hasil berdasarkan keyword relevance
+// Fungsi untuk filter hasil berdasarkan keyword relevance - STRICT MATCHING
 function filterByRelevance(items: any[], keyword: string): any[] {
   const queryLower = keyword.toLowerCase();
+  // Create word boundary regex untuk match full words
+  const wordRegex = new RegExp(`\\b${queryLower}\\b`, 'i');
   
   return items.filter((item) => {
     const title = String(item?.title || "").toLowerCase();
@@ -171,10 +175,10 @@ function filterByRelevance(items: any[], keyword: string): any[] {
       return "";
     }).filter(Boolean);
     
-    // Cek apakah keyword ada di title, category, atau tags
-    const inTitle = title.includes(queryLower);
-    const inCategory = category.includes(queryLower);
-    const inTags = tags.some((tag: string) => tag.includes(queryLower));
+    // STRICT: Full word match di title, category, atau tags
+    const inTitle = wordRegex.test(title);
+    const inCategory = wordRegex.test(category);
+    const inTags = tags.some((tag: string) => wordRegex.test(tag));
     
     // Return hanya jika keyword relevan di minimal satu field
     return inTitle || inCategory || inTags;
@@ -267,196 +271,133 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // ── PRIORITAS 1: Cari dari asset DB milik user ──────────────────────────
-    // Ini gratis, instant, dan relevan karena dari portfolio sendiri
-    // SKIP jika user punya banyak assets (>100) untuk avoid slow query
-    if (userId) {
-      // Check memory cache dulu sebelum query DB
-      const cachedResult = getFromCache(userId, query, limit);
-      if (cachedResult) {
-        console.log(`[Search] Memory cache hit for "${query}"`);
-        return NextResponse.json(cachedResult);
-      }
-
-      const assetCount = await prisma.asset.count({
-        where: { profileId: userId },
+    // ── SEARCH: HANYA dari User's Database (NO Apify) ─────────────────────
+    // User search = search portfolio mereka sendiri, instant dari DB
+    
+    if (!userId) {
+      // Not logged in = no search
+      return NextResponse.json({ 
+        results: [], 
+        message: "Please login to search your assets",
+        fromDb: false 
       });
+    }
+
+    // Check memory cache dulu sebelum query DB
+    const cachedResult = getFromCache(userId, query, limit);
+    if (cachedResult) {
+      console.log(`[Search] Memory cache hit for "${query}"`);
+      return NextResponse.json(cachedResult);
+    }
+
+    // Query ALL assets (public search untuk analytics - bisa dari semua users)
+    console.log(`[Search] Querying all assets (public search)`);
+    
+    // Fetch ALL assets dari database
+    const allUserAssets = await prisma.asset.findMany({
+      orderBy: { downloads: "desc" },
+      take: 1000, // Limit para safety
+    });
+
+    console.log(`[Search] Loaded ${allUserAssets.length} total assets from all users`);
+
+    // Filter by query di memory (case-insensitive, flexible)
+    const queryLower = query.toLowerCase();
+    const matchedAssets = allUserAssets.filter((asset) => {
+      const title = (asset.title || "").toLowerCase();
       
-      // Only query DB kalau assets sedikit (< 100)
-      if (assetCount < 100) {
-        const dbAssets = await prisma.asset.findMany({
-          where: {
-            profileId: userId,
-            OR: [
-              { title: { contains: query, mode: "insensitive" } },
-              { keywords: { has: query } },
-              { category: { contains: query, mode: "insensitive" } },
-            ],
-          },
-          take: limit,
-          orderBy: { downloads: "desc" },
-        });
+      // Keywords sudah array dari Prisma, tidak perlu JSON.parse()
+      const keywords = Array.isArray(asset.keywords) ? asset.keywords : [];
+      const keywordsLower = keywords.map((k: string) => (k || "").toLowerCase());
+      const category = (asset.category || "").toLowerCase();
 
-        if (dbAssets.length >= limit) {
-          console.log(`[Search] ${dbAssets.length} hasil dari DB lokal`);
-          const results = dbAssets.map((a) => ({
-            adobeId: a.assetId,
-            title: a.title,
-            creator: a.contributor || "Unknown",
-            thumbnail: a.thumbnail,
-            type: a.fileType || "Photo",
-            category: a.category || "General",
-            downloads: a.downloads,
-            trend: `+${Math.floor(Math.random() * 30) + 1}%`,
-            revenue: `$${(a.downloads * 0.33).toFixed(2)}`,
-            uploadDate: a.uploadedAt?.toLocaleDateString("id-ID") || "-",
-            contentUrl: a.assetUrl || "",
-            artistUrl: "",
-            status: "Premium",
-            keywords: a.keywords || [],
-            fromDb: true,
-          }));
-          // Log search action untuk quota tracking
-          if (userId) {
-            console.log(`[SearchLog] Logging search from DB - user: ${userId}, query: ${query}`);
-            try {
-              await logSearchAction(userId, query, userEmail);
-            } catch (logError) {
-              console.error(`[SearchLog] Error logging search:`, logError);
-              // Don't fail the entire search if logging fails
-            }
-          } else {
-            console.log(`[SearchLog] userId is null, skip logging`);
-          }
-          const response = { results, fromCache: false, fromDb: true, total: results.length, isPro };
-          // Cache result for 5 minutes
-          if (userId) setCache(userId, query, limit, response);
-          return NextResponse.json(response);
-        }
-      } else {
-        console.log(`[Search] Skip DB query (${assetCount} assets) — langsung ke Apify`);
-      }
-    }
-
-    // ── PRIORITAS 2: Cache Apify ────────────────────────────────────────────
-    const cached = await prisma.searchCache.findFirst({
-      where: {
-        query: query.toLowerCase(),
-        createdAt: { gte: new Date(Date.now() - CACHE_HOURS * 60 * 60 * 1000) },
-      },
+      return (
+        title.includes(queryLower) ||
+        keywordsLower.some((k: string) => k.includes(queryLower)) ||
+        category.includes(queryLower)
+      );
     });
 
-    if (cached) {
-      const allResults = cached.results as any[];
-      // Filter hasil cache untuk memastikan relevan
-      const relevantResults = allResults.filter((r) => {
-        const title = (r?.title || "").toLowerCase();
-        const category = (r?.category || "").toLowerCase();
-        return title.includes(query.toLowerCase()) || category.includes(query.toLowerCase());
-      });
-      console.log(`[Search] Cache hit: ${relevantResults.length}/${allResults.length} hasil relevan`);
-      // Log search action untuk quota tracking
-      if (userId) {
-        console.log(`[SearchLog] Logging search from cache - user: ${userId}, query: ${query}`);
-        try {
-          await logSearchAction(userId, query, userEmail);
-        } catch (logError) {
-          console.error(`[SearchLog] Error logging search:`, logError);
-          // Don't fail the entire search if logging fails
-        }
-      } else {
-        console.log(`[SearchLog] userId is null, skip logging`);
-      }
-      const response = {
-        results: relevantResults.slice(0, limit),
-        fromCache: true,
-        cachedAt: cached.createdAt,
-        isPro,
-        total: relevantResults.length,
-      };
-      // Cache in memory too
-      if (userId) setCache(userId, query, limit, response);
-      return NextResponse.json(response);
-    }
+    console.log(`[Search] After filter: ${matchedAssets.length} assets match "${query}"`);
 
-    // ── PRIORITAS 3: Apify scrape multi-halaman ─────────────────────────────
-    const token = process.env.APIFY_API_TOKEN;
-    const actorId = process.env.APIFY_ACTOR_ID || "cOsM6hOaAbSxqSG1E";
+    // Sort by priority: Title > Keywords > Category
+    const prioritySorted = matchedAssets.sort((a, b) => {
+      const queryLower = query.toLowerCase();
+      const aTitle = (a.title || "").toLowerCase();
+      const bTitle = (b.title || "").toLowerCase();
+      
+      // Keywords sudah array dari Prisma
+      const aKeywords = Array.isArray(a.keywords) ? a.keywords : [];
+      const bKeywords = Array.isArray(b.keywords) ? b.keywords : [];
+      
+      const aKeywordsLower = aKeywords.map(k => (k || "").toLowerCase());
+      const bKeywordsLower = bKeywords.map(k => (k || "").toLowerCase());
+      const aCategory = (a.category || "").toLowerCase();
+      const bCategory = (b.category || "").toLowerCase();
 
-    if (!token) {
-      return NextResponse.json({ error: "APIFY_API_TOKEN belum diset" }, { status: 500 });
-    }
+      // Priority 1: Title match
+      const aTitleMatch = aTitle.includes(queryLower);
+      const bTitleMatch = bTitle.includes(queryLower);
+      if (aTitleMatch && !bTitleMatch) return -1;
+      if (!aTitleMatch && bTitleMatch) return 1;
 
-    // Hitung berapa halaman yang perlu di-scrape
-    // Tiap halaman = 10 item, pro butuh 100 = 10 halaman, free butuh 10 = 1 halaman
-    const pagesNeeded = Math.ceil(limit / 10);
-    console.log(`[Search] Scraping ${pagesNeeded} halaman Apify untuk "${query}"`);
+      // Priority 2: Keywords match
+      const aKeywordMatch = aKeywordsLower.some(k => k.includes(queryLower));
+      const bKeywordMatch = bKeywordsLower.some(k => k.includes(queryLower));
+      if (aKeywordMatch && !bKeywordMatch) return -1;
+      if (!aKeywordMatch && bKeywordMatch) return 1;
 
-    const allItems: any[] = [];
-    const seenIds = new Set<string>();
+      // Priority 3: Category match
+      const aCategoryMatch = aCategory.includes(queryLower);
+      const bCategoryMatch = bCategory.includes(queryLower);
+      if (aCategoryMatch && !bCategoryMatch) return -1;
+      if (!aCategoryMatch && bCategoryMatch) return 1;
 
-    for (let page = 1; page <= pagesNeeded; page++) {
-      const pageUrl = buildSearchUrl(query, page);
-      console.log(`[Search] Halaman ${page}/${pagesNeeded}`);
-
-      let pageItems: any[];
-      try {
-        pageItems = await runApifyPage(actorId, token, pageUrl);
-      } catch (e: any) {
-        console.error(`[Search] Halaman ${page} error: ${e.message}`);
-        break;
-      }
-
-      if (pageItems.length === 0) break;
-
-      for (const item of pageItems) {
-        const id = String(item?.content_id || item?.id || "").trim();
-        if (id && seenIds.has(id)) continue;
-        if (id) seenIds.add(id);
-        allItems.push(item);
-      }
-
-      if (pageItems.length < 10) break; // halaman terakhir
-      if (allItems.length >= limit) break;
-    }
-
-    console.log(`[Search] Total dari Apify: ${allItems.length}`);
-
-    if (allItems.length === 0) {
-      return NextResponse.json({ results: [], fromCache: false, total: 0, isPro });
-    }
-
-    // Filter hasil berdasarkan relevance dengan keyword
-    const relevantItems = filterByRelevance(allItems, query);
-    console.log(`[Search] Setelah filter relevance: ${relevantItems.length}/${allItems.length}`);
-
-    const results = relevantItems.map(formatItem);
-
-    // Simpan ke cache
-    await prisma.searchCache.deleteMany({ where: { query: query.toLowerCase() } });
-    await prisma.searchCache.create({
-      data: { query: query.toLowerCase(), results: results as any },
+      // Same priority = sort by downloads
+      return b.downloads - a.downloads;
     });
+
+    // Format results
+    const results = prioritySorted.slice(0, limit).map((a: any) => ({
+      adobeId: a.assetId,
+      title: a.title,
+      creator: a.contributorId || "Unknown",
+      thumbnail: a.thumbnail,
+      type: a.fileType || "Photo",
+      category: a.category || "General",
+      downloads: a.downloads,
+      trend: `+${Math.floor(Math.random() * 30) + 1}%`,
+      revenue: `$${(a.downloads * 0.33).toFixed(2)}`,
+      uploadDate: a.uploadedAt?.toLocaleDateString("id-ID") || "-",
+      keywords: Array.isArray(a.keywords) ? a.keywords : [],
+      contentUrl: a.assetUrl || "",
+      artistUrl: "",
+      status: "Premium",
+      fromDb: true,
+    }));
 
     // Log search action untuk quota tracking
-    if (userId) {
-      console.log(`[SearchLog] Logging search from Apify - user: ${userId}, query: ${query}`);
-      try {
-        await logSearchAction(userId, query, userEmail);
-      } catch (logError) {
-        console.error(`[SearchLog] Error logging search:`, logError);
-        // Don't fail the entire search if logging fails
-      }
-    } else {
-      console.log(`[SearchLog] userId is null, skip logging`);
+    console.log(`[SearchLog] Logging search - user: ${userId}, query: ${query}`);
+    try {
+      await logSearchAction(userId, query, userEmail);
+    } catch (logError) {
+      console.error(`[SearchLog] Error logging search:`, logError);
+      // Don't fail the entire search if logging fails
     }
 
-    return NextResponse.json({
-      results: results.slice(0, limit),
-      fromCache: false,
-      total: results.length,
+    const response = { 
+      results, 
+      fromCache: false, 
+      fromDb: true, 
+      total: results.length, 
       isPro,
-    });
+      message: results.length === 0 ? "No assets found matching your search" : null 
+    };
+
+    // Cache result for 5 minutes in memory
+    setCache(userId, query, limit, response);
+
+    return NextResponse.json(response);
 
   } catch (error: any) {
     console.error("[Search Error]", error);

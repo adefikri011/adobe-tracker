@@ -74,6 +74,35 @@ function ImageModal({ src, alt, onClose }: { src: string; alt: string; onClose: 
   );
 }
 
+// ── Small copy button ──
+function CopyBtn({ text, label = "Copy" }: { text: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    });
+  };
+
+  return (
+    <motion.button
+      whileTap={{ scale: 0.9 }}
+      onClick={handleCopy}
+      title={copied ? "Copied!" : label}
+      className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all duration-200 flex-shrink-0"
+      style={{
+        background: copied ? "#dcfce7" : "#fff7ed",
+        color: copied ? "#16a34a" : "#ea580c",
+        border: `1px solid ${copied ? "#bbf7d0" : "#fed7aa"}`,
+      }}
+    >
+      {copied ? "✓ Copied" : "⎘ Copy"}
+    </motion.button>
+  );
+}
+
 interface ResultCardProps {
   item: Asset;
   index: number;
@@ -82,6 +111,7 @@ interface ResultCardProps {
 export function ResultCard({ item, index }: ResultCardProps) {
   const [showModal, setShowModal] = useState(false);
   const [hovering, setHovering] = useState(false);
+  const [showFullTitle, setShowFullTitle] = useState(false);
 
   const score = getPerformanceScore(item.downloads);
   const timeAgo = item.uploadDate ? getTimeAgoFromDate(item.uploadDate) : "";
@@ -94,6 +124,8 @@ export function ResultCard({ item, index }: ResultCardProps) {
       : score >= 40
       ? { bg: "#f97316", light: "#fff7ed", text: "#ea580c" }
       : { bg: "#94a3b8", light: "#f1f5f9", text: "#64748b" };
+
+  const allKeywordsText = keywords.join(", ");
 
   return (
     <>
@@ -111,8 +143,6 @@ export function ResultCard({ item, index }: ResultCardProps) {
           border: "1px solid #f0ede8",
           boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
         }}
-        onMouseEnter={() => {}}
-        onMouseLeave={() => {}}
       >
         {/* ── Thumbnail ── */}
         <div
@@ -225,17 +255,40 @@ export function ResultCard({ item, index }: ResultCardProps) {
         {/* ── Card Body ── */}
         <div className="p-4 flex flex-col gap-3 flex-1">
 
-          {/* Title */}
+          {/* Title — dengan Copy + Show All */}
           <div>
-            <p className="text-[9px] font-black text-orange-300 uppercase tracking-[0.18em] mb-0.5">Asset Title</p>
-            <h3 className="text-[13px] font-bold text-gray-800 leading-snug line-clamp-2 group-hover:text-orange-500 transition-colors duration-200">
+            {/* Label row */}
+            <div className="flex items-center justify-between mb-0.5 gap-2">
+              <p className="text-[9px] font-black text-orange-300 uppercase tracking-[0.18em]">
+                Asset Title
+              </p>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                {/* Show All / Show Less toggle */}
+                <button
+                  onClick={() => setShowFullTitle((v) => !v)}
+                  className="text-[10px] font-semibold transition-colors duration-150 flex-shrink-0"
+                  style={{ color: "#ea580c" }}
+                >
+                  {showFullTitle ? "Show Less" : "Show All"}
+                </button>
+                {/* Copy title */}
+                <CopyBtn text={item.title} label="Copy title" />
+              </div>
+            </div>
+
+            {/* Title text */}
+            <h3
+              className={`text-[13px] font-bold text-gray-800 leading-snug group-hover:text-orange-500 transition-colors duration-200 ${
+                showFullTitle ? "" : "line-clamp-2"
+              }`}
+            >
               {item.title}
             </h3>
           </div>
 
           {/* ── Stats row: Downloads + Performance ── */}
           <div className="grid grid-cols-2 gap-2">
-            {/* Downloads — orange warm instead of blue */}
+            {/* Downloads */}
             <div
               className="rounded-xl p-3"
               style={{
@@ -284,20 +337,44 @@ export function ResultCard({ item, index }: ResultCardProps) {
             </div>
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1.5">
+          {/* Category + Type */}
+          <div
+            className="flex items-center justify-between px-3 py-2.5 rounded-xl"
+            style={{ background: "#fff7ed", border: "1px solid #fed7aa" }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-[14px]">🗂️</span>
+              <div>
+                <p className="text-[8px] font-black text-orange-300 uppercase tracking-wider leading-none mb-0.5">
+                  Category
+                </p>
+                <p className="text-[12px] font-bold text-orange-600 leading-none">
+                  {item.category || "General"}
+                </p>
+              </div>
+            </div>
             <span
-              className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
-              style={{ background: "#fff7ed", color: "#ea580c", border: "1px solid #fed7aa" }}
-            >
-              {item.category}
-            </span>
-            <span
-              className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
+              className="text-[10px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0"
               style={{ background: "#f8fafc", color: "#64748b", border: "1px solid #e2e8f0" }}
             >
               {item.type}
             </span>
+          </div>
+
+          {/* Creator / Artist */}
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border border-orange-100 bg-orange-50">
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-black flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #f97316, #c2410c)" }}
+            >
+              {item.creator.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[8px] font-black text-orange-400 uppercase tracking-wider">Creator</p>
+              <p className="text-[11px] font-semibold text-gray-700 truncate">
+                {item.creator}
+              </p>
+            </div>
           </div>
 
           {/* Upload date */}
@@ -316,38 +393,25 @@ export function ResultCard({ item, index }: ResultCardProps) {
             </div>
           )}
 
-          {/* Artist / Portfolio */}
+          {/* Artist / Portfolio Link */}
           {item.artistUrl && (
             <motion.a
               href={item.artistUrl}
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ x: 2 }}
-              className="flex items-center justify-between w-full px-3 py-2.5 rounded-xl transition-all duration-200"
-              style={{ border: "1px solid #f0ede8" }}
+              className="flex items-center justify-center gap-1.5 w-full px-3 py-2.5 rounded-xl transition-all duration-200 text-[11px] font-semibold"
+              style={{ border: "1px solid #fed7aa", background: "#fff7ed", color: "#ea580c" }}
               onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = "#f97316";
+                (e.currentTarget as HTMLElement).style.background = "#ffecd8";
+              }}
+              onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = "#fed7aa";
                 (e.currentTarget as HTMLElement).style.background = "#fff7ed";
               }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "#f0ede8";
-                (e.currentTarget as HTMLElement).style.background = "transparent";
-              }}
             >
-              <div className="flex items-center gap-2.5">
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-black flex-shrink-0"
-                  style={{ background: "linear-gradient(135deg, #f97316, #c2410c)" }}
-                >
-                  {item.creator.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <p className="text-[8px] font-black text-orange-300 uppercase tracking-wider">Portfolio</p>
-                  <p className="text-[11px] font-semibold text-gray-700 truncate max-w-[120px]">
-                    {item.creator}
-                  </p>
-                </div>
-              </div>
+              🔗 View Adobe Stock
               <span className="text-orange-300 text-base font-light">›</span>
             </motion.a>
           )}
@@ -369,21 +433,28 @@ export function ResultCard({ item, index }: ResultCardProps) {
             </span>
           </div>
 
-          {/* Keywords */}
+          {/* Keywords — dengan Copy All */}
           {keywords.length > 0 && (
             <div style={{ borderTop: "1px solid #f0ede8" }} className="pt-3">
-              <div className="flex items-center gap-1.5 mb-2">
-                <span className="text-orange-400 text-xs">🏷</span>
-                <span className="text-[9px] font-black text-gray-300 uppercase tracking-wider">
-                  Keywords
-                </span>
-                <span
-                  className="text-[9px] font-bold px-1.5 py-0.5 rounded-md"
-                  style={{ background: "#fff7ed", color: "#ea580c" }}
-                >
-                  {keywords.length}
-                </span>
+              {/* Header row */}
+              <div className="flex items-center justify-between mb-2 gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-orange-400 text-xs">🏷</span>
+                  <span className="text-[9px] font-black text-gray-300 uppercase tracking-wider">
+                    Keywords
+                  </span>
+                  <span
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded-md"
+                    style={{ background: "#fff7ed", color: "#ea580c" }}
+                  >
+                    {keywords.length}
+                  </span>
+                </div>
+                {/* Copy All Keywords */}
+                <CopyBtn text={allKeywordsText} label={`Copy all ${keywords.length} keywords`} />
               </div>
+
+              {/* Keyword chips */}
               <div className="flex flex-wrap gap-1">
                 {keywords.slice(0, 8).map((kw, i) => (
                   <motion.span
