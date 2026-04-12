@@ -270,14 +270,14 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
 
       <nav
         style={{
-          height: "64px",
+          height: "clamp(56px, 12vw, 64px)",
           position: "sticky",
           top: 0,
           zIndex: 40,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 24px",
+          padding: "0 clamp(12px, 4vw, 24px)",
           background: scrolled
             ? "rgba(255,255,255,0.98)"
             : "rgba(255,255,255,0.97)",
@@ -309,8 +309,8 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                 alt="Logo"
                 className="relative object-contain object-left"
                 style={{
-                  width: "clamp(100px, 12vw, 144px)",
-                  height: "clamp(40px, 5vw, 64px)",
+                  width: "clamp(80px, 10vw, 144px)",
+                  height: "clamp(32px, 4vw, 64px)",
                   filter: "drop-shadow(0 2px 8px rgba(249,115,22,0.15))",
                   transition: "transform 0.3s ease, filter 0.3s ease",
                 }}
@@ -328,12 +328,12 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
         </Link>
 
         {/* ── RIGHT: Actions ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "clamp(4px, 2vw, 8px)" }}>
 
           {/* Page indicator pill — shown when on contributor page */}
           {!isGuest && isContributorPage && (
             <div
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+              className="hidden md:flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold"
               style={{
                 background: "rgba(249,115,22,0.08)",
                 border: "1px solid rgba(249,115,22,0.2)",
@@ -341,7 +341,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
               }}
             >
               <IconContributors />
-              <span>Contributors</span>
+              <span className="hidden sm:inline">Contributors</span>
             </div>
           )}
 
@@ -349,7 +349,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
           {!isGuest && (
             <Link
               href="/dashboard/contibutor"
-              className={`nav-contributors-link hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all duration-200 ${isContributorPage ? "active" : ""}`}
+              className={`nav-contributors-link flex items-center gap-1 md:gap-2 px-1.5 md:px-2 lg:px-4 py-1 md:py-1.5 lg:py-2 rounded-lg lg:rounded-xl text-[11px] md:text-[12px] lg:text-[13px] font-semibold transition-all duration-200 ${isContributorPage ? "active" : ""}`}
               style={{
                 color: isContributorPage ? "#ea580c" : "rgba(0,0,0,0.6)",
                 background: isContributorPage ? "rgba(249,115,22,0.07)" : "transparent",
@@ -373,7 +373,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
               }}
             >
               <IconContributors />
-              Contributors
+              <span className="hidden md:inline">Contributors</span>
             </Link>
           )}
 
@@ -382,23 +382,23 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
             <button
               onClick={handleRedirectToPlans}
               disabled={planLoading}
-              className="nav-upgrade-btn flex items-center gap-1.5 text-white font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
+              className="nav-upgrade-btn flex items-center gap-1 sm:gap-1.5 text-white font-bold rounded-lg lg:rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
-                padding: "9px 16px",
-                fontSize: "13px",
+                padding: "clamp(6px, 2vw, 9px) clamp(10px, 3vw, 16px)",
+                fontSize: "clamp(11px, 2vw, 13px)",
                 boxShadow: "0 4px 18px rgba(249,115,22,0.35)",
                 letterSpacing: "0.01em",
               }}
             >
               <IconZap />
               <span className="hidden sm:inline">Upgrade Pro</span>
-              <span className="sm:hidden">Pro</span>
+              <span className="sm:hidden text-xs">Pro</span>
             </button>
           )}
 
           {/* Separator */}
           {!isGuest && (
-            <div style={{ width: "1px", height: "22px", background: "rgba(0,0,0,0.09)", margin: "0 2px" }} />
+            <div style={{ width: "1px", height: "clamp(14px, 3vw, 22px)", background: "rgba(0,0,0,0.09)", margin: "0 clamp(1px, 1vw, 2px)" }} />
           )}
 
           {/* Profile Avatar Dropdown */}
@@ -408,9 +408,9 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
               <button
                 onClick={() => setProfileOpen((p) => !p)}
                 aria-label="Profile menu"
-                className="flex items-center gap-2.5 rounded-xl transition-all duration-150"
+                className="flex items-center gap-1 sm:gap-2.5 rounded-lg lg:rounded-xl transition-all duration-150"
                 style={{
-                  padding: "6px 10px 6px 6px",
+                  padding: "clamp(4px, 1.5vw, 6px) clamp(6px, 2vw, 10px) clamp(4px, 1.5vw, 6px) clamp(4px, 2vw, 6px)",
                   border: "1.5px solid",
                   borderColor: profileOpen ? "rgba(249,115,22,0.4)" : "rgba(0,0,0,0.08)",
                   background: profileOpen ? "rgba(249,115,22,0.05)" : "transparent",
@@ -435,8 +435,8 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                 {/* Avatar ring */}
                 <div
                   style={{
-                    width: "30px",
-                    height: "30px",
+                    width: "clamp(26px, 5vw, 30px)",
+                    height: "clamp(26px, 5vw, 30px)",
                     borderRadius: "50%",
                     overflow: "hidden",
                     background: "linear-gradient(135deg, #f97316, #ea580c)",
@@ -463,7 +463,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
 
                 {/* Name */}
                 <span
-                  className="hidden md:block text-[13px] font-semibold max-w-[96px] truncate"
+                  className="hidden lg:block text-[11px] lg:text-[13px] font-semibold max-w-[80px] lg:max-w-[96px] truncate"
                   style={{ color: "rgba(0,0,0,0.72)" }}
                 >
                   {displayName}
@@ -472,8 +472,8 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                 {/* Plan dot */}
                 <span
                   style={{
-                    width: "7px",
-                    height: "7px",
+                    width: "clamp(5px, 1.5vw, 7px)",
+                    height: "clamp(5px, 1.5vw, 7px)",
                     borderRadius: "50%",
                     background: isPro ? "#10b981" : "#f97316",
                     flexShrink: 0,
@@ -481,7 +481,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                   }}
                 />
 
-                <span style={{ color: "rgba(0,0,0,0.3)" }}>
+                <span style={{ color: "rgba(0,0,0,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <IconChevron open={profileOpen} />
                 </span>
               </button>
@@ -493,7 +493,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                     position: "absolute",
                     right: 0,
                     top: "calc(100% + 10px)",
-                    width: "256px",
+                    width: "clamp(224px, 90vw, 256px)",
                     background: "rgba(255,255,255,0.99)",
                     border: "1px solid rgba(0,0,0,0.08)",
                     borderRadius: "18px",
@@ -508,17 +508,17 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                   {/* User header */}
                   <div
                     style={{
-                      padding: "16px",
+                      padding: "clamp(12px, 2vh, 16px)",
                       borderBottom: "1px solid rgba(0,0,0,0.06)",
                       background: "linear-gradient(135deg, rgba(249,115,22,0.04) 0%, rgba(255,255,255,0) 100%)",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "clamp(8px, 2vw, 12px)" }}>
                       {/* Big avatar */}
                       <div
                         style={{
-                          width: "42px",
-                          height: "42px",
+                          width: "clamp(36px, 8vw, 42px)",
+                          height: "clamp(36px, 8vw, 42px)",
                           borderRadius: "50%",
                           overflow: "hidden",
                           background: "linear-gradient(135deg, #f97316, #ea580c)",
@@ -537,7 +537,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                             onError={(e) => { (e.currentTarget as HTMLElement).style.display = "none"; }}
                           />
                         ) : (
-                          <span style={{ color: "white", fontSize: "14px", fontWeight: 800 }}>{initials}</span>
+                          <span style={{ color: "white", fontSize: "clamp(12px, 2vw, 14px)", fontWeight: 800 }}>{initials}</span>
                         )}
                       </div>
 
@@ -575,7 +575,7 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
                   </div>
 
                   {/* Menu items */}
-                  <div style={{ padding: "8px" }}>
+                  <div style={{ padding: "clamp(6px, 1.5vh, 8px)" }}>
                     <DropdownItem icon={<IconUser />} label="My Profile" sublabel="View your account" onClick={() => { setProfileOpen(false); router.push("/dashboard/profile"); }} />
                     <DropdownItem icon={<IconBilling />} label="Billing & Plans" sublabel={isPro ? "Manage subscription" : "Upgrade for more"} onClick={() => { setProfileOpen(false); router.push("/dashboard/billing/plans"); }} badge={!isPro ? "Upgrade" : undefined} />
                   </div>

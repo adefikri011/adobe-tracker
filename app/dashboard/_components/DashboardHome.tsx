@@ -40,6 +40,30 @@ function formatNumber(n: number): string {
 export function DashboardHome() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [screenWidth, setScreenWidth] = useState(1024);
+
+  useEffect(() => {
+    const handleResize = () => setScreenWidth(window.innerWidth);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Responsive values berdasarkan screen width
+  const isMobile = screenWidth < 640;
+  const isTablet = screenWidth < 1024;
+  const containerPadding = isMobile ? "16px" : isTablet ? "20px" : "24px";
+  const marginBottom = isMobile ? "20px" : "28px";
+  const headingSize = isMobile ? "18px" : isTablet ? "20px" : "22px";
+  const subTextSize = isMobile ? "12px" : "13px";
+  const statValueSize = isMobile ? "20px" : isTablet ? "23px" : "26px";
+  const statCardPadding = isMobile ? "16px" : "20px";
+  const gridGap = isMobile ? "12px" : "16px";
+  const chartPadding = isMobile ? "16px" : "24px";
+  const chartHeight = isMobile ? 140 : isTablet ? 160 : 180;
+  const chartGridCols = isMobile ? "1fr" : isTablet ? "repeat(2, 1fr)" : "repeat(auto-fit, minmax(300px, 1fr))";
+  const statGridCols = isMobile ? "1fr 1fr" : isTablet ? "repeat(4, 1fr)" : "repeat(auto-fit, minmax(180px, 1fr))";
+  const barChartWidth = isMobile ? 40 : 72;
 
   useEffect(() => {
     fetch("/api/stats")
@@ -79,19 +103,19 @@ export function DashboardHome() {
   ];
 
   return (
-    <div style={{ background: "#ffffff", minHeight: "100vh", padding: "24px", fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ background: "#ffffff", minHeight: "100vh", padding: containerPadding, fontFamily: "'Inter', sans-serif" }}>
 
       {/* Header */}
-      <div style={{ marginBottom: "28px" }}>
+      <div style={{ marginBottom: marginBottom }}>
         <h2 style={{
-          fontSize: "22px",
+          fontSize: headingSize,
           fontWeight: 700,
           color: "#1a2332",
           margin: 0,
           letterSpacing: "-0.3px",
         }}>
           Dashboard Overview</h2>
-        <p style={{ color: "#8a96a8", fontSize: "13px", marginTop: "4px" }}>
+        <p style={{ color: "#8a96a8", fontSize: subTextSize, marginTop: "4px" }}>
           Track your Adobe Stock analytics in real-time
         </p>
       </div>
@@ -99,8 +123,8 @@ export function DashboardHome() {
       {/* Stats Grid */}
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-        gap: "16px",
+        gridTemplateColumns: statGridCols,
+        gap: gridGap,
         marginBottom: "24px",
       }}>
         {statCards.map((s) => (
@@ -110,7 +134,7 @@ export function DashboardHome() {
               background: "#ffffff",
               border: "1.5px solid #e8ecf2",
               borderRadius: "16px",
-              padding: "20px",
+              padding: statCardPadding,
               boxShadow: "0 2px 12px rgba(26,35,50,0.06)",
               transition: "box-shadow 0.2s ease, transform 0.2s ease",
             }}
@@ -135,7 +159,7 @@ export function DashboardHome() {
               }}>{s.icon}</span>
             </div>
             <div style={{
-              fontSize: "26px",
+              fontSize: statValueSize,
               fontWeight: 800,
               color: "#f97316",
               letterSpacing: "-0.5px",
@@ -152,7 +176,7 @@ export function DashboardHome() {
       {/* Charts */}
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+        gridTemplateColumns: chartGridCols,
         gap: "20px",
       }}>
         {/* Line Chart */}
@@ -160,14 +184,14 @@ export function DashboardHome() {
           background: "#ffffff",
           border: "1.5px solid #e8ecf2",
           borderRadius: "16px",
-          padding: "24px",
+          padding: chartPadding,
           boxShadow: "0 2px 12px rgba(26,35,50,0.06)",
         }}>
           <h3 style={{ fontWeight: 700, color: "#1a2332", margin: 0, fontSize: "15px" }}>
             Download Trend
           </h3>
           <p style={{ color: "#adb5c2", fontSize: "12px", margin: "4px 0 20px" }}>Last 7 days</p>
-          <ResponsiveContainer width="100%" height={180}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <LineChart data={CHART_DATA}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f2f5" />
               <XAxis
@@ -211,14 +235,14 @@ export function DashboardHome() {
           background: "#ffffff",
           border: "1.5px solid #e8ecf2",
           borderRadius: "16px",
-          padding: "24px",
+          padding: chartPadding,
           boxShadow: "0 2px 12px rgba(26,35,50,0.06)",
         }}>
           <h3 style={{ fontWeight: 700, color: "#1a2332", margin: 0, fontSize: "15px" }}>
             Top Categories
           </h3>
           <p style={{ color: "#adb5c2", fontSize: "12px", margin: "4px 0 20px" }}>By total downloads</p>
-          <ResponsiveContainer width="100%" height={180}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <BarChart data={CATEGORY_DATA} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f2f5" />
               <XAxis
@@ -233,7 +257,7 @@ export function DashboardHome() {
                 type="category"
                 stroke="#c8d0db"
                 tick={{ fontSize: 11, fill: "#8a96a8" }}
-                width={72}
+                width={barChartWidth}
                 axisLine={false}
                 tickLine={false}
               />

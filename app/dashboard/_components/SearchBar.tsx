@@ -154,16 +154,16 @@ export function SearchBar({ query, loading, onChange, onSearch }: SearchBarProps
   };
 
   return (
-    <div className="text-center mb-8 sm:mb-10">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900">
+    <div className="text-center mb-6 sm:mb-8 md:mb-10">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 text-gray-900">
         Adobe Stock Analytics
       </h1>
-      <p className="text-gray-400 text-sm mb-6 sm:mb-8">
+      <p className="text-gray-400 text-xs sm:text-sm mb-4 sm:mb-6 md:mb-8">
         Search any keyword to discover top-performing assets
       </p>
 
       {/* Search Input */}
-      <div className="flex gap-2 sm:gap-3 max-w-2xl mx-auto">
+      <div className="flex gap-2 sm:gap-3 max-w-2xl mx-auto px-4 sm:px-0">
         <div className="relative flex-1 min-w-0">
           <input
             type="text"
@@ -171,14 +171,14 @@ export function SearchBar({ query, loading, onChange, onSearch }: SearchBarProps
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             placeholder=""
-            className="w-full bg-white border border-gray-200 rounded-xl px-4 sm:px-5 py-3 sm:py-3.5 text-sm text-gray-900 focus:outline-none focus:border-orange-400 transition shadow-sm"
+            className="w-full bg-white border border-gray-200 rounded-lg sm:rounded-xl px-3 sm:px-5 py-2.5 sm:py-3 md:py-3.5 text-xs sm:text-sm text-gray-900 focus:outline-none focus:border-orange-400 transition shadow-sm"
           />
           {!query && (
             <div
-              className="absolute inset-0 flex items-center px-4 sm:px-5 pointer-events-none select-none"
+              className="absolute inset-0 flex items-center px-3 sm:px-5 pointer-events-none select-none"
               aria-hidden="true"
             >
-              <span className="text-sm text-gray-400 whitespace-nowrap overflow-hidden">
+              <span className="text-xs sm:text-sm text-gray-400 whitespace-nowrap overflow-hidden">
                 {placeholder}
                 <span
                   className="inline-block w-[1.5px] h-[13px] bg-orange-400 ml-[2px] align-middle"
@@ -192,12 +192,13 @@ export function SearchBar({ query, loading, onChange, onSearch }: SearchBarProps
         <button
           onClick={handleSearch}
           disabled={loading}
-          className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 transition px-5 sm:px-8 py-3 sm:py-3.5 rounded-xl font-semibold text-sm flex items-center gap-2 flex-shrink-0 text-white"
+          className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 transition px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-2 flex-shrink-0 text-white whitespace-nowrap"
         >
           {loading ? (
             <>
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Searching...
+              <span className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="hidden sm:inline">Searching...</span>
+              <span className="sm:hidden">Searching...</span>
             </>
           ) : (
             "Search"
@@ -214,11 +215,11 @@ export function SearchBar({ query, loading, onChange, onSearch }: SearchBarProps
 
       {/* Recent Searches */}
       {recentSearches.length > 0 && (
-        <div className="mt-5 max-w-3xl mx-auto">
-          <div className="flex items-center gap-3 px-1">
+        <div className="mt-4 sm:mt-5 md:mt-6 max-w-4xl mx-auto px-4 sm:px-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             {/* Label */}
             <div className="flex items-center gap-1.5 shrink-0">
-              <Clock size={13} className="text-gray-400" />
+              <Clock size={12} className="text-gray-400" />
               <span className="text-xs font-semibold text-gray-400 whitespace-nowrap">
                 Recent Searches
               </span>
@@ -228,18 +229,18 @@ export function SearchBar({ query, loading, onChange, onSearch }: SearchBarProps
             </div>
 
             {/* Chips */}
-            <div className="flex items-center gap-2 flex-wrap flex-1">
+            <div className="flex items-center gap-1.5 flex-wrap flex-1">
               {recentSearches.map((search) => (
                 <button
                   key={search.id}
                   onClick={() => handleRecentClick(search.query)}
-                  className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50 transition-all duration-150 text-left"
+                  className="group flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50 transition-all duration-150 text-left"
                 >
                   <Search
-                    size={11}
+                    size={10}
                     className="text-gray-300 group-hover:text-orange-400 transition-colors shrink-0"
                   />
-                  <span className="text-xs text-gray-600 font-medium group-hover:text-orange-700 transition-colors max-w-[120px] truncate">
+                  <span className="text-xs text-gray-600 font-medium group-hover:text-orange-700 transition-colors max-w-[100px] sm:max-w-[120px] truncate">
                     {search.query}
                   </span>
                   <span
@@ -247,7 +248,7 @@ export function SearchBar({ query, loading, onChange, onSearch }: SearchBarProps
                     onClick={(e) => handleDeleteOne(e as any, search.id)}
                     className="ml-0.5 text-gray-300 hover:text-gray-500 transition-colors shrink-0"
                   >
-                    <X size={11} />
+                    <X size={10} />
                   </span>
                 </button>
               ))}
@@ -256,9 +257,9 @@ export function SearchBar({ query, loading, onChange, onSearch }: SearchBarProps
             {/* Clear All */}
             <button
               onClick={handleClearAll}
-              className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-600 font-medium transition-colors shrink-0 ml-1"
+              className="flex items-center gap-1 sm:gap-1.5 text-xs text-red-400 hover:text-red-600 font-medium transition-colors shrink-0 justify-center sm:justify-end"
             >
-              <Trash2 size={12} />
+              <Trash2 size={11} />
               Clear
             </button>
           </div>

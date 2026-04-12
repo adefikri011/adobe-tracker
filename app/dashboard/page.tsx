@@ -245,7 +245,7 @@ export default function DashboardPage() {
           onUpgradeClick={() => setShowPayment(true)}
         />
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-10">
           <SearchBar
             query={query}
             loading={loading}

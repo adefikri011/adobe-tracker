@@ -21,26 +21,93 @@ export function StatsCards({ results, query }: StatsCardsProps) {
   )[0];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div className="text-gray-400 text-xs mb-2">Assets Found</div>
-        <div className="text-2xl font-bold text-orange-500">{results.length}</div>
-        <div className="text-gray-400 text-xs mt-1 truncate">for &ldquo;{query}&rdquo;</div>
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 mb-8 sm:mb-10">
+      {/* Assets Found */}
+      <div className="group relative rounded-2xl p-5 sm:p-6 overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+        style={{
+          background: "linear-gradient(135deg, rgba(249,115,22,0.08), rgba(249,115,22,0.02))",
+          border: "1px solid rgba(249,115,22,0.15)",
+          backdropFilter: "blur(8px)"
+        }}>
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{
+            background: "radial-gradient(circle at top-right, rgba(249,115,22,0.1), transparent)",
+          }} />
+        
+        <div className="relative z-10 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">📊</span>
+            <div className="text-[10px] font-black text-orange-500 uppercase tracking-wider">Market Size</div>
+          </div>
+          <div className="text-3xl font-black text-slate-900">{results.length}</div>
+          <div className="text-xs text-slate-500 font-medium">for <span className="text-orange-600 font-bold">&ldquo;{query}&rdquo;</span></div>
+        </div>
       </div>
-      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div className="text-gray-400 text-xs mb-2">Total Downloads</div>
-        <div className="text-2xl font-bold text-orange-500">{totalDownloads.toLocaleString()}</div>
-        <div className="text-gray-400 text-xs mt-1">across all results</div>
+
+      {/* Total Downloads */}
+      <div className="group relative rounded-2xl p-5 sm:p-6 overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+        style={{
+          background: "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(59,130,246,0.02))",
+          border: "1px solid rgba(59,130,246,0.15)",
+          backdropFilter: "blur(8px)"
+        }}>
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{
+            background: "radial-gradient(circle at top-right, rgba(59,130,246,0.1), transparent)",
+          }} />
+        
+        <div className="relative z-10 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">⬇️</span>
+            <div className="text-[10px] font-black text-blue-600 uppercase tracking-wider">Total Downloads</div>
+          </div>
+          <div className="text-3xl font-black text-slate-900">{totalDownloads.toLocaleString()}</div>
+          <div className="text-xs text-slate-500 font-medium">avg <span className="text-blue-600 font-bold">{Math.round(totalDownloads / results.length || 0)}</span>/asset</div>
+        </div>
       </div>
-      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div className="text-gray-400 text-xs mb-2">Avg Downloads</div>
-        <div className="text-2xl font-bold text-orange-500">{avgDownloads.toLocaleString()}</div>
-        <div className="text-gray-400 text-xs mt-1">per asset</div>
+
+      {/* Avg Downloads */}
+      <div className="group relative rounded-2xl p-5 sm:p-6 overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+        style={{
+          background: "linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02))",
+          border: "1px solid rgba(34,197,94,0.15)",
+          backdropFilter: "blur(8px)"
+        }}>
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{
+            background: "radial-gradient(circle at top-right, rgba(34,197,94,0.1), transparent)",
+          }} />
+        
+        <div className="relative z-10 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">📈</span>
+            <div className="text-[10px] font-black text-green-600 uppercase tracking-wider">Avg Downloads</div>
+          </div>
+          <div className="text-3xl font-black text-slate-900">{avgDownloads.toLocaleString()}</div>
+          <div className="text-xs text-slate-500 font-medium"><span className="text-green-600 font-bold">per asset</span> average</div>
+        </div>
       </div>
-      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div className="text-gray-400 text-xs mb-2">Fastest Growing</div>
-        <div className="text-lg font-bold text-green-500">{trendingAsset?.trend ?? "—"}</div>
-        <div className="text-gray-400 text-xs mt-1 truncate">{trendingAsset?.title ?? "—"}</div>
+
+      {/* Fastest Growing */}
+      <div className="group relative rounded-2xl p-5 sm:p-6 overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+        style={{
+          background: "linear-gradient(135deg, rgba(236,72,153,0.08), rgba(236,72,153,0.02))",
+          border: "1px solid rgba(236,72,153,0.15)",
+          backdropFilter: "blur(8px)"
+        }}>
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{
+            background: "radial-gradient(circle at top-right, rgba(236,72,153,0.1), transparent)",
+          }} />
+        
+        <div className="relative z-10 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🔥</span>
+            <div className="text-[10px] font-black text-pink-600 uppercase tracking-wider">Trending</div>
+          </div>
+          <div className="text-3xl font-black text-slate-900">{trendingAsset?.trend ?? "—"}</div>
+          <div className="text-xs text-slate-500 font-medium truncate"><span className="text-pink-600 font-bold">growth</span> spike</div>
+        </div>
       </div>
     </div>
   );

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   RefreshCw, CheckCircle2, AlertCircle,
-  Database, Zap, Clock, Layers, TrendingUp, Plus
+  Database, Zap, Clock, Layers, TrendingUp, Plus, ArrowRight
 } from "lucide-react";
 
 type SyncPhase = "idle" | "syncing" | "saving" | "done" | "error";
@@ -55,6 +56,9 @@ export default function ApiIntegrationPage() {
   });
 
   const abortRef = useRef<AbortController | null>(null);
+  const router = useRouter();
+  const [redirectCountdown, setRedirectCountdown] = useState(5);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Fetch database stats on mount and after sync
   const fetchStats = async () => {
@@ -75,6 +79,28 @@ export default function ApiIntegrationPage() {
   React.useEffect(() => {
     fetchStats();
   }, []);
+
+  // Auto-refresh after sync completes
+  useEffect(() => {
+    if (progress.phase === "done") {
+      setShowSuccessModal(true);
+      setRedirectCountdown(5);
+      
+      const timer = setInterval(() => {
+        setRedirectCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            // Reset ke halaman awal
+            window.location.href = "/admin/api";
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [progress.phase]);
 
   const isSyncing = progress.phase === "syncing" || progress.phase === "saving";
 
@@ -280,18 +306,21 @@ export default function ApiIntegrationPage() {
   return (
     <div className="p-6 lg:p-10 max-w-5xl mx-auto space-y-8">
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 italic tracking-tight">
-            API <span className="text-orange-500">INTEGRATION</span>
-          </h1>
-          <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
-            Connect Adobe Stock via Apify
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-3xl font-black text-slate-900 italic tracking-tighter">
+              API <span className="text-orange-500">INTEGRATION</span>
+            </h1>
+            <span className="px-3 py-1 bg-orange-100 text-orange-700 text-[10px] font-black rounded-full">⚡ SYNC</span>
+          </div>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+            Connect & Synchronize Adobe Stock Assets via Apify Crawler
           </p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-100 rounded-2xl">
-          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">Gateway Ready</span>
+        <div className="flex items-center gap-3 px-4 py-2.5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl shadow-sm">
+          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <span className="text-[10px] font-black text-green-700 uppercase tracking-widest">✓ Gateway Ready</span>
         </div>
       </div>
 
@@ -299,39 +328,41 @@ export default function ApiIntegrationPage() {
         <div className="lg:col-span-2 space-y-6">
 
           {/* MAIN SYNC CARD */}
-          <div className="bg-white border border-slate-100 rounded-[40px] p-10 shadow-sm relative overflow-hidden">
-            <div className="absolute -top-10 -right-10 opacity-[0.03] text-orange-500 rotate-12">
-              <Zap size={240} />
+          <div className="bg-white border-2 border-slate-100 rounded-[40px] p-10 shadow-xl hover:shadow-2xl transition-shadow relative overflow-hidden">
+            <div className="absolute -top-16 -right-16 opacity-[0.02] text-orange-500 rotate-12">
+              <Zap size={300} />
             </div>
 
             <div className="relative z-10 space-y-6">
-              <div className="space-y-1">
-                <h3 className="text-xl font-bold text-slate-800">Manual Synchronization</h3>
-                <p className="text-xs text-slate-400 leading-relaxed max-w-md">
-                  Run the crawler bot to fetch the latest sales and asset performance data from Adobe Stock.
-                  <span className="text-orange-500 font-bold"> (Cost per sync: $0.01)</span>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-slate-900">Manual Synchronization</h3>
+                <p className="text-xs text-slate-600 leading-relaxed max-w-xl font-medium">
+                  Run the crawler bot to fetch the latest sales and asset performance data from Adobe Stock. Each sync includes realistic download counts and revenue estimates.
+                  <span className="text-orange-600 font-bold"> (Cost per sync: $0.01)</span>
                 </p>
               </div>
 
               {/* PROGRESS SECTION — hanya tampil saat syncing/saving/done/error */}
               {progress.phase !== "idle" && (
-                <div className="space-y-4 pt-2">
+                <div className="space-y-5 pt-4 pb-2">
 
-                  {/* Progress bar */}
-                  <div className="space-y-2">
+                  {/* Progress bar dengan label yang lebih rapi */}
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {progress.phase === "saving"
-                          ? "Saving to database..."
-                          : progress.phase === "done"
-                          ? "Complete"
-                          : progress.phase === "error"
-                          ? "Error"
-                          : `Page ${progress.currentPage}/${progress.totalPages}`}
-                      </span>
-                      <span className="text-[10px] font-black text-orange-500">{progressPct}%</span>
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          {progress.phase === "saving"
+                            ? "Saving to database..."
+                            : progress.phase === "done"
+                            ? "Synchronization Complete"
+                            : progress.phase === "error"
+                            ? "Sync Failed"
+                            : `Syncing — Page ${progress.currentPage}/${progress.totalPages}`}
+                        </p>
+                      </div>
+                      <span className="text-[11px] font-black text-orange-500 bg-orange-50 px-3 py-1 rounded-full">{progressPct}%</span>
                     </div>
-                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-700 ease-out"
                         style={{
@@ -347,128 +378,132 @@ export default function ApiIntegrationPage() {
                     </div>
                   </div>
 
-                  {/* Stats row */}
+                  {/* Stats row — lebih rapi dan besar */}
                   {(isSyncing || progress.phase === "done") && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                        <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Collected</p>
-                        <p className="text-lg font-black text-slate-800">{progress.totalCollected}</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-4 border border-slate-150 hover:border-slate-200 transition">
+                        <p className="text-[8px] font-black text-slate-500 uppercase mb-1.5 tracking-wider">📊 Collected</p>
+                        <p className="text-2xl font-black text-slate-800">{progress.totalCollected.toLocaleString()}</p>
                       </div>
-                      <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                        <p className="text-[9px] font-black text-slate-400 uppercase mb-1 flex items-center gap-1">
-                          <Plus size={8} /> New
-                        </p>
-                        <p className="text-lg font-black text-green-600">{progress.created}</p>
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 border border-green-150 hover:border-green-200 transition">
+                        <p className="text-[8px] font-black text-green-600 uppercase mb-1.5 tracking-wider">✨ New</p>
+                        <p className="text-2xl font-black text-green-600">{progress.created.toLocaleString()}</p>
                       </div>
-                      <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                        <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Updated</p>
-                        <p className="text-lg font-black text-orange-500">{progress.updated}</p>
+                      <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 border border-orange-150 hover:border-orange-200 transition">
+                        <p className="text-[8px] font-black text-orange-600 uppercase mb-1.5 tracking-wider">🔄 Updated</p>
+                        <p className="text-2xl font-black text-orange-600">{progress.updated.toLocaleString()}</p>
                       </div>
-                      <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
-                        <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Est. Remaining</p>
-                        <p className="text-lg font-black text-slate-800">
+                      <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-4 border border-indigo-150 hover:border-indigo-200 transition">
+                        <p className="text-[8px] font-black text-indigo-600 uppercase mb-1.5 tracking-wider">⏱️ Remaining</p>
+                        <p className="text-2xl font-black text-indigo-600">
                           {progress.phase === "done"
-                            ? "—"
+                            ? "✓"
                             : formatDuration(progress.estimatedRemainingMs)}
                         </p>
                       </div>
                     </div>
                   )}
 
-                  {/* Error message */}
+                  {/* Error message — lebih prominent */}
                   {progress.phase === "error" && (
-                    <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl">
-                      <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
-                      <p className="text-xs text-red-700 font-medium">{progress.errorMessage}</p>
+                    <div className="flex items-start gap-4 p-5 bg-red-50 border border-red-200 rounded-2xl animate-in fade-in">
+                      <AlertCircle size={18} className="text-red-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-bold text-red-900">Sync Failed</p>
+                        <p className="text-xs text-red-700 leading-relaxed mt-1">{progress.errorMessage}</p>
+                      </div>
                     </div>
                   )}
 
                   {/* Done message */}
                   {progress.phase === "done" && (
-                    <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-100 rounded-2xl">
-                      <CheckCircle2 size={16} className="text-green-500 shrink-0" />
-                      <p className="text-xs text-green-700 font-medium">
-                        Synchronization complete! <span className="font-black">{progress.created} new</span> added,{" "}
-                        <span className="font-black">{progress.updated} updated</span>. Total in database:{" "}
-                        <span className="font-black">{progress.totalInDatabase}</span> assets.
-                      </p>
+                    <div className="flex items-center gap-4 p-5 bg-green-50 border border-green-200 rounded-2xl animate-in fade-in">
+                      <CheckCircle2 size={18} className="text-green-600 shrink-0 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-green-900">Sync Successful!</p>
+                        <p className="text-xs text-green-700 leading-relaxed mt-0.5">
+                          <span className="font-black">{progress.created}</span> new assets added, 
+                          <span className="font-black ml-1">{progress.updated}</span> updated. 
+                          Total: <span className="font-black ml-1">{progress.totalInDatabase.toLocaleString()}</span> assets.
+                        </p>
+                      </div>
                     </div>
                   )}
 
-                  {/* Live log */}
+                  {/* Live log — compact dan modern */}
                   {isSyncing && progress.logs.length > 0 && (
-                    <div className="bg-slate-900 rounded-2xl p-4 space-y-1 font-mono">
-                      {progress.logs.map((log, i) => (
+                    <div className="bg-slate-900 rounded-2xl p-4 space-y-1.5 font-mono max-h-40 overflow-y-auto">
+                      {progress.logs.slice(-8).map((log, i) => (
                         <p
                           key={i}
-                          className="text-[10px] text-slate-400 leading-relaxed"
-                          style={{ opacity: 0.4 + (i / progress.logs.length) * 0.6 }}
+                          className="text-[10px] text-slate-300 leading-relaxed"
+                          style={{ opacity: 0.3 + (i / progress.logs.length) * 0.7 }}
                         >
-                          <span className="text-orange-400">›</span> {log}
+                          <span className="text-orange-400 mr-2">▸</span> {log}
                         </p>
                       ))}
-                      <p className="text-[10px] text-orange-400 animate-pulse">█</p>
+                      <p className="text-[10px] text-orange-400 animate-pulse">●</p>
                     </div>
                   )}
                 </div>
               )}
 
               {/* BUTTON ROW */}
-              <div className="flex flex-col gap-4 pt-2">
+              <div className="flex flex-col gap-4 pt-4">
                 
-                {/* Mode & Query Section */}
+                {/* Mode & Query Section - lebih rapi */}
                 {progress.phase === "idle" && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Sync Mode Toggle */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                        Sync Mode
+                  <div className="space-y-4 pb-2 border-t border-slate-100 pt-4">
+                    {/* Sync Mode Toggle - full width dan lebih besar */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">
+                        📋 Sync Mode
                       </label>
-                      <div className="flex gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={() => setSyncMode("all")}
-                          className={`flex-1 py-2.5 px-4 rounded-[16px] font-semibold text-sm transition ${
+                          className={`py-3.5 px-4 rounded-2xl font-bold text-sm transition-all duration-200 ${
                             syncMode === "all"
-                              ? "bg-orange-500 text-white border border-orange-500"
-                              : "bg-slate-50 text-slate-600 border border-slate-200 hover:border-orange-300"
+                              ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-200 scale-[1.02]"
+                              : "bg-slate-100 text-slate-600 border border-slate-200 hover:border-orange-300 hover:bg-slate-50"
                           }`}
                         >
-                          Sync All
+                          🌐 Sync All
                         </button>
                         <button
                           onClick={() => setSyncMode("custom")}
-                          className={`flex-1 py-2.5 px-4 rounded-[16px] font-semibold text-sm transition ${
+                          className={`py-3.5 px-4 rounded-2xl font-bold text-sm transition-all duration-200 ${
                             syncMode === "custom"
-                              ? "bg-orange-500 text-white border border-orange-500"
-                              : "bg-slate-50 text-slate-600 border border-slate-200 hover:border-orange-300"
+                              ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-200 scale-[1.02]"
+                              : "bg-slate-100 text-slate-600 border border-slate-200 hover:border-orange-300 hover:bg-slate-50"
                           }`}
                         >
-                          Custom
+                          ⚙️ Custom
                         </button>
                       </div>
                     </div>
 
-                    {/* Search Query Input - hanya tampil saat custom mode */}
+                    {/* Search Query Input - tampil dengan better styling */}
                     {syncMode === "custom" && (
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                          Search Queries
+                      <div className="flex flex-col gap-2 pt-2 pb-1">
+                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                          🔍 Search Queries
                         </label>
                         <input
                           type="text"
-                          placeholder="nature, business, technology"
+                          placeholder="nature, business, technology, travel..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="px-4 py-2.5 border border-slate-200 rounded-[16px] text-sm font-semibold text-slate-700 focus:outline-none focus:border-orange-400 transition"
+                          className="px-4 py-3 border-2 border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all"
                           disabled={isSyncing}
                         />
                       </div>
                     )}
 
-                    {/* Sync Limit Input */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                        Items to Sync
+                    {/* Sync Limit Input - lebih rapi */}
+                    <div className="flex flex-col gap-2 pt-1">
+                      <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                        📦 Items to Sync
                       </label>
                       <input
                         type="number"
@@ -477,34 +512,34 @@ export default function ApiIntegrationPage() {
                         step="10"
                         value={syncLimit}
                         onChange={(e) => setSyncLimit(Math.max(10, Math.min(1000, parseInt(e.target.value) || 1000)))}
-                        className="px-4 py-2.5 border border-slate-200 rounded-[16px] text-sm font-semibold text-slate-700 focus:outline-none focus:border-orange-400 transition"
+                        className="px-4 py-3 border-2 border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all"
                         disabled={isSyncing}
                       />
                     </div>
                   </div>
                 )}
 
-                {/* Info & Button Section */}
-                <div className="flex flex-col sm:flex-row items-stretch gap-4">
+                {/* Info & Button Section - lebih besar dan prominent */}
+                <div className="flex flex-col sm:flex-row items-stretch gap-4 pt-2">
                   <button
                     onClick={handleSync}
                     disabled={isSyncing}
-                    className={`flex items-center justify-center gap-3 px-10 py-5 rounded-[24px] font-black text-[12px] uppercase tracking-widest transition-all shadow-xl ${
+                    className={`flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all shadow-xl whitespace-nowrap ${
                       isSyncing
-                        ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                        : "bg-slate-900 text-white hover:bg-orange-500 hover:scale-[1.02] active:scale-95 shadow-slate-200"
+                        ? "bg-slate-100 text-slate-400 cursor-not-allowed opacity-60"
+                        : "bg-gradient-to-r from-slate-900 to-slate-800 text-white hover:from-orange-600 hover:to-orange-500 hover:shadow-orange-200 hover:scale-[1.02] active:scale-95 shadow-slate-300"
                     }`}
                   >
                     <RefreshCw size={18} className={isSyncing ? "animate-spin" : ""} />
-                    {isSyncing ? "Syncing..." : "Sync Now"}
+                    {isSyncing ? "Syncing..." : "Start Sync"}
                   </button>
 
-                  <div className="flex flex-col items-center sm:items-start justify-center flex-1">
-                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">
-                      Activity Status
+                  <div className="flex flex-col items-center sm:items-start justify-center flex-1 bg-gradient-to-r from-slate-50 to-slate-100 rounded-2xl px-4 py-3 border border-slate-200">
+                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                      ⏰ Last Activity
                     </span>
-                    <span className="text-xs font-bold text-slate-600 flex items-center gap-2">
-                      <Clock size={12} className="text-orange-500" /> {lastSync}
+                    <span className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                      <Clock size={14} className="text-orange-500" /> {lastSync}
                     </span>
                   </div>
                 </div>
@@ -513,23 +548,29 @@ export default function ApiIntegrationPage() {
           </div>
 
           {/* API CONFIG */}
-          <div className="bg-white border border-slate-100 rounded-[32px] p-8">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">
-              Configuration Status
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 rounded-[32px] p-8 shadow-sm">
+            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+              <Layers size={14} /> Configuration Status
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <p className="text-[9px] font-black text-slate-400 uppercase mb-2">Apify Agent</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="p-5 bg-white rounded-2xl border-2 border-slate-100 hover:border-slate-200 transition">
+                <p className="text-[9px] font-black text-slate-400 uppercase mb-3">🤖 Apify Agent</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-700 font-mono">cOsM6h...SG1E</span>
-                  <CheckCircle2 size={14} className="text-green-500" />
+                  <span className="text-xs font-bold text-slate-700 font-mono bg-slate-100 px-2.5 py-1 rounded-lg">cOsM6h...SG1E</span>
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-green-50 rounded-lg">
+                    <CheckCircle2 size={12} className="text-green-600" />
+                    <span className="text-[9px] font-bold text-green-700">Active</span>
+                  </div>
                 </div>
               </div>
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <p className="text-[9px] font-black text-slate-400 uppercase mb-2">Target Profile</p>
+              <div className="p-5 bg-white rounded-2xl border-2 border-slate-100 hover:border-slate-200 transition">
+                <p className="text-[9px] font-black text-slate-400 uppercase mb-3">📁 Target Database</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-700">Adobe Contributor</span>
-                  <CheckCircle2 size={14} className="text-green-500" />
+                  <span className="text-xs font-bold text-slate-700">Adobe Assets</span>
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-green-50 rounded-lg">
+                    <CheckCircle2 size={12} className="text-green-600" />
+                    <span className="text-[9px] font-bold text-green-700">Connected</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -538,72 +579,151 @@ export default function ApiIntegrationPage() {
 
         {/* SIDEBAR */}
         <div className="space-y-6">
-          <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Database size={80} />
+          {/* Database Stats - lebih modern */}
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden border border-slate-700">
+            <div className="absolute top-4 right-4 opacity-5">
+              <Database size={100} />
             </div>
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8">
-              Database Stats
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8 relative z-10">
+              📊 Database Stats
             </h4>
             <div className="space-y-6 relative z-10">
-              <div className="flex justify-between items-end">
-                <span className="text-[10px] text-slate-400 font-bold uppercase">Stored Assets</span>
-                <span className="text-2xl font-black italic">
-                  {progress.phase === "done" && progress.totalInDatabase > 0
-                    ? progress.totalInDatabase
-                    : totalAssets > 0
-                    ? totalAssets
-                    : "--"}
-                </span>
+              {/* Total Assets */}
+              <div>
+                <p className="text-[10px] text-slate-400 font-bold uppercase mb-2">Total Assets</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-black italic">
+                    {progress.phase === "done" && progress.totalInDatabase > 0
+                      ? progress.totalInDatabase.toLocaleString()
+                      : totalAssets > 0
+                      ? totalAssets.toLocaleString()
+                      : "—"}
+                  </span>
+                  <span className="text-slate-400 text-sm">items</span>
+                </div>
               </div>
               
-              {/* Apify Usage */}
-              <div className="space-y-2">
+              {/* Apify Usage - dengan progress bar yang lebih detail */}
+              <div className="space-y-3 border-t border-slate-700 pt-6">
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">Apify Usage</span>
-                  <span className="text-xl font-black text-orange-400">
-                    ${estimatedCost.toFixed(2)} / ${apifyUsage.limit.toFixed(2)}
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">Apify Budget</span>
+                  <span className="text-lg font-black text-orange-400">
+                    ${estimatedCost.toFixed(2)}
                   </span>
                 </div>
-                <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full transition-all"
-                    style={{
-                      width: `${Math.min(100, (estimatedCost / apifyUsage.limit) * 100)}%`,
-                    }}
-                  />
+                <div className="space-y-1.5">
+                  <div className="w-full h-2.5 bg-slate-700 rounded-full overflow-hidden border border-slate-600">
+                    <div
+                      className="h-full bg-gradient-to-r from-orange-400 via-orange-500 to-red-500 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(100, (estimatedCost / apifyUsage.limit) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <p className="text-[10px] text-slate-400">
+                      {apifyUsage.limit > 0
+                        ? `${Math.round((estimatedCost / apifyUsage.limit) * 100)}% of $${apifyUsage.limit.toFixed(2)}`
+                        : "Budget unknown"}
+                    </p>
+                    <p className="text-[10px] text-slate-500">
+                      ${(apifyUsage.limit - estimatedCost).toFixed(2)} left
+                    </p>
+                  </div>
                 </div>
-                <p className="text-[10px] text-slate-400">
-                  {apifyUsage.limit > 0
-                    ? `${Math.round((estimatedCost / apifyUsage.limit) * 100)}% of monthly budget`
-                    : "Budget limit unknown"}
-                </p>
               </div>
 
+              {/* Elapsed time saat syncing */}
               {progress.phase === "syncing" && (
-                <div className="flex justify-between items-end">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">Elapsed</span>
-                  <span className="text-sm font-black text-slate-300">
-                    {formatDuration(progress.elapsedMs)}
-                  </span>
+                <div className="border-t border-slate-700 pt-3 mt-3">
+                  <div className="flex justify-between items-end">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase">Elapsed Time</span>
+                    <span className="text-lg font-black text-slate-300 font-mono">
+                      {formatDuration(progress.elapsedMs)}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="p-6 bg-orange-50 border border-orange-100 rounded-[32px]">
+          {/* Info box */}
+          <div className="p-6 bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-100 rounded-[32px] shadow-sm">
             <div className="flex gap-4">
-              <AlertCircle size={20} className="text-orange-500 shrink-0" />
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-orange-900">Information</p>
-                <p className="text-[10px] text-orange-700 leading-relaxed font-medium">
-                  Each synchronization will take around 1-2 minutes depending on the number of assets in your Adobe Stock portfolio.
-                </p>
+              <div className="flex-shrink-0 pt-0.5">
+                <AlertCircle size={20} className="text-orange-600" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-orange-900">💡 Pro Tips</p>
+                <ul className="text-[10px] text-orange-800 leading-relaxed space-y-1 font-medium">
+                  <li>• Sync takes ~1-2 min depending on items count</li>
+                  <li>• Sync All uses diverse topics for better coverage</li>
+                  <li>• Each item has realistic download data</li>
+                  <li>• Page will auto-refresh after completion</li>
+                </ul>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* SUCCESS MODAL — Tampil setelah sync selesai */}
+      {showSuccessModal && progress.phase === "done" && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl animate-in fade-in scale-95 slide-in-from-bottom-4 duration-300">
+            <div className="text-center space-y-4">
+              {/* Success Icon */}
+              <div className="flex justify-center mb-2">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-green-500 rounded-full opacity-20 animate-pulse" />
+                  <div className="relative bg-gradient-to-br from-green-400 to-green-600 rounded-full p-4">
+                    <CheckCircle2 size={40} className="text-white" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Title */}
+              <div>
+                <h2 className="text-2xl font-black text-slate-900">Sync Complete!</h2>
+                <p className="text-sm text-slate-500 mt-1">Your assets have been successfully synchronized</p>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-3 bg-slate-50 rounded-2xl p-4">
+                <div className="text-center">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">New</p>
+                  <p className="text-xl font-black text-green-600">{progress.created}</p>
+                </div>
+                <div className="text-center border-l border-r border-slate-200">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Updated</p>
+                  <p className="text-xl font-black text-orange-500">{progress.updated}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Total</p>
+                  <p className="text-xl font-black text-slate-800">{progress.totalInDatabase}</p>
+                </div>
+              </div>
+
+              {/* Auto-redirect countdown */}
+              <div className="flex items-center justify-center gap-2 pt-2">
+                <Clock size={14} className="text-slate-400" />
+                <p className="text-xs text-slate-500">
+                  Redirecting in <span className="font-bold text-slate-700">{redirectCountdown}s</span>
+                </p>
+              </div>
+
+              {/* Action button */}
+              <button
+                onClick={() => window.location.href = "/admin/api"}
+                className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 group"
+              >
+                Go to Dashboard
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

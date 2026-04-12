@@ -27,6 +27,12 @@ export default function ContributorPage() {
   const [isPro, setIsPro] = useState(false);
   const [planLoading, setPlanLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  
+  // API data states
+  const [contributor, setContributor] = useState<any>(null);
+  const [assets, setAssets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     fetch("/api/user/plan")
@@ -40,8 +46,32 @@ export default function ContributorPage() {
       .catch(() => setPlanLoading(false));
   }, []);
 
-  const handleSearch = () => {
-    if (searchId.trim()) setShowResults(true);
+  const handleSearch = async () => {
+    if (!searchId.trim()) return;
+    
+    setLoading(true);
+    setError("");
+    
+    try {
+      const response = await fetch(`/api/contributor/search?search=${encodeURIComponent(searchId)}`);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        setError(data.error || "Contributor not found");
+        setShowResults(false);
+        return;
+      }
+      
+      setContributor(data.contributor);
+      setAssets(data.assets);
+      setShowResults(true);
+    } catch (err) {
+      console.error("[Search Error]", err);
+      setError("Failed to search. Please try again.");
+      setShowResults(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -51,94 +81,17 @@ export default function ContributorPage() {
   const handleClear = () => {
     setSearchId("");
     setShowResults(false);
+    setContributor(null);
+    setAssets([]);
+    setError("");
   };
-
-  const mockContributor = {
-    id: "202488794",
-    name: "xy_studio",
-    totalAssets: 145,
-    totalDownloads: 8542,
-    rating: 4.8,
-    joinDate: "Jun 2019",
-    topCategory: "Business",
-    weeklyGrowth: "+12%",
-  };
-
-  const mockAssets = [
-    {
-      id: "57383738",
-      title: "Display of Stock Market",
-      category: "Business",
-      type: "Photo",
-      downloads: 256,
-      views: 1820,
-      thumbnail: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=260&fit=crop",
-      uploadDate: "27 Jun 2019",
-      trending: true,
-    },
-    {
-      id: "64352337",
-      title: "Stock Market Quotes Display",
-      category: "Finance",
-      type: "Vector",
-      downloads: 189,
-      views: 940,
-      thumbnail: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=260&fit=crop&sat=-80",
-      uploadDate: "15 Jul 2019",
-      trending: false,
-    },
-    {
-      id: "103458765",
-      title: "Stock Market Graph Analysis",
-      category: "Business",
-      type: "Photo",
-      downloads: 412,
-      views: 3210,
-      thumbnail: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=400&h=260&fit=crop",
-      uploadDate: "22 Aug 2019",
-      trending: true,
-    },
-    {
-      id: "121910498",
-      title: "Economical Stock Market Graph",
-      category: "Finance",
-      type: "Photo",
-      downloads: 178,
-      views: 760,
-      thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=260&fit=crop",
-      uploadDate: "10 Sep 2019",
-      trending: false,
-    },
-    {
-      id: "125435283",
-      title: "Stock Exchange Concept",
-      category: "Business",
-      type: "Vector",
-      downloads: 95,
-      views: 430,
-      thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=260&fit=crop",
-      uploadDate: "05 Oct 2019",
-      trending: false,
-    },
-    {
-      id: "134830386",
-      title: "Brokers Analysing Stocks",
-      category: "Business",
-      type: "Photo",
-      downloads: 334,
-      views: 2100,
-      thumbnail: "https://images.unsplash.com/photo-1559526324-593bc073d938?w=400&h=260&fit=crop",
-      uploadDate: "18 Nov 2019",
-      trending: true,
-    },
-  ];
 
   const filteredAssets =
     selectedFilter === "All"
-      ? mockAssets
+      ? assets
       : selectedFilter === "Trending"
-      ? mockAssets.filter((a) => a.trending)
-      : mockAssets.filter(
+      ? assets.filter((a) => a.trending)
+      : assets.filter(
           (a) => a.type === selectedFilter || a.category === selectedFilter
         );
 
@@ -235,19 +188,25 @@ export default function ContributorPage() {
               <p className="text-slate-400 text-sm max-w-xs mx-auto">
                 Enter a contributor ID above to view their portfolio, download stats, and latest assets.
               </p>
-
-              {/* sample IDs */}
-              <div className="mt-8 flex flex-wrap gap-2 justify-center">
-                {["202488794", "198374650", "305827401"].map((id) => (
-                  <button
-                    key={id}
-                    onClick={() => { setSearchId(id); setShowResults(true); }}
-                    className="px-4 py-2 rounded-lg border border-slate-200 text-xs font-mono text-slate-500 hover:border-orange-300 hover:text-orange-600 hover:bg-orange-50 transition flex items-center gap-1.5"
-                  >
-                    {id}
-                    <ChevronRight size={11} />
-                  </button>
-                ))}
+            </div>
+          ) : loading ? (
+            /* LOADING STATE */
+            <div className="flex flex-col items-center justify-center py-24">
+              <div className="w-16 h-16 rounded-full border-4 border-slate-200 border-t-orange-500 animate-spin" />
+              <p className="mt-6 text-slate-600 font-medium">Searching for contributor...</p>
+            </div>
+          ) : error ? (
+            /* ERROR STATE */
+            <div className="max-w-md mx-auto py-16">
+              <div className="p-6 rounded-xl border border-red-200 bg-red-50">
+                <h3 className="font-bold text-red-900 mb-2">Search Failed</h3>
+                <p className="text-red-700 text-sm mb-4">{error}</p>
+                <button
+                  onClick={handleClear}
+                  className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition"
+                >
+                  Try Again
+                </button>
               </div>
             </div>
           ) : (
@@ -257,15 +216,15 @@ export default function ContributorPage() {
               <div className="rounded-2xl border border-slate-200 p-6 bg-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-6">
                 {/* avatar */}
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-black text-2xl shrink-0 shadow-lg shadow-orange-200">
-                  {mockContributor.name[0].toUpperCase()}
+                  {contributor?.name?.[0]?.toUpperCase()}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <h2 className="text-lg font-bold text-slate-900">{mockContributor.name}</h2>
+                    <h2 className="text-lg font-bold text-slate-900">{contributor?.name}</h2>
                     <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-semibold">ACTIVE</span>
                   </div>
-                  <p className="text-xs text-slate-400 font-mono">ID: {mockContributor.id} · Joined {mockContributor.joinDate}</p>
+                  <p className="text-xs text-slate-400 font-mono">ID: {contributor?.id} · Joined {contributor?.joinDate}</p>
                 </div>
 
                 <button className="px-4 py-2 rounded-xl border border-orange-200 text-orange-600 text-xs font-semibold hover:bg-orange-50 transition flex items-center gap-1.5 shrink-0">
@@ -278,28 +237,28 @@ export default function ContributorPage() {
                 {[
                   {
                     label: "TOTAL ASSETS",
-                    value: mockContributor.totalAssets,
+                    value: contributor?.totalAssets,
                     sub: "Published works",
                     icon: <ImageIcon size={18} className="text-orange-400" />,
                     accent: "orange",
                   },
                   {
                     label: "TOTAL DOWNLOADS",
-                    value: mockContributor.totalDownloads.toLocaleString(),
+                    value: contributor?.totalDownloads?.toLocaleString?.(),
                     sub: "Across all assets",
                     icon: <Download size={18} className="text-green-400" />,
                     accent: "green",
                   },
                   {
                     label: "AVG RATING",
-                    value: mockContributor.rating,
+                    value: contributor?.rating,
                     sub: "Average score",
                     icon: <Star size={18} className="text-yellow-400" />,
                     accent: "yellow",
                   },
                   {
                     label: "WEEKLY GROWTH",
-                    value: mockContributor.weeklyGrowth,
+                    value: contributor?.weeklyGrowth,
                     sub: "Downloads this week",
                     icon: <TrendingUp size={18} className="text-blue-400" />,
                     accent: "blue",
@@ -328,7 +287,7 @@ export default function ContributorPage() {
                 <Trophy size={18} className="text-orange-500 shrink-0" />
                 <div className="text-sm text-slate-700">
                   Top performing category:{" "}
-                  <span className="font-bold text-orange-600">{mockContributor.topCategory}</span>
+                  <span className="font-bold text-orange-600">{contributor?.topCategory}</span>
                 </div>
                 <div className="ml-auto flex items-center gap-1 text-xs font-semibold text-orange-600">
                   <Flame size={12} /> Most downloaded
@@ -340,22 +299,24 @@ export default function ContributorPage() {
                 <div className="flex items-center justify-between mb-5">
                   <div>
                     <h2 className="text-base font-bold text-slate-900">Latest Assets</h2>
-                    <p className="text-xs text-slate-400 mt-0.5">{filteredAssets.length} assets found</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{filteredAssets?.length || 0} assets found</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setViewMode("grid")}
-                      className={`p-2 rounded-lg transition ${viewMode === "grid" ? "bg-orange-100 text-orange-600" : "text-slate-400 hover:text-slate-600"}`}
-                    >
-                      <Grid3X3 size={15} />
-                    </button>
-                    <button
-                      onClick={() => setViewMode("list")}
-                      className={`p-2 rounded-lg transition ${viewMode === "list" ? "bg-orange-100 text-orange-600" : "text-slate-400 hover:text-slate-600"}`}
-                    >
-                      <BarChart3 size={15} />
-                    </button>
-                  </div>
+                  {assets && assets.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setViewMode("grid")}
+                        className={`p-2 rounded-lg transition ${viewMode === "grid" ? "bg-orange-100 text-orange-600" : "text-slate-400 hover:text-slate-600"}`}
+                      >
+                        <Grid3X3 size={15} />
+                      </button>
+                      <button
+                        onClick={() => setViewMode("list")}
+                        className={`p-2 rounded-lg transition ${viewMode === "list" ? "bg-orange-100 text-orange-600" : "text-slate-400 hover:text-slate-600"}`}
+                      >
+                        <BarChart3 size={15} />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {viewMode === "grid" ? (
