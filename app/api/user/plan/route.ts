@@ -46,6 +46,7 @@ export async function GET() {
       isPremium: planInfo.isPremium,
       planName: planInfo.planName,
       searchQuotaLimit: planInfo.searchQuotaLimit,
+      planExpiry: profile?.planExpiry,
     });
   } catch (error) {
     console.error("[Plan API] Error getting plan info:", error);

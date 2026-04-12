@@ -102,3 +102,8 @@ export type Logo = Prisma.LogoModel
  * 
  */
 export type Favicon = Prisma.FaviconModel
+/**
+ * Model RecentSearch
+ * 
+ */
+export type RecentSearch = Prisma.RecentSearchModel

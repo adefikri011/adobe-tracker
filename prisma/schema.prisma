@@ -25,6 +25,7 @@ model Profile {
   subscriptions Subscription[]
   syncLogs      SyncLog[]
   transactions  Transaction[]
+  recentSearches RecentSearch[]
 
   @@map("Profile")
 }
@@ -290,4 +291,14 @@ model Favicon {
   updatedAt     DateTime @updatedAt
 
   @@map("Favicon")
+}
+
+model RecentSearch {
+  id        String   @id @default(cuid())
+  profileId String
+  query     String
+  createdAt DateTime @default(now())
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("RecentSearch")
 }

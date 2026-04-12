@@ -6,6 +6,8 @@ export type Asset = {
   adobeId: string;
   title: string;
   creator: string;
+  creatorName?: string;
+  creatorId?: string;
   category: string;
   type: string;
   downloads: number;
@@ -367,12 +369,12 @@ export function ResultCard({ item, index }: ResultCardProps) {
               className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-black flex-shrink-0"
               style={{ background: "linear-gradient(135deg, #f97316, #c2410c)" }}
             >
-              {item.creator.charAt(0).toUpperCase()}
+              {(item.creatorName || item.creator).charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-black text-orange-400 uppercase tracking-wider">Creator</p>
+              <p className="text-[8px] font-black text-orange-400 uppercase tracking-wider">{item.creatorName || item.creator}</p>
               <p className="text-[11px] font-semibold text-gray-700 truncate">
-                {item.creator}
+                {item.creatorId || item.creator}
               </p>
             </div>
           </div>

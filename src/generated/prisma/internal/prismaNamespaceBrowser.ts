@@ -67,7 +67,8 @@ export const ModelName = {
   Notification: 'Notification',
   NotificationPreference: 'NotificationPreference',
   Logo: 'Logo',
-  Favicon: 'Favicon'
+  Favicon: 'Favicon',
+  RecentSearch: 'RecentSearch'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -348,6 +349,16 @@ export const FaviconScalarFieldEnum = {
 } as const
 
 export type FaviconScalarFieldEnum = (typeof FaviconScalarFieldEnum)[keyof typeof FaviconScalarFieldEnum]
+
+
+export const RecentSearchScalarFieldEnum = {
+  id: 'id',
+  profileId: 'profileId',
+  query: 'query',
+  createdAt: 'createdAt'
+} as const
+
+export type RecentSearchScalarFieldEnum = (typeof RecentSearchScalarFieldEnum)[keyof typeof RecentSearchScalarFieldEnum]
 
 
 export const SortOrder = {

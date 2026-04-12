@@ -269,6 +269,7 @@ export type ProfileWhereInput = {
   subscriptions?: Prisma.SubscriptionListRelationFilter
   syncLogs?: Prisma.SyncLogListRelationFilter
   transactions?: Prisma.TransactionListRelationFilter
+  recentSearches?: Prisma.RecentSearchListRelationFilter
 }
 
 export type ProfileOrderByWithRelationInput = {
@@ -288,6 +289,7 @@ export type ProfileOrderByWithRelationInput = {
   subscriptions?: Prisma.SubscriptionOrderByRelationAggregateInput
   syncLogs?: Prisma.SyncLogOrderByRelationAggregateInput
   transactions?: Prisma.TransactionOrderByRelationAggregateInput
+  recentSearches?: Prisma.RecentSearchOrderByRelationAggregateInput
 }
 
 export type ProfileWhereUniqueInput = Prisma.AtLeast<{
@@ -310,6 +312,7 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   subscriptions?: Prisma.SubscriptionListRelationFilter
   syncLogs?: Prisma.SyncLogListRelationFilter
   transactions?: Prisma.TransactionListRelationFilter
+  recentSearches?: Prisma.RecentSearchListRelationFilter
 }, "id" | "email">
 
 export type ProfileOrderByWithAggregationInput = {
@@ -365,6 +368,7 @@ export type ProfileCreateInput = {
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutProfileInput
   syncLogs?: Prisma.SyncLogCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUncheckedCreateInput = {
@@ -384,6 +388,7 @@ export type ProfileUncheckedCreateInput = {
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutProfileInput
   syncLogs?: Prisma.SyncLogUncheckedCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchUncheckedCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUpdateInput = {
@@ -403,6 +408,7 @@ export type ProfileUpdateInput = {
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutProfileNestedInput
   syncLogs?: Prisma.SyncLogUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileUncheckedUpdateInput = {
@@ -422,6 +428,7 @@ export type ProfileUncheckedUpdateInput = {
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutProfileNestedInput
   syncLogs?: Prisma.SyncLogUncheckedUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUncheckedUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileCreateManyInput = {
@@ -630,6 +637,20 @@ export type ProfileUpdateOneRequiredWithoutSyncLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutSyncLogsInput, Prisma.ProfileUpdateWithoutSyncLogsInput>, Prisma.ProfileUncheckedUpdateWithoutSyncLogsInput>
 }
 
+export type ProfileCreateNestedOneWithoutRecentSearchesInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutRecentSearchesInput, Prisma.ProfileUncheckedCreateWithoutRecentSearchesInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutRecentSearchesInput
+  connect?: Prisma.ProfileWhereUniqueInput
+}
+
+export type ProfileUpdateOneRequiredWithoutRecentSearchesNestedInput = {
+  create?: Prisma.XOR<Prisma.ProfileCreateWithoutRecentSearchesInput, Prisma.ProfileUncheckedCreateWithoutRecentSearchesInput>
+  connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutRecentSearchesInput
+  upsert?: Prisma.ProfileUpsertWithoutRecentSearchesInput
+  connect?: Prisma.ProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutRecentSearchesInput, Prisma.ProfileUpdateWithoutRecentSearchesInput>, Prisma.ProfileUncheckedUpdateWithoutRecentSearchesInput>
+}
+
 export type ProfileCreateWithoutAssetsInput = {
   id: string
   fullName?: string | null
@@ -646,6 +667,7 @@ export type ProfileCreateWithoutAssetsInput = {
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutProfileInput
   syncLogs?: Prisma.SyncLogCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUncheckedCreateWithoutAssetsInput = {
@@ -664,6 +686,7 @@ export type ProfileUncheckedCreateWithoutAssetsInput = {
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutProfileInput
   syncLogs?: Prisma.SyncLogUncheckedCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchUncheckedCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileCreateOrConnectWithoutAssetsInput = {
@@ -698,6 +721,7 @@ export type ProfileUpdateWithoutAssetsInput = {
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutProfileNestedInput
   syncLogs?: Prisma.SyncLogUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutAssetsInput = {
@@ -716,6 +740,7 @@ export type ProfileUncheckedUpdateWithoutAssetsInput = {
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutProfileNestedInput
   syncLogs?: Prisma.SyncLogUncheckedUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUncheckedUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileCreateWithoutTransactionsInput = {
@@ -734,6 +759,7 @@ export type ProfileCreateWithoutTransactionsInput = {
   loginLogs?: Prisma.LoginLogCreateNestedManyWithoutProfileInput
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutProfileInput
   syncLogs?: Prisma.SyncLogCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUncheckedCreateWithoutTransactionsInput = {
@@ -752,6 +778,7 @@ export type ProfileUncheckedCreateWithoutTransactionsInput = {
   loginLogs?: Prisma.LoginLogUncheckedCreateNestedManyWithoutProfileInput
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutProfileInput
   syncLogs?: Prisma.SyncLogUncheckedCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchUncheckedCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileCreateOrConnectWithoutTransactionsInput = {
@@ -786,6 +813,7 @@ export type ProfileUpdateWithoutTransactionsInput = {
   loginLogs?: Prisma.LoginLogUpdateManyWithoutProfileNestedInput
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutProfileNestedInput
   syncLogs?: Prisma.SyncLogUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutTransactionsInput = {
@@ -804,6 +832,7 @@ export type ProfileUncheckedUpdateWithoutTransactionsInput = {
   loginLogs?: Prisma.LoginLogUncheckedUpdateManyWithoutProfileNestedInput
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutProfileNestedInput
   syncLogs?: Prisma.SyncLogUncheckedUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUncheckedUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileCreateWithoutSubscriptionsInput = {
@@ -822,6 +851,7 @@ export type ProfileCreateWithoutSubscriptionsInput = {
   loginLogs?: Prisma.LoginLogCreateNestedManyWithoutProfileInput
   syncLogs?: Prisma.SyncLogCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUncheckedCreateWithoutSubscriptionsInput = {
@@ -840,6 +870,7 @@ export type ProfileUncheckedCreateWithoutSubscriptionsInput = {
   loginLogs?: Prisma.LoginLogUncheckedCreateNestedManyWithoutProfileInput
   syncLogs?: Prisma.SyncLogUncheckedCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchUncheckedCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileCreateOrConnectWithoutSubscriptionsInput = {
@@ -874,6 +905,7 @@ export type ProfileUpdateWithoutSubscriptionsInput = {
   loginLogs?: Prisma.LoginLogUpdateManyWithoutProfileNestedInput
   syncLogs?: Prisma.SyncLogUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutSubscriptionsInput = {
@@ -892,6 +924,7 @@ export type ProfileUncheckedUpdateWithoutSubscriptionsInput = {
   loginLogs?: Prisma.LoginLogUncheckedUpdateManyWithoutProfileNestedInput
   syncLogs?: Prisma.SyncLogUncheckedUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUncheckedUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileCreateWithoutLoginLogsInput = {
@@ -910,6 +943,7 @@ export type ProfileCreateWithoutLoginLogsInput = {
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutProfileInput
   syncLogs?: Prisma.SyncLogCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUncheckedCreateWithoutLoginLogsInput = {
@@ -928,6 +962,7 @@ export type ProfileUncheckedCreateWithoutLoginLogsInput = {
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutProfileInput
   syncLogs?: Prisma.SyncLogUncheckedCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchUncheckedCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileCreateOrConnectWithoutLoginLogsInput = {
@@ -962,6 +997,7 @@ export type ProfileUpdateWithoutLoginLogsInput = {
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutProfileNestedInput
   syncLogs?: Prisma.SyncLogUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutLoginLogsInput = {
@@ -980,6 +1016,7 @@ export type ProfileUncheckedUpdateWithoutLoginLogsInput = {
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutProfileNestedInput
   syncLogs?: Prisma.SyncLogUncheckedUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUncheckedUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileCreateWithoutSyncLogsInput = {
@@ -998,6 +1035,7 @@ export type ProfileCreateWithoutSyncLogsInput = {
   loginLogs?: Prisma.LoginLogCreateNestedManyWithoutProfileInput
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileUncheckedCreateWithoutSyncLogsInput = {
@@ -1016,6 +1054,7 @@ export type ProfileUncheckedCreateWithoutSyncLogsInput = {
   loginLogs?: Prisma.LoginLogUncheckedCreateNestedManyWithoutProfileInput
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutProfileInput
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutProfileInput
+  recentSearches?: Prisma.RecentSearchUncheckedCreateNestedManyWithoutProfileInput
 }
 
 export type ProfileCreateOrConnectWithoutSyncLogsInput = {
@@ -1050,6 +1089,7 @@ export type ProfileUpdateWithoutSyncLogsInput = {
   loginLogs?: Prisma.LoginLogUpdateManyWithoutProfileNestedInput
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUpdateManyWithoutProfileNestedInput
 }
 
 export type ProfileUncheckedUpdateWithoutSyncLogsInput = {
@@ -1068,6 +1108,99 @@ export type ProfileUncheckedUpdateWithoutSyncLogsInput = {
   loginLogs?: Prisma.LoginLogUncheckedUpdateManyWithoutProfileNestedInput
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutProfileNestedInput
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutProfileNestedInput
+  recentSearches?: Prisma.RecentSearchUncheckedUpdateManyWithoutProfileNestedInput
+}
+
+export type ProfileCreateWithoutRecentSearchesInput = {
+  id: string
+  fullName?: string | null
+  email?: string | null
+  plan?: string
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
+  createdAt?: Date | string
+  planExpiry?: Date | string | null
+  assets?: Prisma.AssetCreateNestedManyWithoutProfileInput
+  loginLogs?: Prisma.LoginLogCreateNestedManyWithoutProfileInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutProfileInput
+  syncLogs?: Prisma.SyncLogCreateNestedManyWithoutProfileInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutProfileInput
+}
+
+export type ProfileUncheckedCreateWithoutRecentSearchesInput = {
+  id: string
+  fullName?: string | null
+  email?: string | null
+  plan?: string
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  deviceLimit?: number
+  timezone?: string
+  timeFormat?: string
+  createdAt?: Date | string
+  planExpiry?: Date | string | null
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutProfileInput
+  loginLogs?: Prisma.LoginLogUncheckedCreateNestedManyWithoutProfileInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutProfileInput
+  syncLogs?: Prisma.SyncLogUncheckedCreateNestedManyWithoutProfileInput
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutProfileInput
+}
+
+export type ProfileCreateOrConnectWithoutRecentSearchesInput = {
+  where: Prisma.ProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutRecentSearchesInput, Prisma.ProfileUncheckedCreateWithoutRecentSearchesInput>
+}
+
+export type ProfileUpsertWithoutRecentSearchesInput = {
+  update: Prisma.XOR<Prisma.ProfileUpdateWithoutRecentSearchesInput, Prisma.ProfileUncheckedUpdateWithoutRecentSearchesInput>
+  create: Prisma.XOR<Prisma.ProfileCreateWithoutRecentSearchesInput, Prisma.ProfileUncheckedCreateWithoutRecentSearchesInput>
+  where?: Prisma.ProfileWhereInput
+}
+
+export type ProfileUpdateToOneWithWhereWithoutRecentSearchesInput = {
+  where?: Prisma.ProfileWhereInput
+  data: Prisma.XOR<Prisma.ProfileUpdateWithoutRecentSearchesInput, Prisma.ProfileUncheckedUpdateWithoutRecentSearchesInput>
+}
+
+export type ProfileUpdateWithoutRecentSearchesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assets?: Prisma.AssetUpdateManyWithoutProfileNestedInput
+  loginLogs?: Prisma.LoginLogUpdateManyWithoutProfileNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutProfileNestedInput
+  syncLogs?: Prisma.SyncLogUpdateManyWithoutProfileNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutProfileNestedInput
+}
+
+export type ProfileUncheckedUpdateWithoutRecentSearchesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  plan?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  planExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutProfileNestedInput
+  loginLogs?: Prisma.LoginLogUncheckedUpdateManyWithoutProfileNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutProfileNestedInput
+  syncLogs?: Prisma.SyncLogUncheckedUpdateManyWithoutProfileNestedInput
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutProfileNestedInput
 }
 
 
@@ -1081,6 +1214,7 @@ export type ProfileCountOutputType = {
   subscriptions: number
   syncLogs: number
   transactions: number
+  recentSearches: number
 }
 
 export type ProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1089,6 +1223,7 @@ export type ProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   subscriptions?: boolean | ProfileCountOutputTypeCountSubscriptionsArgs
   syncLogs?: boolean | ProfileCountOutputTypeCountSyncLogsArgs
   transactions?: boolean | ProfileCountOutputTypeCountTransactionsArgs
+  recentSearches?: boolean | ProfileCountOutputTypeCountRecentSearchesArgs
 }
 
 /**
@@ -1136,6 +1271,13 @@ export type ProfileCountOutputTypeCountTransactionsArgs<ExtArgs extends runtime.
   where?: Prisma.TransactionWhereInput
 }
 
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeCountRecentSearchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RecentSearchWhereInput
+}
+
 
 export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1154,6 +1296,7 @@ export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   subscriptions?: boolean | Prisma.Profile$subscriptionsArgs<ExtArgs>
   syncLogs?: boolean | Prisma.Profile$syncLogsArgs<ExtArgs>
   transactions?: boolean | Prisma.Profile$transactionsArgs<ExtArgs>
+  recentSearches?: boolean | Prisma.Profile$recentSearchesArgs<ExtArgs>
   _count?: boolean | Prisma.ProfileCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["profile"]>
 
@@ -1206,6 +1349,7 @@ export type ProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   subscriptions?: boolean | Prisma.Profile$subscriptionsArgs<ExtArgs>
   syncLogs?: boolean | Prisma.Profile$syncLogsArgs<ExtArgs>
   transactions?: boolean | Prisma.Profile$transactionsArgs<ExtArgs>
+  recentSearches?: boolean | Prisma.Profile$recentSearchesArgs<ExtArgs>
   _count?: boolean | Prisma.ProfileCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProfileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1219,6 +1363,7 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     subscriptions: Prisma.$SubscriptionPayload<ExtArgs>[]
     syncLogs: Prisma.$SyncLogPayload<ExtArgs>[]
     transactions: Prisma.$TransactionPayload<ExtArgs>[]
+    recentSearches: Prisma.$RecentSearchPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1631,6 +1776,7 @@ export interface Prisma__ProfileClient<T, Null = never, ExtArgs extends runtime.
   subscriptions<T extends Prisma.Profile$subscriptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$subscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   syncLogs<T extends Prisma.Profile$syncLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$syncLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SyncLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   transactions<T extends Prisma.Profile$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  recentSearches<T extends Prisma.Profile$recentSearchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$recentSearchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecentSearchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2181,6 +2327,30 @@ export type Profile$transactionsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.TransactionScalarFieldEnum | Prisma.TransactionScalarFieldEnum[]
+}
+
+/**
+ * Profile.recentSearches
+ */
+export type Profile$recentSearchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RecentSearch
+   */
+  select?: Prisma.RecentSearchSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RecentSearch
+   */
+  omit?: Prisma.RecentSearchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RecentSearchInclude<ExtArgs> | null
+  where?: Prisma.RecentSearchWhereInput
+  orderBy?: Prisma.RecentSearchOrderByWithRelationInput | Prisma.RecentSearchOrderByWithRelationInput[]
+  cursor?: Prisma.RecentSearchWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RecentSearchScalarFieldEnum | Prisma.RecentSearchScalarFieldEnum[]
 }
 
 /**

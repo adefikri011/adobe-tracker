@@ -15,7 +15,12 @@ interface Plan {
   features: string[];
 }
 
-// Helper function untuk format feature names
+// Helper function untuk extract jumlah hari dari text
+const extractDays = (text: string): number => {
+  const match = text.match(/(\d+)/);
+  return match ? parseInt(match[0]) : 0;
+};
+
 const formatFeatureName = (feature: string): string => {
   return feature
     .replace(/_/g, " ")
@@ -227,6 +232,11 @@ export default function UserPlansPage() {
   const [currency, setCurrency] = useState<string>("USD");
   const [exchangeRate, setExchangeRate] = useState<number>(15800);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isPro, setIsPro] = useState(false);
+  const [planLoading, setPlanLoading] = useState(true);
+  const [userPlan, setUserPlan] = useState<string>("free");
+  const [planExpiry, setPlanExpiry] = useState<Date | null>(null);
+  const [remainingDays, setRemainingDays] = useState<number>(0);
   
   // Payment Details Modal States
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -242,6 +252,33 @@ export default function UserPlansPage() {
         setIsAuthenticated(res.ok);
       } catch {
         setIsAuthenticated(false);
+      }
+    };
+
+    // Fetch user's plan status
+    const fetchUserPlan = async () => {
+      try {
+        const res = await fetch("/api/user/plan");
+        if (res.ok) {
+          const data = await res.json();
+          const isProPlan = data.isPremium !== undefined ? data.isPremium : data.plan === "pro";
+          setIsPro(isProPlan);
+          setUserPlan(data.plan || "free");
+          
+          // Calculate remaining days if planExpiry exists
+          if (data.planExpiry) {
+            const expiry = new Date(data.planExpiry);
+            const today = new Date();
+            const diff = expiry.getTime() - today.getTime();
+            const days = Math.ceil(diff / (1000 * 3600 * 24));
+            setRemainingDays(Math.max(0, days));
+            setPlanExpiry(expiry);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch user plan:", error);
+      } finally {
+        setPlanLoading(false);
       }
     };
 
@@ -281,6 +318,7 @@ export default function UserPlansPage() {
     };
 
     fetchAuthStatus();
+    fetchUserPlan();
     fetchSettings();
     fetchPlans();
   }, []);
@@ -369,7 +407,7 @@ export default function UserPlansPage() {
         }
       `}</style>
 
-      <Navbar isPro={false} planLoading={false} onUpgradeClick={() => {}} isGuest={!isAuthenticated} />
+      <Navbar isPro={isPro} planLoading={planLoading} onUpgradeClick={() => {}} isGuest={!isAuthenticated} />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 pb-16 sm:pb-20 md:pb-24 pt-10 sm:pt-12 md:pt-14">
 
@@ -417,16 +455,33 @@ export default function UserPlansPage() {
 
                   {/* Active + Discount row */}
                   <div className="flex items-center justify-between mb-4">
-                    <span
-                      className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${
-                        isPopular
-                          ? "bg-white/10 text-emerald-300"
-                          : "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                      }`}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                      Active
-                    </span>
+                    {isPro && extractDays(userPlan) === extractDays(plan.name) && (
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                          isPopular
+                            ? "bg-white/10 text-emerald-300"
+                            : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                        }`}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                        Active
+                      </span>
+                    )}
+                    {!isPro && plan.name.toLowerCase() === "free" && (
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                          isPopular
+                            ? "bg-white/10 text-emerald-300"
+                            : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                        }`}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                        Active
+                      </span>
+                    )}
+                    {!userPlan || (!isPro && plan.name.toLowerCase() !== "free") || (isPro && extractDays(userPlan) !== extractDays(plan.name)) ? (
+                      <div />
+                    ) : null}
                     {plan.discount > 0 && (
                       <span className="text-[10px] font-black bg-orange-500 text-white px-2 py-1 rounded-full uppercase tracking-wider">
                         -{plan.discount}%
@@ -537,26 +592,62 @@ export default function UserPlansPage() {
                   </ul>
 
                   {/* CTA */}
-                  <button
-                    onClick={() => handleCheckout(plan.id)}
-                    disabled={showPaymentModal || isProcessingPayment || !isAuthenticated}
-                    className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 mt-auto disabled:opacity-50 ${
-                      isPopular
-                        ? "bg-orange-500 hover:bg-orange-400 text-white shadow-lg shadow-orange-500/20"
-                        : "bg-slate-900 hover:bg-orange-500 text-white"
-                    }`}
-                  >
-                    {isProcessingPayment ? (
-                      <Loader2 className="animate-spin" size={16} />
-                    ) : !isAuthenticated ? (
-                      "Login to Buy"
-                    ) : (
-                      <>
-                        <Zap size={13} className="hidden sm:inline" fill="currentColor" />
-                        Get Started
-                      </>
-                    )}
-                  </button>
+                  {/* Get Started Button atau Active Info */}
+                  {isPro && extractDays(userPlan) === extractDays(plan.name) ? (
+                    <div className="w-full py-4 sm:py-5 md:py-6 px-4 rounded-xl text-center bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 border-2 border-emerald-300 shadow-sm">
+                      {/* Header dengan checkmark */}
+                      <div className="inline-flex items-center justify-center gap-2 mb-3 px-3 py-1.5 bg-emerald-100 rounded-full">
+                        <span className="text-sm">✓</span>
+                        <span className="text-xs sm:text-sm font-bold text-emerald-700">Plan Aktif</span>
+                      </div>
+
+                      {/* Plan name */}
+                      <p className="text-sm sm:text-base font-black text-emerald-900 mb-3 uppercase tracking-wider">
+                        {userPlan}
+                      </p>
+
+                      {/* Countdown visual */}
+                      <div className="mb-3 p-2.5 bg-white/60 rounded-lg border border-emerald-200">
+                        <div className="text-xl sm:text-2xl font-black text-emerald-600 mb-0.5">
+                          {remainingDays}
+                        </div>
+                        <p className="text-xs text-emerald-600 font-semibold">hari tersisa</p>
+                      </div>
+
+                      {/* End date */}
+                      {planExpiry && (
+                        <p className="text-xs sm:text-[13px] text-emerald-600 font-medium leading-relaxed">
+                          Berakhir <br />
+                          <span className="font-bold text-emerald-700">
+                            {planExpiry.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => !isPro && handleCheckout(plan.id)}
+                      disabled={showPaymentModal || isProcessingPayment || !isAuthenticated || isPro}
+                      className={`w-full py-2.5 sm:py-3 md:py-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 mt-auto ${
+                        isPro
+                          ? "opacity-50 cursor-not-allowed bg-slate-200 text-slate-400"
+                          : isPopular
+                          ? "bg-orange-500 hover:bg-orange-400 text-white shadow-lg shadow-orange-500/20"
+                          : "bg-slate-900 hover:bg-orange-500 text-white"
+                      }`}
+                    >
+                      {isProcessingPayment ? (
+                        <Loader2 className="animate-spin" size={16} />
+                      ) : !isAuthenticated ? (
+                        "Login to Buy"
+                      ) : (
+                        <>
+                          <Zap size={13} className="hidden sm:inline" fill="currentColor" />
+                          Get Started
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               );
             })}

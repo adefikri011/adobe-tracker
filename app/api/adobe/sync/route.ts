@@ -252,6 +252,8 @@ export async function POST(req: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        console.log(`[Sync] Starting sync - LIMIT: ${LIMIT}, searchQuery: "${searchQuery}", creatorId: ${creatorId}`);
+        
         sseEvent(controller, encoder, {
           type: "start",
           message: `Memulai sinkronisasi${searchQuery ? ` dengan query "${searchQuery}"` : " untuk semua jenis aset"}...`,
@@ -264,6 +266,7 @@ export async function POST(req: Request) {
 
         for (let page = 1; page <= MAX_PAGES; page++) {
           const pageUrl = buildPageUrl(creatorId, page, searchQuery);
+          console.log(`[Sync] Page ${page}/${MAX_PAGES} URL: ${pageUrl}`);
 
           sseEvent(controller, encoder, {
             type: "page_start",
@@ -276,8 +279,11 @@ export async function POST(req: Request) {
 
           let pageItems: any[];
           try {
+            console.log(`[Sync] Calling Apify for page ${page}...`);
             pageItems = await runApifyAndGetItems(actorId, token, pageUrl);
+            console.log(`[Sync] Page ${page} returned ${pageItems.length} items`);
           } catch (e: any) {
+            console.error(`[Sync] Page ${page} ERROR:`, e.message);
             sseEvent(controller, encoder, {
               type: "page_error",
               page,
@@ -334,6 +340,7 @@ export async function POST(req: Request) {
         if (allRawItems.length > 0) {
           const sample = allRawItems[0];
           console.log("[Sync Debug] Sample item keys:", Object.keys(sample));
+          console.log("[Sync Debug] Sample item:", sample);
           console.log("[Sync Debug] Date fields:", {
             creation_date: sample?.creation_date,
             upload_date: sample?.upload_date,
@@ -343,6 +350,10 @@ export async function POST(req: Request) {
           });
         }
 
+        // Debug: Check existing assets count
+        const existingBefore = await prisma.asset.count({ where: { profileId: user.id } });
+        console.log(`[Sync Debug] Existing assets for user before sync: ${existingBefore}`);
+
         const normalizedItems: NormalizedAsset[] = allRawItems
           .map((item: any): NormalizedAsset | null => {
             const rawId = item?.content_id || item?.id || item?.assetId || item?.asset_id || "";
@@ -351,6 +362,7 @@ export async function POST(req: Request) {
             const downloads = parseInt(String(item?.nb_downloads ?? item?.downloads ?? 0), 10);
             const earnings = parseFloat(String(item?.earnings ?? item?.revenue ?? 0));
             const popularity = parseFloat(String(item?.order_key ?? item?.popularity ?? 0));
+            console.log(`[Sync] Normalized asset: ${assetId} - ${String(item?.title || item?.name || "Untitled").trim()}`);
             return {
               assetId,
               title: String(item?.title || item?.name || "Untitled").trim(),
@@ -380,6 +392,19 @@ export async function POST(req: Request) {
             };
           })
           .filter((item): item is NormalizedAsset => item !== null);
+
+        console.log(`[Sync] All normalized items: ${normalizedItems.length}`);
+        
+        // Check which will be duplicates
+        const existingIds = await prisma.asset.findMany({
+          where: { assetId: { in: normalizedItems.map(n => n.assetId) } },
+          select: { assetId: true }
+        });
+        const existingSet = new Set(existingIds.map(e => e.assetId));
+        console.log(`[Sync] Existing in DB: ${existingSet.size}/${normalizedItems.length}`);
+        for (const id of existingSet) {
+          console.log(`[Sync] Duplicate (will skip): ${id}`);
+        }
 
         // Shuffle untuk variasi data
         const shuffledItems = shuffleArray(normalizedItems);

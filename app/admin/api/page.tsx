@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 type SyncPhase = "idle" | "syncing" | "saving" | "done" | "error";
+type SyncMode = "all" | "custom";
 
 interface SyncProgress {
   phase: SyncPhase;
@@ -35,8 +36,9 @@ export default function ApiIntegrationPage() {
   const [totalAssets, setTotalAssets] = useState(0);
   const [estimatedCost, setEstimatedCost] = useState(0);
   const [apifyUsage, setApifyUsage] = useState({ current: 0, limit: 5.0 });
-  const [syncLimit, setSyncLimit] = useState(1000); // Default 1000 items for local testing
-  const [searchQuery, setSearchQuery] = useState(""); // Empty = all types of assets
+  const [syncMode, setSyncMode] = useState<SyncMode>("all");
+  const [syncLimit, setSyncLimit] = useState(1000);
+  const [searchQuery, setSearchQuery] = useState("");
   const [progress, setProgress] = useState<SyncProgress>({
     phase: "idle",
     currentPage: 0,
@@ -81,55 +83,127 @@ export default function ApiIntegrationPage() {
 
     abortRef.current = new AbortController();
 
-    setProgress({
-      phase: "syncing",
-      currentPage: 0,
-      totalPages: Math.ceil(syncLimit / 10),
-      totalCollected: 0,
-      currentPageItems: 0,
-      elapsedMs: 0,
-      estimatedRemainingMs: 0,
-      created: 0,
-      updated: 0,
-      totalInDatabase: 0,
-      errorMessage: "",
-      logs: ["Connecting to Apify..."],
-    });
-
-    try {
-      const response = await fetch(`/api/adobe/sync?limit=${syncLimit}&query=${encodeURIComponent(searchQuery)}`, {
-        method: "POST",
-        signal: abortRef.current.signal,
+    // Determine queries based on mode
+    let queriesToSync: string[] = [];
+    
+    if (syncMode === "all") {
+      // Sync all - gunakan diverse queries otomatis
+      queriesToSync = [
+        "nature", "landscape", "technology", "business", 
+        "person", "portrait", "food", "travel"
+      ];
+      setProgress({
+        phase: "syncing",
+        currentPage: 0,
+        totalPages: Math.ceil(syncLimit / 10),
+        totalCollected: 0,
+        currentPageItems: 0,
+        elapsedMs: 0,
+        estimatedRemainingMs: 0,
+        created: 0,
+        updated: 0,
+        totalInDatabase: 0,
+        errorMessage: "",
+        logs: [`Starting sync for ALL diverse topics (${queriesToSync.length} queries)...`, ...queriesToSync.map(q => `  • ${q}`)],
       });
-
-      if (!response.body) throw new Error("No response stream available");
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const event = JSON.parse(line.slice(6));
-            handleSSEEvent(event);
-          } catch {}
-        }
+    } else {
+      // Custom queries
+      queriesToSync = searchQuery
+        .split(',')
+        .map(q => q.trim())
+        .filter(q => q.length > 0);
+      
+      if (queriesToSync.length === 0) {
+        alert("Please enter at least one query or select 'Sync All'");
+        return;
       }
-    } catch (e: any) {
-      if (e?.name === "AbortError") return;
+
+      setProgress({
+        phase: "syncing",
+        currentPage: 0,
+        totalPages: Math.ceil(syncLimit / 10),
+        totalCollected: 0,
+        currentPageItems: 0,
+        elapsedMs: 0,
+        estimatedRemainingMs: 0,
+        created: 0,
+        updated: 0,
+        totalInDatabase: 0,
+        errorMessage: "",
+        logs: [`Starting sync for ${queriesToSync.length} custom query/queries...`, ...queriesToSync.map(q => `  • ${q}`)],
+      });
+    }
+
+    let totalCreatedAll = 0;
+    let totalInDatabaseAll = 0;
+
+    for (let queryIndex = 0; queryIndex < queriesToSync.length; queryIndex++) {
+      const currentQuery = queriesToSync[queryIndex];
+      
+      setProgress(prev => ({
+        ...prev,
+        logs: [...prev.logs, queryIndex > 0 ? `\n[${queryIndex + 1}/${queriesToSync.length}] Syncing: "${currentQuery}"` : `[${queryIndex + 1}/${queriesToSync.length}] Syncing: "${currentQuery}"`]
+      }));
+
+      try {
+        const response = await fetch(`/api/adobe/sync?limit=${syncLimit}&query=${encodeURIComponent(currentQuery)}`, {
+          method: "POST",
+          signal: abortRef.current.signal,
+        });
+
+        if (!response.body) throw new Error("No response stream available");
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            try {
+              const event = JSON.parse(line.slice(6));
+              
+              // Accumulate created from all queries
+              if (event.type === "done") {
+                event.queryIndex = queryIndex;
+                event.totalQueries = queriesToSync.length;
+                totalCreatedAll += event.created || 0;
+                totalInDatabaseAll = event.totalInDatabase || 0;
+              }
+              
+              handleSSEEvent(event);
+            } catch {}
+          }
+        }
+      } catch (e: any) {
+        if (e?.name === "AbortError") return;
+        setProgress((prev) => ({
+          ...prev,
+          phase: "error",
+          errorMessage: `Query "${currentQuery}": ${e?.message || "Connection failed"}`,
+        }));
+        // Continue to next query even if one fails
+        continue;
+      }
+    }
+
+    // Final done event after all queries
+    if (queriesToSync.length > 0) {
+      setLastSync("Just now");
+      setTimeout(() => fetchStats(), 1000);
       setProgress((prev) => ({
         ...prev,
-        phase: "error",
-        errorMessage: e?.message || "Connection failed",
+        phase: "done",
+        created: totalCreatedAll,
+        totalInDatabase: totalInDatabaseAll,
+        logs: [...prev.logs, `\n✅ All ${queriesToSync.length} queries completed!`, `Total new assets: ${totalCreatedAll}`],
       }));
     }
   };
@@ -174,16 +248,14 @@ export default function ApiIntegrationPage() {
           return { ...prev, phase: "saving", totalCollected: event.totalCollected ?? prev.totalCollected, logs };
 
         case "done":
-          setLastSync("Just now");
-          // Fetch updated stats after sync completes
-          setTimeout(() => fetchStats(), 1000);
+          // Don't call fetchStats here - will be called after all queries done
+          // Just update progress with this query's results
           return {
             ...prev,
-            phase: "done",
-            created: event.created,
-            updated: event.updated,
+            created: (prev.created || 0) + (event.created || 0),
+            updated: (prev.updated || 0) + (event.updated || 0),
             totalInDatabase: event.totalInDatabase,
-            logs,
+            logs: [...logs, `✓ Query completed: +${event.created} new assets`],
           };
 
         case "error":
@@ -342,65 +414,99 @@ export default function ApiIntegrationPage() {
               )}
 
               {/* BUTTON ROW */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 pt-2">
-                {/* Search Query Input */}
+              <div className="flex flex-col gap-4 pt-2">
+                
+                {/* Mode & Query Section */}
                 {progress.phase === "idle" && (
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                      Search Filter (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Leave empty for all types, or type: nature, urban, business"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value.trim())}
-                      className="px-4 py-2.5 border border-slate-200 rounded-[16px] text-sm font-semibold text-slate-700 focus:outline-none focus:border-orange-400 transition"
-                      disabled={isSyncing}
-                    />
-                    <span className="text-[8px] text-slate-400 font-medium">Empty = 1000 diverse items, or filter specific</span>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Sync Mode Toggle */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                        Sync Mode
+                      </label>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setSyncMode("all")}
+                          className={`flex-1 py-2.5 px-4 rounded-[16px] font-semibold text-sm transition ${
+                            syncMode === "all"
+                              ? "bg-orange-500 text-white border border-orange-500"
+                              : "bg-slate-50 text-slate-600 border border-slate-200 hover:border-orange-300"
+                          }`}
+                        >
+                          Sync All
+                        </button>
+                        <button
+                          onClick={() => setSyncMode("custom")}
+                          className={`flex-1 py-2.5 px-4 rounded-[16px] font-semibold text-sm transition ${
+                            syncMode === "custom"
+                              ? "bg-orange-500 text-white border border-orange-500"
+                              : "bg-slate-50 text-slate-600 border border-slate-200 hover:border-orange-300"
+                          }`}
+                        >
+                          Custom
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Search Query Input - hanya tampil saat custom mode */}
+                    {syncMode === "custom" && (
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                          Search Queries
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="nature, business, technology"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="px-4 py-2.5 border border-slate-200 rounded-[16px] text-sm font-semibold text-slate-700 focus:outline-none focus:border-orange-400 transition"
+                          disabled={isSyncing}
+                        />
+                      </div>
+                    )}
+
+                    {/* Sync Limit Input */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                        Items to Sync
+                      </label>
+                      <input
+                        type="number"
+                        min="10"
+                        max="1000"
+                        step="10"
+                        value={syncLimit}
+                        onChange={(e) => setSyncLimit(Math.max(10, Math.min(1000, parseInt(e.target.value) || 1000)))}
+                        className="px-4 py-2.5 border border-slate-200 rounded-[16px] text-sm font-semibold text-slate-700 focus:outline-none focus:border-orange-400 transition"
+                        disabled={isSyncing}
+                      />
+                    </div>
                   </div>
                 )}
 
-                {/* Sync Limit Input */}
-                {progress.phase === "idle" && (
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                      Items to Sync
-                    </label>
-                    <input
-                      type="number"
-                      min="10"
-                      max="1000"
-                      step="10"
-                      value={syncLimit}
-                      onChange={(e) => setSyncLimit(Math.max(10, Math.min(1000, parseInt(e.target.value) || 1000)))}
-                      className="px-4 py-2.5 border border-slate-200 rounded-[16px] text-sm font-semibold text-slate-700 focus:outline-none focus:border-orange-400 transition"
-                      disabled={isSyncing}
-                    />
-                    <span className="text-[8px] text-slate-400 font-medium">Min: 10, Max: 1000</span>
+                {/* Info & Button Section */}
+                <div className="flex flex-col sm:flex-row items-stretch gap-4">
+                  <button
+                    onClick={handleSync}
+                    disabled={isSyncing}
+                    className={`flex items-center justify-center gap-3 px-10 py-5 rounded-[24px] font-black text-[12px] uppercase tracking-widest transition-all shadow-xl ${
+                      isSyncing
+                        ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                        : "bg-slate-900 text-white hover:bg-orange-500 hover:scale-[1.02] active:scale-95 shadow-slate-200"
+                    }`}
+                  >
+                    <RefreshCw size={18} className={isSyncing ? "animate-spin" : ""} />
+                    {isSyncing ? "Syncing..." : "Sync Now"}
+                  </button>
+
+                  <div className="flex flex-col items-center sm:items-start justify-center flex-1">
+                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">
+                      Activity Status
+                    </span>
+                    <span className="text-xs font-bold text-slate-600 flex items-center gap-2">
+                      <Clock size={12} className="text-orange-500" /> {lastSync}
+                    </span>
                   </div>
-                )}
-
-                <button
-                  onClick={handleSync}
-                  disabled={isSyncing}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-10 py-5 rounded-[24px] font-black text-[12px] uppercase tracking-widest transition-all shadow-xl ${
-                    isSyncing
-                      ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                      : "bg-slate-900 text-white hover:bg-orange-500 hover:scale-[1.02] active:scale-95 shadow-slate-200"
-                  }`}
-                >
-                  <RefreshCw size={18} className={isSyncing ? "animate-spin" : ""} />
-                  {isSyncing ? "Syncing..." : "Sync Now"}
-                </button>
-
-                <div className="flex flex-col items-center sm:items-start">
-                  <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">
-                    Activity Status
-                  </span>
-                  <span className="text-xs font-bold text-slate-600 flex items-center gap-2">
-                    <Clock size={12} className="text-orange-500" /> {lastSync}
-                  </span>
                 </div>
               </div>
             </div>

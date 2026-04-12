@@ -400,7 +400,8 @@ export const ModelName = {
   Notification: 'Notification',
   NotificationPreference: 'NotificationPreference',
   Logo: 'Logo',
-  Favicon: 'Favicon'
+  Favicon: 'Favicon',
+  RecentSearch: 'RecentSearch'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "searchCache" | "marketInsight" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog" | "syncLog" | "gatewayConfig" | "activityLog" | "notification" | "notificationPreference" | "logo" | "favicon"
+    modelProps: "profile" | "searchCache" | "marketInsight" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog" | "syncLog" | "gatewayConfig" | "activityLog" | "notification" | "notificationPreference" | "logo" | "favicon" | "recentSearch"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1678,6 +1679,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RecentSearch: {
+      payload: Prisma.$RecentSearchPayload<ExtArgs>
+      fields: Prisma.RecentSearchFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RecentSearchFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecentSearchPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RecentSearchFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecentSearchPayload>
+        }
+        findFirst: {
+          args: Prisma.RecentSearchFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecentSearchPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RecentSearchFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecentSearchPayload>
+        }
+        findMany: {
+          args: Prisma.RecentSearchFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecentSearchPayload>[]
+        }
+        create: {
+          args: Prisma.RecentSearchCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecentSearchPayload>
+        }
+        createMany: {
+          args: Prisma.RecentSearchCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RecentSearchCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecentSearchPayload>[]
+        }
+        delete: {
+          args: Prisma.RecentSearchDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecentSearchPayload>
+        }
+        update: {
+          args: Prisma.RecentSearchUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecentSearchPayload>
+        }
+        deleteMany: {
+          args: Prisma.RecentSearchDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RecentSearchUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RecentSearchUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecentSearchPayload>[]
+        }
+        upsert: {
+          args: Prisma.RecentSearchUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecentSearchPayload>
+        }
+        aggregate: {
+          args: Prisma.RecentSearchAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRecentSearch>
+        }
+        groupBy: {
+          args: Prisma.RecentSearchGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecentSearchGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RecentSearchCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecentSearchCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1979,6 +2054,16 @@ export const FaviconScalarFieldEnum = {
 } as const
 
 export type FaviconScalarFieldEnum = (typeof FaviconScalarFieldEnum)[keyof typeof FaviconScalarFieldEnum]
+
+
+export const RecentSearchScalarFieldEnum = {
+  id: 'id',
+  profileId: 'profileId',
+  query: 'query',
+  createdAt: 'createdAt'
+} as const
+
+export type RecentSearchScalarFieldEnum = (typeof RecentSearchScalarFieldEnum)[keyof typeof RecentSearchScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2293,6 +2378,7 @@ export type GlobalOmitConfig = {
   notificationPreference?: Prisma.NotificationPreferenceOmit
   logo?: Prisma.LogoOmit
   favicon?: Prisma.FaviconOmit
+  recentSearch?: Prisma.RecentSearchOmit
 }
 
 /* Types for Logging */

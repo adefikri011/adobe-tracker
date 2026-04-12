@@ -361,7 +361,9 @@ export async function GET(req: NextRequest) {
     const results = prioritySorted.slice(0, limit).map((a: any) => ({
       adobeId: a.assetId,
       title: a.title,
-      creator: a.contributorId || "Unknown",
+      creatorName: a.contributor || "Unknown",
+      creatorId: a.contributorId || "Unknown",
+      creator: a.contributor || a.contributorId || "Unknown",
       thumbnail: a.thumbnail,
       type: a.fileType || "Photo",
       category: a.category || "General",
