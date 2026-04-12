@@ -21,6 +21,7 @@ interface HistoryItem {
   expiry: string;
   status: "active" | "expired" | "cancelled";
   progress: number;
+  isAdminGrant?: boolean;
 }
 
 interface CurrencySettings {
@@ -168,8 +169,17 @@ export default function BillingHistoryPage() {
 
                 {/* AMOUNT */}
                 <td className="px-6 py-5 text-right">
-                  <p className="text-sm font-bold text-slate-700">{formatPrice(item.amount)}</p>
-                  <p className="text-[10px] text-slate-400 italic">Success</p>
+                  {item.isAdminGrant ? (
+                    <>
+                      <p className="text-sm font-bold text-emerald-600">Complimentary</p>
+                      <p className="text-[10px] text-emerald-500 italic">Granted by Admin</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm font-bold text-slate-700">{formatPrice(item.amount)}</p>
+                      <p className="text-[10px] text-slate-400 italic">Success</p>
+                    </>
+                  )}
                 </td>
 
                 {/* ACTION */}

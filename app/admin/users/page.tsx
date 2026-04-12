@@ -10,7 +10,26 @@ import {
 
 type UserRole = "admin" | "user";
 type UserStatus = "active" | "suspended";
-type PlanType = "free" | "pro_1d" | "pro_3d" | "pro_7d" | "pro_15d" | "pro_30d" | "lifetime";
+
+interface Plan {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  duration: {
+    days: number;
+    label: string;
+  };
+  pricing: {
+    original: number;
+    final: number;
+    discount: string | null;
+    currency: string;
+  };
+  deviceLimit: number;
+  features: string[];
+  upgradeUrl: string;
+}
 
 interface UserData {
   id: string;
@@ -18,7 +37,7 @@ interface UserData {
   email: string;
   role: UserRole;
   status: UserStatus;
-  plan: PlanType;
+  plan: string;
   deviceLimit: number;
 }
 
@@ -72,10 +91,13 @@ export default function UserListPage() {
     </>
   );
   
+  // Plans from API
+  const [plans, setPlans] = useState<Plan[]>([]);
+  
   // Edit Modal
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editPlan, setEditPlan] = useState<PlanType>("free");
+  const [editPlanId, setEditPlanId] = useState<string>("");
   const [editLimit, setEditLimit] = useState(1);
 
   // Create Modal
@@ -83,27 +105,45 @@ export default function UserListPage() {
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserRole, setNewUserRole] = useState<UserRole>("user");
-  const [newUserPlan, setNewUserPlan] = useState<PlanType>("free");
+  const [newUserPlanId, setNewUserPlanId] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
 
   // Ban/Unban Confirmation Modal
   const [banConfirmModal, setBanConfirmModal] = useState<{ isOpen: boolean; userId: string }>({ isOpen: false, userId: "" });
   const [isBanProcessing, setIsBanProcessing] = useState(false);
 
-  // Fetch users from Supabase
+  // Fetch plans and users from APIs
   useEffect(() => {
-    async function loadUsers() {
+    async function loadData() {
       try {
-        const res = await fetch("/api/admin/users", {
+        // Fetch available plans
+        const plansRes = await fetch("/api/billing/plans/available", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
 
-        if (!res.ok) {
+        if (plansRes.ok) {
+          const plansPayload = await plansRes.json();
+          const availablePlans = Array.isArray(plansPayload?.plans) ? plansPayload.plans : [];
+          setPlans(availablePlans);
+          // Set default plan to first available (usually "free")
+          if (availablePlans.length > 0 && !editPlanId) {
+            setEditPlanId(availablePlans[0].id);
+            setNewUserPlanId(availablePlans[0].id);
+          }
+        }
+
+        // Fetch users from Supabase
+        const usersRes = await fetch("/api/admin/users", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!usersRes.ok) {
           throw new Error("Failed to load users");
         }
 
-        const payload = await res.json();
+        const payload = await usersRes.json();
         const serverUsers = Array.isArray(payload?.users) ? payload.users : [];
 
         const formattedUsers: UserData[] = serverUsers.map((user: UserData) => ({
@@ -122,7 +162,7 @@ export default function UserListPage() {
       }
     }
 
-    loadUsers();
+    loadData();
   }, []);
 
   const filteredUsers = useMemo(() => {
@@ -136,7 +176,10 @@ export default function UserListPage() {
 
   const handleEditClick = (user: UserData) => {
     setSelectedUser(user);
-    setEditPlan(user.plan);
+    // Set edit plan to first plan by default (usually "free")
+    if (plans.length > 0) {
+      setEditPlanId(plans[0].id);
+    }
     setEditLimit(user.deviceLimit);
     setIsModalOpen(true);
   };
@@ -149,7 +192,7 @@ export default function UserListPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userId: selectedUser.id,
-        plan: editPlan,
+        planId: editPlanId,
         deviceLimit: editLimit,
       }),
     });
@@ -159,9 +202,13 @@ export default function UserListPage() {
       return;
     }
 
+    // Get the plan name to display (normalize to "pro" if it's a pro plan, "free" otherwise)
+    const selectedPlan = plans.find(p => p.id === editPlanId);
+    const displayPlan = selectedPlan?.slug === "free" || selectedPlan?.slug?.startsWith("free") ? "free" : "pro";
+
     setUsers(users.map(u => 
       u.id === selectedUser.id 
-      ? { ...u, plan: editPlan, deviceLimit: editLimit } 
+      ? { ...u, plan: displayPlan, deviceLimit: editLimit } 
       : u
     ));
     setIsModalOpen(false);
@@ -219,7 +266,7 @@ export default function UserListPage() {
           fullName: newUserName,
           email: newUserEmail,
           role: newUserRole,
-          plan: newUserPlan,
+          planId: newUserPlanId,
           status: "active",
           deviceLimit: 1,
         }),
@@ -256,7 +303,7 @@ export default function UserListPage() {
       setNewUserName("");
       setNewUserEmail("");
       setNewUserRole("user");
-      setNewUserPlan("free");
+      setNewUserPlanId("");
       setIsCreating(false);
     } catch (err) {
       console.error("Error:", err);
@@ -434,20 +481,21 @@ export default function UserListPage() {
                 {/* Membership Grid */}
                 <div className="space-y-3">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <Calendar size={14} /> Plan Duration (Manual)
+                    <Calendar size={14} /> Select Plan
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {["free", "pro_1d", "pro_3d", "pro_7d", "pro_15d", "pro_30d", "lifetime"].map((p) => (
+                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                    {plans.map((plan) => (
                       <button
-                        key={p}
-                        onClick={() => setEditPlan(p as PlanType)}
-                        className={`px-2 py-2 rounded-xl text-[10px] font-bold transition-all border capitalize ${
-                          editPlan === p 
+                        key={plan.id}
+                        onClick={() => setEditPlanId(plan.id)}
+                        className={`px-3 py-2.5 rounded-xl text-[10px] font-bold transition-all border text-left ${
+                          editPlanId === plan.id 
                           ? "bg-[#ff6b00] text-white border-[#ff6b00] shadow-sm shadow-orange-100" 
-                          : "bg-white text-slate-400 border-slate-100 hover:border-orange-100"
+                          : "bg-white text-slate-600 border-slate-100 hover:border-orange-100"
                         }`}
                       >
-                        {p.replace(/_/g, " ")}
+                        <div className="font-semibold">{plan.name}</div>
+                        <div className="text-[9px] opacity-75">{plan.duration.label}</div>
                       </button>
                     ))}
                   </div>
@@ -562,18 +610,19 @@ export default function UserListPage() {
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                     <Crown size={14} /> Initial Plan
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {["free", "pro_1d", "pro_7d", "pro_30d", "lifetime"].map((plan) => (
+                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                    {plans.map((plan) => (
                       <button
-                        key={plan}
-                        onClick={() => setNewUserPlan(plan as PlanType)}
-                        className={`px-2 py-2 rounded-xl text-[10px] font-bold transition-all border capitalize ${
-                          newUserPlan === plan 
+                        key={plan.id}
+                        onClick={() => setNewUserPlanId(plan.id)}
+                        className={`px-3 py-2.5 rounded-xl text-[10px] font-bold transition-all border text-left ${
+                          newUserPlanId === plan.id 
                           ? "bg-[#ff6b00] text-white border-[#ff6b00] shadow-sm shadow-orange-100" 
-                          : "bg-white text-slate-400 border-slate-100 hover:border-orange-100"
+                          : "bg-white text-slate-600 border-slate-100 hover:border-orange-100"
                         }`}
                       >
-                        {plan.replace(/_/g, " ")}
+                        <div className="font-semibold">{plan.name}</div>
+                        <div className="text-[9px] opacity-75">{plan.duration.label}</div>
                       </button>
                     ))}
                   </div>

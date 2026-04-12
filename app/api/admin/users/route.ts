@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getClientIP } from "../../../lib/activity-log";
 
-type PlanType = "free" | "pro_1d" | "pro_3d" | "pro_7d" | "pro_15d" | "pro_30d" | "lifetime";
 type UserRole = "admin" | "user";
 type UserStatus = "active" | "suspended";
 
@@ -33,6 +32,48 @@ async function ensureAdmin() {
   };
 }
 
+/**
+ * Helper: Activate plan untuk user
+ * - Jika planId ada & valid → set plan="pro", set planExpiry, create Subscription
+ * - Jika planId tidak ada / planId="free" → set plan="free", planExpiry=null
+ */
+async function activatePlanForUser(userId: string, planId?: string) {
+  const updateData: any = {};
+
+  if (!planId || planId === "free") {
+    // Free plan
+    updateData.plan = "free";
+    updateData.planExpiry = null;
+  } else {
+    // Pro plan - extract dari database
+    const plan = await prisma.plan.findUnique({
+      where: { id: planId },
+      select: { id: true, name: true, durationDays: true },
+    });
+
+    if (!plan) {
+      throw new Error(`Plan not found: ${planId}`);
+    }
+
+    // Set plan to "pro" (bukan pro_30d, hanya pro)
+    updateData.plan = "pro";
+    updateData.planExpiry = new Date(Date.now() + plan.durationDays * 24 * 60 * 60 * 1000);
+
+    // Create Subscription record
+    await prisma.subscription.create({
+      data: {
+        profileId: userId,
+        planId: plan.id,
+        status: "active",
+        startDate: new Date(),
+        endDate: updateData.planExpiry,
+      },
+    });
+  }
+
+  return updateData;
+}
+
 export async function GET() {
   try {
     const adminCheck = await ensureAdmin();
@@ -48,6 +89,7 @@ export async function GET() {
         role: true,
         status: true,
         plan: true,
+        planExpiry: true,
         deviceLimit: true,
       },
       orderBy: { createdAt: "desc" },
@@ -71,7 +113,7 @@ export async function POST(req: Request) {
       fullName?: string;
       email?: string;
       role?: UserRole;
-      plan?: PlanType;
+      planId?: string; // Plan ID dari database
       status?: UserStatus;
       deviceLimit?: number;
     };
@@ -83,13 +125,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "fullName and email are required" }, { status: 400 });
     }
 
+    const userId = crypto.randomUUID();
+
+    // Activate plan (akan set plan="free" atau "pro" + planExpiry + create Subscription)
+    const planData = await activatePlanForUser(userId, body.planId);
+
     const created = await prisma.profile.create({
       data: {
-        id: crypto.randomUUID(),
+        id: userId,
         fullName,
         email,
         role: body.role === "admin" ? "admin" : "user",
-        plan: body.plan || "free",
+        plan: planData.plan,
+        planExpiry: planData.planExpiry,
         status: body.status || "active",
         deviceLimit: Math.max(1, Math.floor(body.deviceLimit || 1)),
       },
@@ -100,25 +148,27 @@ export async function POST(req: Request) {
         role: true,
         status: true,
         plan: true,
+        planExpiry: true,
         deviceLimit: true,
       },
     });
 
-    // Log activity - mencatat admin yang melakukan aksi
+    // Log activity
+    const planName = body.planId && body.planId !== "free" ? " with pro plan" : "";
     await prisma.activityLog.create({
       data: {
         user: `${adminCheck.adminName} (admin)`,
         email: adminCheck.adminEmail,
         action: "Created User",
-        detail: `Created new user ${fullName} (${email}) with role: ${body.role === "admin" ? "admin" : "user"}`,
+        detail: `Created user ${fullName} (${email})${planName}`,
         ipAddress: getClientIP(req),
       },
     });
 
     return NextResponse.json({ user: created }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Create admin user error:", error);
-    return NextResponse.json({ message: "Failed to create user" }, { status: 500 });
+    return NextResponse.json({ message: error.message || "Failed to create user" }, { status: 500 });
   }
 }
 
@@ -131,7 +181,7 @@ export async function PATCH(req: Request) {
 
     const body = (await req.json()) as {
       userId?: string;
-      plan?: PlanType;
+      planId?: string; // Plan ID dari database
       deviceLimit?: number;
       status?: UserStatus;
     };
@@ -140,14 +190,13 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ message: "userId is required" }, { status: 400 });
     }
 
-    const updateData: {
-      plan?: PlanType;
-      deviceLimit?: number;
-      status?: UserStatus;
-    } = {};
+    const updateData: any = {};
 
-    if (body.plan) {
-      updateData.plan = body.plan;
+    // Handle plan change
+    if (body.planId !== undefined) {
+      const planData = await activatePlanForUser(body.userId, body.planId);
+      updateData.plan = planData.plan;
+      updateData.planExpiry = planData.planExpiry;
     }
 
     if (typeof body.deviceLimit === "number") {
@@ -168,13 +217,14 @@ export async function PATCH(req: Request) {
         role: true,
         status: true,
         plan: true,
+        planExpiry: true,
         deviceLimit: true,
       },
     });
 
-    // Log activity - mencatat admin yang melakukan aksi
+    // Log activity
     const changes = [];
-    if (body.plan) changes.push(`plan: ${body.plan}`);
+    if (body.planId !== undefined) changes.push(`plan: ${body.planId === "free" ? "free" : "pro"}`);
     if (body.deviceLimit) changes.push(`deviceLimit: ${body.deviceLimit}`);
     if (body.status) changes.push(`status: ${body.status}`);
 
@@ -189,8 +239,8 @@ export async function PATCH(req: Request) {
     });
 
     return NextResponse.json({ user: updated });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Update admin user error:", error);
-    return NextResponse.json({ message: "Failed to update user" }, { status: 500 });
+    return NextResponse.json({ message: error.message || "Failed to update user" }, { status: 500 });
   }
 }

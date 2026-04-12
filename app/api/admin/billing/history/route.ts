@@ -44,6 +44,23 @@ export async function GET() {
       },
     });
 
+    // Fetch semua transactions dengan status success untuk check payment-based subscriptions
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        status: "success", // Hanya payment yang berhasil
+      },
+      select: {
+        id: true,
+        profileId: true,
+        planId: true,
+      },
+    });
+
+    // Buat map untuk quick lookup: "${profileId}:${planId}" => true
+    const transactionMap = new Map(
+      transactions.map((tx) => [`${tx.profileId}:${tx.planId}`, true])
+    );
+
     // Format response dengan kalkulasi progress
     const formatted = subscriptions.map((sub) => {
       const startDate = new Date(sub.startDate);
@@ -59,6 +76,10 @@ export async function GET() {
       const formatDate = (date: Date) => 
         date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
+      // Cek apakah subscription ini dari payment (ada transaction success) atau admin grant
+      const hasSuccessTransaction = transactionMap.has(`${sub.profileId}:${sub.planId}`);
+      const isAdminGrant = !hasSuccessTransaction;
+
       return {
         id: sub.id,
         user: sub.profile?.fullName || sub.profile?.email || "Unknown",
@@ -68,6 +89,7 @@ export async function GET() {
         expiry: formatDate(endDate),
         status: sub.status.toLowerCase() as "active" | "expired" | "cancelled",
         progress: Math.round(progress),
+        isAdminGrant,
       };
     });
 
