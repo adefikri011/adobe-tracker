@@ -328,11 +328,13 @@ export default function LoginPage() {
       <motion.div initial="hidden" animate="show" className="w-full max-w-md relative z-10" suppressHydrationWarning>
         {/* Header - Margin dikurangi biar rapi */}
         <motion.div variants={fadeUp} custom={0} className="text-center mb-0" suppressHydrationWarning>
-          <Link href="/" className="inline-flex justify-center mb-1.5 group">
+          <Link href="/" className="inline-flex justify-center mb-8 group">
             {logoUrl ? (
+              // Ganti h-24 menjadi h-12 (atau angka lain yang lebih kecil)
               <img src={logoUrl} alt="TrackStock Logo" className="h-12 w-auto object-contain" />
             ) : (
-              <TrackStockLogo/>
+              // Jangan lupa ganti juga di sini supaya konsisten
+              <TrackStockLogo />
             )}
           </Link>
           <h1 className="text-3xl md:text-4xl font-[900] tracking-tight text-slate-900 mb-0.5">

@@ -111,7 +111,7 @@ export default function ForgotPasswordPage() {
             <Link href="/" className="inline-flex justify-center mb-8 group"> {/* Margin diperbesar dari mb-6 ke mb-8 */}
               {logoUrl ? (
                 // Ukuran diperbesar dari h-12 ke h-20
-                <img src={logoUrl} alt="TrackStock Logo" className="h-20 w-20 object-contain" />
+                <img src={logoUrl} alt="TrackStock Logo" className="h-12 w-12 object-contain" />
               ) : (
                 <TrackStockLogo />
               )}

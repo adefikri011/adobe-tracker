@@ -13,8 +13,6 @@ import {
   ChevronRight,
   Loader2,
   AlertCircle,
-  Type,
-  Palette,
 } from "lucide-react";
 
 interface Section {
@@ -420,7 +418,6 @@ export default function GeneralSettingsPage() {
         {/* Branding Card */}
         <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-5">
-            <Palette className="w-5 h-5 text-orange-500" />
             <h3 className="text-sm font-semibold text-slate-900">Page Title & Favicon</h3>
           </div>
 
@@ -520,7 +517,7 @@ export default function GeneralSettingsPage() {
       </p>
 
       {/* 3 Cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-4 mb-8">
         {SECTIONS.map((section) => (
           <LogoCard
             key={section.key}

@@ -50,6 +50,7 @@ export default function ResetPasswordPage() {
     
     setMounted(true);
   }, [searchParams]);
+  const [logoSize, setLogoSize] = useState("h-12 w-12");
 
   // Fetch logo dari admin settings
   useEffect(() => {
@@ -65,7 +66,20 @@ export default function ResetPasswordPage() {
       }
     };
 
+    const fetchLogoSize = async () => {
+      try {
+        const response = await fetch("/api/admin/settings/logo-size");
+        if (response.ok) {
+          const data = await response.json();
+          setLogoSize(data.logoSize);
+        }
+      } catch (error) {
+        console.error("Error fetching logo size:", error);
+      }
+    };
+
     fetchLogo();
+    fetchLogoSize();
   }, []);
 
   const validatePassword = (): boolean => {
@@ -202,7 +216,7 @@ export default function ResetPasswordPage() {
         <motion.div variants={fadeUp} custom={0} className="text-center mb-2.5" suppressHydrationWarning>
           <Link href="/" className="inline-flex justify-center mb-6 group">
             {logoUrl ? (
-              <img src={logoUrl} alt="TrackStock Logo" className="h-16 w-16 object-contain" />
+              <img src={logoUrl} alt="TrackStock Logo" className="h-12 w-12 object-contain" />
             ) : (
               <TrackStockLogo />
             )}

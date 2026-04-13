@@ -40,6 +40,7 @@ export default function VerifyResetCodePage() {
 
     return () => clearInterval(timer);
   }, [timeLeft]);
+  const [logoSize, setLogoSize] = useState("h-12 w-12");
 
   // Fetch logo dari admin settings
   useEffect(() => {
@@ -55,7 +56,20 @@ export default function VerifyResetCodePage() {
       }
     };
 
+    const fetchLogoSize = async () => {
+      try {
+        const response = await fetch("/api/admin/settings/logo-size");
+        if (response.ok) {
+          const data = await response.json();
+          setLogoSize(data.logoSize);
+        }
+      } catch (error) {
+        console.error("Error fetching logo size:", error);
+      }
+    };
+
     fetchLogo();
+    fetchLogoSize();
   }, []);
 
   const formatTime = (seconds: number) => {

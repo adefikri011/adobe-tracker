@@ -104,6 +104,7 @@ export default function UserListPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserRole, setNewUserRole] = useState<UserRole>("user");
   const [newUserPlanId, setNewUserPlanId] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
@@ -251,8 +252,8 @@ export default function UserListPage() {
   };
 
   const handleCreateUser = async () => {
-    if (!newUserName.trim() || !newUserEmail.trim()) {
-      alert("Name and Email required!");
+    if (!newUserName.trim() || !newUserEmail.trim() || !newUserPassword.trim()) {
+      alert("Name, Email, and Password required!");
       return;
     }
 
@@ -265,6 +266,7 @@ export default function UserListPage() {
         body: JSON.stringify({
           fullName: newUserName,
           email: newUserEmail,
+          password: newUserPassword,
           role: newUserRole,
           planId: newUserPlanId,
           status: "active",
@@ -273,8 +275,8 @@ export default function UserListPage() {
       });
 
       if (!createRes.ok) {
-        console.error("Error creating user");
-        alert("Failed to create user");
+        const errorData = await createRes.json();
+        alert(errorData.message || "Failed to create user");
         setIsCreating(false);
         return;
       }
@@ -302,6 +304,7 @@ export default function UserListPage() {
       setIsCreateModalOpen(false);
       setNewUserName("");
       setNewUserEmail("");
+      setNewUserPassword("");
       setNewUserRole("user");
       setNewUserPlanId("");
       setIsCreating(false);
@@ -581,6 +584,21 @@ export default function UserListPage() {
                     onChange={(e) => setNewUserEmail(e.target.value)}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:border-orange-500/50 transition-all font-medium"
                   />
+                </div>
+
+                {/* Password Input */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Enter login password"
+                    value={newUserPassword}
+                    onChange={(e) => setNewUserPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:border-orange-500/50 transition-all font-medium"
+                  />
+                  <p className="text-[9px] text-slate-400 mt-1">User can login directly with this password (no email verification needed)</p>
                 </div>
 
                 {/* Role Selection */}

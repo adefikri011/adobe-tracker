@@ -63,7 +63,7 @@ export default function RecentActivity() {
         const { icon: Icon, bg, color, ring } = iconMap[item.type];
         return (
           <motion.div
-            key={item.id}
+            key={item.id || `activity-${i}`}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05, duration: 0.3 }}

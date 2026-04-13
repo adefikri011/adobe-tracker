@@ -320,7 +320,7 @@ export default function RegisterPage() {
       <motion.div initial="hidden" animate="show" className="w-full max-w-md relative z-10" suppressHydrationWarning>
         {/* Header - Margin dikurangi */}
         <motion.div variants={fadeUp} custom={0} className="text-center mb-0" suppressHydrationWarning>
-          <Link href="/" className="inline-flex justify-center mb-1.5 group">
+          <Link href="/" className="inline-flex justify-center mb-8 group">
             {logoUrl ? (
               // Ganti h-24 menjadi h-12 (atau angka lain yang lebih kecil)
               <img src={logoUrl} alt="TrackStock Logo" className="h-12 w-auto object-contain" />
