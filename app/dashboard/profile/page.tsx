@@ -14,6 +14,7 @@ type UserProfile = {
 	accountStatus: string;
 	planSlug: string;
 	planName: string;
+	planExpiresAt: string | null;
 };
 
 function getInitials(name: string, email: string): string {
@@ -29,7 +30,7 @@ function formatDate(dateString: string | null): string {
 	if (!dateString) return "-";
 	const date = new Date(dateString);
 	if (Number.isNaN(date.getTime())) return "-";
-	return new Intl.DateTimeFormat("id-ID", {
+	return new Intl.DateTimeFormat("en-US", {
 		day: "2-digit",
 		month: "long",
 		year: "numeric",
@@ -73,6 +74,7 @@ export default function ProfilePage() {
 				const planSlug = apiData?.plan?.slug || "free";
 				const planName = apiData?.plan?.name || "Free";
 				const isPremium = Boolean(apiData?.plan?.isPremium);
+				const planExpiresAt = apiData?.plan?.expiresAt || null;
 
 				setProfile({
 					name: apiData?.fullName || user.user_metadata?.full_name || user.user_metadata?.name || "User",
@@ -83,6 +85,7 @@ export default function ProfilePage() {
 					accountStatus: apiData?.accountStatus || "active",
 					planSlug,
 					planName,
+					planExpiresAt,
 				});
 
 				setFullName(apiData?.fullName || user.user_metadata?.full_name || user.user_metadata?.name || "");
@@ -108,7 +111,10 @@ export default function ProfilePage() {
 		if (slug === "free") return "Free";
 
 		const durationMatch = slug.match(/(\d+)/) || profile.planName.match(/(\d+)/);
-		if (durationMatch?.[1]) return `Pro ${durationMatch[1]} Hari`;
+		if (durationMatch?.[1]) {
+			const days = parseInt(durationMatch[1]);
+			return `Pro ${days} Day${days > 1 ? 's' : ''}`;
+		}
 
 		return profile.planName || "Pro";
 	}, [profile]);
@@ -123,13 +129,13 @@ export default function ProfilePage() {
 		const trimmedEmail = email.trim().toLowerCase();
 
 		if (trimmedName.length < 2) {
-			setProfileMessage({ type: "error", text: "Nama minimal 2 karakter." });
+			setProfileMessage({ type: "error", text: "Name must be at least 2 characters." });
 			return;
 		}
 
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(trimmedEmail)) {
-			setProfileMessage({ type: "error", text: "Format email tidak valid." });
+			setProfileMessage({ type: "error", text: "Email format is invalid." });
 			return;
 		}
 
@@ -137,7 +143,7 @@ export default function ProfilePage() {
 		const isEmailChanged = trimmedEmail !== profile.email.toLowerCase();
 
 		if (!isNameChanged && !isEmailChanged) {
-			setProfileMessage({ type: "success", text: "Tidak ada perubahan data profil." });
+			setProfileMessage({ type: "success", text: "No profile changes detected." });
 			return;
 		}
 
@@ -152,14 +158,14 @@ export default function ProfilePage() {
 				});
 				const data = await res.json();
 				if (!res.ok) {
-					throw new Error(data?.error || "Gagal menyimpan nama.");
+					throw new Error(data?.error || "Failed to save name.");
 				}
 			}
 
 			if (isEmailChanged) {
 				const { error } = await supabase.auth.updateUser({ email: trimmedEmail });
 				if (error) {
-					throw new Error(error.message || "Gagal update email.");
+					throw new Error(error.message || "Failed to update email.");
 				}
 			}
 
@@ -175,13 +181,13 @@ export default function ProfilePage() {
 			setProfileMessage({
 				type: "success",
 				text: isEmailChanged
-					? "Profil tersimpan. Cek email untuk konfirmasi perubahan alamat email."
-					: "Profil berhasil diperbarui.",
+					? "Profile saved. Check your email to confirm the address change."
+					: "Profile successfully updated.",
 			});
 		} catch (error) {
 			setProfileMessage({
 				type: "error",
-				text: error instanceof Error ? error.message : "Terjadi kesalahan saat menyimpan profil.",
+				text: error instanceof Error ? error.message : "An error occurred while saving your profile.",
 			});
 		} finally {
 			setSavingProfile(false);
@@ -193,12 +199,12 @@ export default function ProfilePage() {
 		setPasswordMessage(null);
 
 		if (newPassword.length < 8) {
-			setPasswordMessage({ type: "error", text: "Password baru minimal 8 karakter." });
+			setPasswordMessage({ type: "error", text: "New password must be at least 8 characters." });
 			return;
 		}
 
 		if (newPassword !== confirmPassword) {
-			setPasswordMessage({ type: "error", text: "Konfirmasi password tidak sama." });
+			setPasswordMessage({ type: "error", text: "Passwords do not match." });
 			return;
 		}
 
@@ -207,16 +213,16 @@ export default function ProfilePage() {
 		try {
 			const { error } = await supabase.auth.updateUser({ password: newPassword });
 			if (error) {
-				throw new Error(error.message || "Gagal mengubah password.");
+				throw new Error(error.message || "Failed to change password.");
 			}
 
 			setNewPassword("");
 			setConfirmPassword("");
-			setPasswordMessage({ type: "success", text: "Password berhasil diperbarui." });
+			setPasswordMessage({ type: "success", text: "Password successfully updated." });
 		} catch (error) {
 			setPasswordMessage({
 				type: "error",
-				text: error instanceof Error ? error.message : "Terjadi kesalahan saat mengganti password.",
+				text: error instanceof Error ? error.message : "An error occurred while changing your password.",
 			});
 		} finally {
 			setSavingPassword(false);
@@ -265,7 +271,7 @@ export default function ProfilePage() {
 
 								<div>
 									<p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.16em] text-orange-600/90">
-										Profile Saya
+									My Profile
 									</p>
 									<h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
 										{profile?.name || "User"}
@@ -279,20 +285,20 @@ export default function ProfilePage() {
 
 				<section className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
 					<div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-						<p className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Tanggal Bergabung</p>
+						<p className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Join Date</p>
 						<p className="text-sm font-semibold text-slate-800 mt-2">{formatDate(profile?.createdAt || null)}</p>
 					</div>
 
 					<div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-						<p className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Login Terakhir</p>
+						<p className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Last Sign In</p>
 						<p className="text-sm font-semibold text-slate-800 mt-2">{formatDate(profile?.lastSignInAt || null)}</p>
 					</div>
 
 					<div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-						<p className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Keamanan Akun</p>
+						<p className="text-[11px] uppercase tracking-[0.14em] font-bold text-slate-400">Account Security</p>
 						<div className="mt-2 inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5">
 							<span className="h-2 w-2 rounded-full bg-emerald-500" />
-							<span className="text-xs font-bold text-emerald-700">Status Aman</span>
+							<span className="text-xs font-bold text-emerald-700">Secure</span>
 						</div>
 					</div>
 				</section>
@@ -317,15 +323,15 @@ export default function ProfilePage() {
 				<section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 					<form onSubmit={handleSaveProfile} className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
 						<h3 className="text-lg font-black text-slate-900">Edit Profile</h3>
-						<p className="text-sm text-slate-500 mt-1">Perbarui nama dan email akun kamu.</p>
+						<p className="text-sm text-slate-500 mt-1">Update your account name and email.</p>
 
 						<div className="mt-5 space-y-4">
 							<div>
-								<label className="block text-sm font-bold text-slate-700 mb-2">Nama</label>
+								<label className="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
 								<input
 									value={fullName}
 									onChange={(e) => setFullName(e.target.value)}
-									placeholder="Nama lengkap"
+									placeholder="Full name"
 									className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
 								/>
 							</div>
@@ -339,7 +345,7 @@ export default function ProfilePage() {
 									placeholder="you@example.com"
 									className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
 								/>
-								<p className="text-xs text-slate-400 mt-2">Jika email berubah, sistem akan kirim verifikasi ke email baru.</p>
+								<p className="text-xs text-slate-400 mt-2">If your email changes, the system will send a verification to your new email.</p>
 							</div>
 						</div>
 
@@ -362,34 +368,34 @@ export default function ProfilePage() {
 							className="mt-5 px-4 py-2.5 rounded-xl text-white text-sm font-bold disabled:opacity-50"
 							style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
 						>
-							{savingProfile ? "Menyimpan..." : "Simpan Profil"}
+							{savingProfile ? "Saving..." : "Save Profile"}
 						</button>
 					</form>
 
 					<div className="space-y-5">
 						<form onSubmit={handleChangePassword} className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
-							<h3 className="text-lg font-black text-slate-900">Ganti Password</h3>
-							<p className="text-sm text-slate-500 mt-1">Gunakan kombinasi huruf, angka, dan simbol untuk keamanan lebih baik.</p>
+							<h3 className="text-lg font-black text-slate-900">Change Password</h3>
+							<p className="text-sm text-slate-500 mt-1">Use a combination of letters, numbers, and symbols for better security.</p>
 
 							<div className="mt-5 space-y-4">
 								<div>
-									<label className="block text-sm font-bold text-slate-700 mb-2">Password Baru</label>
+									<label className="block text-sm font-bold text-slate-700 mb-2">New Password</label>
 									<input
 										type="password"
 										value={newPassword}
 										onChange={(e) => setNewPassword(e.target.value)}
-										placeholder="Minimal 8 karakter"
+										placeholder="Minimum 8 characters"
 										className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
 									/>
 								</div>
 
 								<div>
-									<label className="block text-sm font-bold text-slate-700 mb-2">Konfirmasi Password</label>
+									<label className="block text-sm font-bold text-slate-700 mb-2">Confirm Password</label>
 									<input
 										type="password"
 										value={confirmPassword}
 										onChange={(e) => setConfirmPassword(e.target.value)}
-										placeholder="Ulangi password baru"
+										placeholder="Repeat new password"
 										className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-orange-300 focus:ring-2 focus:ring-orange-100"
 									/>
 								</div>
@@ -414,13 +420,13 @@ export default function ProfilePage() {
 								className="mt-5 px-4 py-2.5 rounded-xl text-white text-sm font-bold disabled:opacity-50"
 								style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
 							>
-								{savingPassword ? "Menyimpan..." : "Update Password"}
+								{savingPassword ? "Saving..." : "Update Password"}
 							</button>
 						</form>
 
 						<div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
-							<h3 className="text-lg font-black text-slate-900">Status Akun</h3>
-							<p className="text-sm text-slate-500 mt-1">Status akun aktif kamu saat ini.</p>
+							<h3 className="text-lg font-black text-slate-900">Account Status</h3>
+							<p className="text-sm text-slate-500 mt-1">Your current active account status.</p>
 
 							<div className="mt-4 flex items-center gap-2 flex-wrap">
 								<span className="px-3 py-1.5 rounded-lg bg-orange-50 text-orange-700 text-sm font-bold border border-orange-200">
@@ -431,18 +437,25 @@ export default function ProfilePage() {
 								</span>
 							</div>
 
+							{profile?.planExpiresAt && isPro && (
+								<div className="mt-4 p-3 rounded-lg bg-orange-50 border border-orange-200">
+									<p className="text-xs font-bold uppercase tracking-[0.12em] text-orange-600">Expiration Date</p>
+									<p className="text-sm font-semibold text-orange-900 mt-1">{formatDate(profile.planExpiresAt)}</p>
+								</div>
+							)}
+
 							<div className="mt-5">
-								<p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Varian Paket</p>
+								<p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Plan Variants</p>
 								<div className="mt-2 flex flex-wrap gap-2">
 									<PlanChip label="Free" active={profile?.planSlug === "free"} />
-									<PlanChip label="Pro 1 Hari" active={accountPlanLabel.toLowerCase().includes("1")} />
-									<PlanChip label="Pro 3 Hari" active={accountPlanLabel.toLowerCase().includes("3")} />
-									<PlanChip label="Pro 7 Hari" active={accountPlanLabel.toLowerCase().includes("7")} />
+									<PlanChip label="Pro 1 Day" active={accountPlanLabel.toLowerCase().includes("1")} />
+									<PlanChip label="Pro 3 Days" active={accountPlanLabel.toLowerCase().includes("3")} />
+									<PlanChip label="Pro 7 Days" active={accountPlanLabel.toLowerCase().includes("7")} />
 								</div>
 							</div>
 
 							<p className="text-xs text-slate-400 mt-4">
-								Untuk ubah paket, gunakan menu Billing agar sinkron dengan langganan aktif.
+								To change your plan, use the Billing menu to sync with your active subscription.
 							</p>
 						</div>
 					</div>

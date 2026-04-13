@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getUserPlanInfo } from "@/lib/access-control/permission";
+import { getUserPlanInfo, getActiveSubscription } from "@/lib/access-control/permission";
 
 export async function GET() {
   try {
@@ -36,6 +36,7 @@ export async function GET() {
     });
 
     const planInfo = await getUserPlanInfo(user.id);
+    const activeSubscription = await getActiveSubscription(user.id);
 
     return NextResponse.json({
       success: true,
@@ -49,6 +50,7 @@ export async function GET() {
           slug: planInfo.planSlug,
           name: planInfo.planName,
           isPremium: planInfo.isPremium,
+          expiresAt: activeSubscription?.endDate || null,
         },
       },
     });
