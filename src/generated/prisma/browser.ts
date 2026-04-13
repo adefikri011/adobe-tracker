@@ -78,6 +78,16 @@ export type SyncLog = Prisma.SyncLogModel
  */
 export type GatewayConfig = Prisma.GatewayConfigModel
 /**
+ * Model EmailVerification
+ * 
+ */
+export type EmailVerification = Prisma.EmailVerificationModel
+/**
+ * Model PasswordReset
+ * 
+ */
+export type PasswordReset = Prisma.PasswordResetModel
+/**
  * Model ActivityLog
  * 
  */

@@ -198,6 +198,28 @@ model GatewayConfig {
   @@map("GatewayConfig")
 }
 
+model EmailVerification {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  code      String   @unique  // Verification code 6 digits
+  isUsed    Boolean  @default(false)
+  expiresAt DateTime // Code expires after 15 minutes
+  createdAt DateTime @default(now())
+
+  @@map("EmailVerification")
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  email     String
+  code      String   @unique  // Verification code 6 digits
+  isUsed    Boolean  @default(false)
+  expiresAt DateTime // Code expires after 15 minutes
+  createdAt DateTime @default(now())
+
+  @@map("PasswordReset")
+}
+
 enum UserRole {
   user
   admin

@@ -141,12 +141,36 @@ export async function POST(req: Request) {
     const { email, password } = await req.json();
     const supabase = await createServerSupabaseClient();
 
-    // Load the account first so we can block suspended users before creating any auth session.
+    // 1. LOGIN KE SUPABASE AUTH TERLEBIH DAHULU
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    // Jika email/pass salah
+    if (authError) {
+      return NextResponse.json({ error: authError.message }, { status: 401 });
+    }
+
+    const userId = authData.user.id;
+
+    // 2. CHECK EMAIL VERIFICATION STATUS
+    // Jika profile tidak ada di database, berarti email belum verified
     const existingProfile = await prisma.profile.findUnique({
       where: { email },
       select: { id: true, status: true },
     });
 
+    if (!existingProfile) {
+      // Email belum verified, sign out dari Supabase dan redirect ke verification
+      await supabase.auth.signOut();
+      return NextResponse.json({
+        error: "EMAIL_NOT_VERIFIED",
+        message: "Please verify your email first. We've sent a verification code to your email.",
+      }, { status: 403 });
+    }
+
+    // Load the account first so we can block suspended users before creating any auth session.
     const existingSessionBeforeLogin = existingProfile
       ? await prisma.userSession.findUnique({ where: { id: existingProfile.id } })
       : null;
@@ -185,18 +209,6 @@ export async function POST(req: Request) {
       }, { status: 403 });
     }
 
-    // 1. LOGIN KE SUPABASE AUTH
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    // Jika email/pass salah
-    if (authError) {
-      return NextResponse.json({ error: authError.message }, { status: 401 });
-    }
-
-    const userId = authData.user.id;
     const currentToken = authData.session.access_token;
     const loginFullName =
       authData.user.user_metadata?.full_name ||

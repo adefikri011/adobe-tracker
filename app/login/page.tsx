@@ -34,6 +34,7 @@ export default function LoginPage() {
   const [captchaUrl, setCaptchaUrl] = useState("/api/captcha");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   // State baru untuk Suspend Modal
   const [showSuspendModal, setShowSuspendModal] = useState(false);
@@ -56,6 +57,23 @@ export default function LoginPage() {
     const cleanUrl = window.location.pathname;
     window.history.replaceState({}, "", cleanUrl);
   };
+
+  // Fetch logo dari admin settings
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const response = await fetch("/api/admin/logos?sectionType=land");
+        if (response.ok) {
+          const data = await response.json();
+          setLogoUrl(data.fileUrl);
+        }
+      } catch (error) {
+        console.error("Error fetching logo:", error);
+      }
+    };
+
+    fetchLogo();
+  }, []);
 
   // Refresh Captcha
   const refreshCaptcha = () => {
@@ -226,6 +244,15 @@ export default function LoginPage() {
       const data = await loginRes.json();
 
       if (!loginRes.ok) {
+        // Check jika email belum verified
+        if (data.error === "EMAIL_NOT_VERIFIED") {
+          // Store email di session/state untuk nanti
+          sessionStorage.setItem("unverified_email", email);
+          router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+          setLoading(false);
+          return;
+        }
+
         // Check jika suspended status
         if (data.error === "SUSPENDED_ACCOUNT") {
           setSuspendMsg("Your account has been suspended due to unauthorized access attempts. Please contact support for assistance.");
@@ -236,7 +263,7 @@ export default function LoginPage() {
           setLoading(false);
           return;
         }
-        
+
         // Cek jika errornya karena Double Login atau Suspend
         if (data.error === "DOUBLE_LOGIN" || data.error === "SUSPENDED") {
           setSuspendMsg(data.message);
@@ -300,17 +327,13 @@ export default function LoginPage() {
 
       <motion.div initial="hidden" animate="show" className="w-full max-w-md relative z-10" suppressHydrationWarning>
         {/* Header - Margin dikurangi biar rapi */}
-        <motion.div variants={fadeUp} custom={0} className="text-center mb-2.5" suppressHydrationWarning>
-          <Link href="/" className="inline-flex items-center gap-3 mb-4 group">
-            <TrackStockLogo />
-            <div className="flex flex-col text-left">
-              <span className="font-[950] text-xl tracking-tighter text-slate-900 leading-none">
-                Track<span className="text-orange-500">Stock</span>
-              </span>
-              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-400 leading-none mt-1">
-                Analytics Pro
-              </span>
-            </div>
+        <motion.div variants={fadeUp} custom={0} className="text-center mb-0" suppressHydrationWarning>
+          <Link href="/" className="inline-flex justify-center mb-1.5 group">
+            {logoUrl ? (
+              <img src={logoUrl} alt="TrackStock Logo" className="h-12 w-auto object-contain" />
+            ) : (
+              <TrackStockLogo/>
+            )}
           </Link>
           <h1 className="text-3xl md:text-4xl font-[900] tracking-tight text-slate-900 mb-0.5">
             Welcome back
@@ -319,16 +342,16 @@ export default function LoginPage() {
         </motion.div>
 
         {/* Card - Padding dikurangi agar lebih compact */}
-        <motion.div variants={fadeUp} custom={1} className="bg-white/80 backdrop-blur-xl border border-white/60 shadow-2xl shadow-orange-500/5 rounded-[2rem] p-6 md:p-8">
+        <motion.div variants={fadeUp} custom={1} className="bg-white/80 backdrop-blur-xl border border-white/60 shadow-2xl shadow-orange-500/5 rounded-[2rem] p-5 md:p-6 -mt-1">
 
           {error && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl mb-2 flex items-center gap-2">
               <span className="font-bold">Error:</span> {error}
             </motion.div>
           )}
 
           {/* Social Button - Margin dikurangi */}
-          <div className="mb-3">
+          <div className="mb-1.5">
             <button
               onClick={() => handleSocialLogin("google")}
               disabled={loading}
@@ -340,16 +363,16 @@ export default function LoginPage() {
           </div>
 
           {/* Divider - Margin disesuaikan */}
-          <div className="relative flex py-2 items-center mb-3">
+          <div className="relative flex py-0.5 items-center mb-1.5">
             <div className="flex-grow border-t border-slate-100"></div>
             <span className="flex-shrink-0 mx-4 text-slate-400 text-[10px] font-bold uppercase tracking-wider">Or use email</span>
             <div className="flex-grow border-t border-slate-100"></div>
           </div>
 
           {/* Inputs - Space dikurangi */}
-          <div className="space-y-2.5">
+          <div className="space-y-1.5">
             <motion.div variants={fadeUp} custom={2}>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block ml-1">Email Address</label>
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5 block ml-1">Email Address</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-orange-500 transition-colors">
                   <Mail className="w-4 h-4" />
@@ -365,7 +388,12 @@ export default function LoginPage() {
             </motion.div>
 
             <motion.div variants={fadeUp} custom={3}>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block ml-1">Password</label>
+              <div className="flex items-center justify-between mb-0.5 ml-1">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Password</label>
+                <Link href="/forgot-password" className="text-[10px] font-bold text-orange-500 hover:text-orange-600 uppercase tracking-wider transition-colors">
+                  Forgot?
+                </Link>
+              </div>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-orange-500 transition-colors">
                   <Lock className="w-4 h-4" />
@@ -381,11 +409,11 @@ export default function LoginPage() {
             </motion.div>
 
             {/* Captcha Verification Section - Layout lebih rapat */}
-            <motion.div variants={fadeUp} custom={4} className="bg-slate-50/50 p-3 rounded-xl border border-slate-100">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 block ml-1">
+            <motion.div variants={fadeUp} custom={4} className="bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 block ml-1">
                 Security Check
               </label>
-              <div className="flex gap-2 mb-2 items-center">
+              <div className="flex gap-2 mb-1 items-center">
                 <div className="bg-white rounded-lg overflow-hidden border border-slate-200 shadow-sm grow flex justify-center items-center p-1 min-h-[42px]">
                   <img src={captchaUrl} alt="captcha" className="h-full max-h-10 w-auto" onError={(e) => { e.currentTarget.src = `/api/captcha?t=${Date.now()}`; }} />
                 </div>
@@ -409,7 +437,7 @@ export default function LoginPage() {
           </div>
 
           {/* Submit - Margin dikurangi */}
-          <motion.div variants={fadeUp} custom={5} className="mt-6">
+          <motion.div variants={fadeUp} custom={5} className="mt-2">
             <button
               onClick={handleLogin}
               disabled={loading}
@@ -422,7 +450,7 @@ export default function LoginPage() {
           </motion.div>
 
           {/* Footer */}
-          <motion.p variants={fadeUp} custom={6} className="text-center text-slate-500 text-xs mt-4 font-medium">
+          <motion.p variants={fadeUp} custom={6} className="text-center text-slate-500 text-xs mt-1 font-medium">
             Don't have an account?{" "}
             <Link href="/register" className="text-orange-500 hover:text-orange-600 font-bold transition-colors inline-flex items-center gap-1 group">
               Sign up free <Sparkles className="w-3 h-3 group-hover:rotate-12 transition-transform" />

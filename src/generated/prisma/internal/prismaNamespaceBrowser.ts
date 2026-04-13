@@ -63,6 +63,8 @@ export const ModelName = {
   LoginLog: 'LoginLog',
   SyncLog: 'SyncLog',
   GatewayConfig: 'GatewayConfig',
+  EmailVerification: 'EmailVerification',
+  PasswordReset: 'PasswordReset',
   ActivityLog: 'ActivityLog',
   Notification: 'Notification',
   NotificationPreference: 'NotificationPreference',
@@ -279,6 +281,30 @@ export const GatewayConfigScalarFieldEnum = {
 } as const
 
 export type GatewayConfigScalarFieldEnum = (typeof GatewayConfigScalarFieldEnum)[keyof typeof GatewayConfigScalarFieldEnum]
+
+
+export const EmailVerificationScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  code: 'code',
+  isUsed: 'isUsed',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailVerificationScalarFieldEnum = (typeof EmailVerificationScalarFieldEnum)[keyof typeof EmailVerificationScalarFieldEnum]
+
+
+export const PasswordResetScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  code: 'code',
+  isUsed: 'isUsed',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetScalarFieldEnum = (typeof PasswordResetScalarFieldEnum)[keyof typeof PasswordResetScalarFieldEnum]
 
 
 export const ActivityLogScalarFieldEnum = {
