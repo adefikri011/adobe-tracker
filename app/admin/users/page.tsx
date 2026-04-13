@@ -113,6 +113,13 @@ export default function UserListPage() {
   const [banConfirmModal, setBanConfirmModal] = useState<{ isOpen: boolean; userId: string }>({ isOpen: false, userId: "" });
   const [isBanProcessing, setIsBanProcessing] = useState(false);
 
+  // Suspend Confirmation Modal
+  const [suspendConfirmModal, setSuspendConfirmModal] = useState<{ isOpen: boolean; userId: string }>({ isOpen: false, userId: "" });
+  const [suspendDurationDays, setSuspendDurationDays] = useState(7);
+  const [suspendDurationHours, setSuspendDurationHours] = useState(0);
+  const [suspendDurationMinutes, setSuspendDurationMinutes] = useState(0);
+  const [isSuspendProcessing, setIsSuspendProcessing] = useState(false);
+
   // Fetch plans and users from APIs
   useEffect(() => {
     async function loadData() {
@@ -249,6 +256,56 @@ export default function UserListPage() {
     
     setBanConfirmModal({ isOpen: false, userId: "" });
     setIsBanProcessing(false);
+  };
+
+  const handleSuspendClick = (id: string) => {
+    setSuspendConfirmModal({ isOpen: true, userId: id });
+    // Reset duration inputs
+    setSuspendDurationDays(7);
+    setSuspendDurationHours(0);
+    setSuspendDurationMinutes(0);
+  };
+
+  const handleConfirmSuspendAction = async () => {
+    if (!suspendConfirmModal.userId) return;
+
+    setIsSuspendProcessing(true);
+
+    try {
+      // Calculate total duration in minutes
+      const totalMinutes = 
+        (suspendDurationDays * 24 * 60) + 
+        (suspendDurationHours * 60) + 
+        suspendDurationMinutes;
+
+      // If all 0, it's at least 1 minute (minimum)
+      const finalMinutes = totalMinutes === 0 ? 1 : totalMinutes;
+
+      const suspendRes = await fetch("/api/admin/suspend-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          userId: suspendConfirmModal.userId,
+          durationMinutes: finalMinutes
+        })
+      });
+
+      if (!suspendRes.ok) {
+        console.error("Failed to suspend user");
+        setIsSuspendProcessing(false);
+        return;
+      }
+
+      setUsers(users.map(u => 
+        u.id === suspendConfirmModal.userId ? { ...u, status: "suspended" } : u
+      ));
+      
+      setSuspendConfirmModal({ isOpen: false, userId: "" });
+    } catch (err) {
+      console.error("Error suspending user:", err);
+    }
+
+    setIsSuspendProcessing(false);
   };
 
   const handleCreateUser = async () => {
@@ -438,11 +495,19 @@ export default function UserListPage() {
                         >
                           <Key size={16} />
                         </button>
-                        {user.status === "suspended" && (
+                        {user.status === "suspended" ? (
                           <button 
                             onClick={() => handleToggleBan(user.id)}
                             title="Unlock Suspended User" 
                             className="p-2 text-red-500 hover:text-green-500 transition-colors"
+                          >
+                            <Ban size={16} />
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => handleSuspendClick(user.id)}
+                            title="Suspend User" 
+                            className="p-2 text-slate-300 hover:text-red-500 transition-colors"
                           >
                             <Ban size={16} />
                           </button>
@@ -715,6 +780,122 @@ export default function UserListPage() {
                       </>
                     ) : (
                       "Unlock User"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── SUSPEND CONFIRMATION MODAL ──────────────────────────────────── */}
+      <AnimatePresence>
+        {suspendConfirmModal.isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setSuspendConfirmModal({ isOpen: false, userId: "" })}
+              className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              className="relative bg-white w-full max-w-md rounded-[28px] shadow-2xl overflow-hidden border border-slate-100"
+            >
+              <div className="p-8 space-y-6">
+                <div className="flex justify-center mb-2">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center bg-red-100 text-red-600">
+                    <Ban size={24} />
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <h2 className="text-lg font-semibold text-[#1e293b] mb-1">
+                    Suspend User?
+                  </h2>
+                  <p className="text-sm text-slate-500 font-medium">
+                    Set the suspension duration for this user.
+                  </p>
+                </div>
+
+                {/* Duration Input */}
+                <div className="space-y-4 bg-slate-50 p-4 rounded-xl">
+                  <div>
+                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-2">
+                      Days
+                    </label>
+                    <input 
+                      type="number" 
+                      min="0" 
+                      value={suspendDurationDays}
+                      onChange={(e) => setSuspendDurationDays(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00]/20"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-2">
+                        Hours
+                      </label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        max="23"
+                        value={suspendDurationHours}
+                        onChange={(e) => setSuspendDurationHours(Math.max(0, Math.min(23, parseInt(e.target.value) || 0)))}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00]/20"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-2">
+                        Minutes
+                      </label>
+                      <input 
+                        type="number" 
+                        min="0" 
+                        max="59"
+                        value={suspendDurationMinutes}
+                        onChange={(e) => setSuspendDurationMinutes(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#ff6b00] focus:ring-1 focus:ring-[#ff6b00]/20"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+
+                  {(suspendDurationDays > 0 || suspendDurationHours > 0 || suspendDurationMinutes > 0) && (
+                    <div className="pt-2 border-t border-slate-200">
+                      <p className="text-xs text-slate-600 font-medium">
+                        <span className="font-bold text-slate-700">Duration:</span>{" "}
+                        {suspendDurationDays > 0 && `${suspendDurationDays}d `}
+                        {suspendDurationHours > 0 && `${suspendDurationHours}h `}
+                        {suspendDurationMinutes > 0 && `${suspendDurationMinutes}m`}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setSuspendConfirmModal({ isOpen: false, userId: "" })}
+                    disabled={isSuspendProcessing}
+                    className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmSuspendAction}
+                    disabled={isSuspendProcessing}
+                    className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl font-bold text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2 hover:bg-red-600"
+                  >
+                    {isSuspendProcessing ? (
+                      <>
+                        <LoaderSpinner size={14} /> Suspending...
+                      </>
+                    ) : (
+                      "Suspend User"
                     )}
                   </button>
                 </div>
