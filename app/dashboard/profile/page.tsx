@@ -444,16 +444,6 @@ export default function ProfilePage() {
 								</div>
 							)}
 
-							<div className="mt-5">
-								<p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Plan Variants</p>
-								<div className="mt-2 flex flex-wrap gap-2">
-									<PlanChip label="Free" active={profile?.planSlug === "free"} />
-									<PlanChip label="Pro 1 Day" active={accountPlanLabel.toLowerCase().includes("1")} />
-									<PlanChip label="Pro 3 Days" active={accountPlanLabel.toLowerCase().includes("3")} />
-									<PlanChip label="Pro 7 Days" active={accountPlanLabel.toLowerCase().includes("7")} />
-								</div>
-							</div>
-
 							<p className="text-xs text-slate-400 mt-4">
 								To change your plan, use the Billing menu to sync with your active subscription.
 							</p>
