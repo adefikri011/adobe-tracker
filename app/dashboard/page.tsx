@@ -1,12 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import { Navbar } from "./_components/Navbar";
 import { SearchBar } from "./_components/SearchBar";
-import { DashboardHome } from "./_components/DashboardHome";
-import { SearchCharts } from "./_components/SearchCharts";
-import { KeywordStats } from "./_components/KeywordStats";
+import { PopularSearches } from "./_components/PopularSearches";
 import { ResultsSection } from "./_components/ResultsSection";
 import { PaymentModal } from "./_components/PaymentModal";
 import { Asset } from "./_components/ResultCard";
@@ -29,6 +27,11 @@ export default function DashboardPage() {
   const [suspendDurationMinutes, setSuspendDurationMinutes] = useState(SUSPEND_TEST_MINUTES);
   const [showQuotaModal, setShowQuotaModal] = useState(false);
   const [quotaData, setQuotaData] = useState<any>(null);
+  const [sortBy, setSortBy] = useState("relevance");
+  const [contentType, setContentType] = useState("all");
+  const [activeTags, setActiveTags] = useState<string[]>([]);
+
+  const pendingSearchRef = useRef<string | null>(null);
 
   useEffect(() => {
     fetch("/api/user/plan")
@@ -133,11 +136,22 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
+  const handleSearch = async (searchQuery?: string) => {
+    const queryToSearch = searchQuery || query;
+    if (!queryToSearch.trim()) return;
+    
+    if (searchQuery !== undefined) {
+      setQuery(searchQuery);
+    }
+    
     setLoading(true);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const searchParams = new URLSearchParams({
+        q: queryToSearch,
+        sortBy: sortBy || "relevance",
+        contentType: contentType || "all",
+      });
+      const res = await fetch(`/api/search?${searchParams.toString()}`);
       
       // Handle quota exceeded (429)
       if (res.status === 429) {
@@ -251,14 +265,22 @@ export default function DashboardPage() {
             loading={loading}
             onChange={setQuery}
             onSearch={handleSearch}
+            sortBy={sortBy}
+            onSortByChange={setSortBy}
+            contentType={contentType}
+            onContentTypeChange={setContentType}
+            activeTags={activeTags}
+            onRemoveTag={(tag) => setActiveTags((prev) => prev.filter((t) => t !== tag))}
           />
 
-          {!searched && <DashboardHome />}
+          {!searched && (
+            <PopularSearches
+              onSearchSelect={(query) => handleSearch(query)}
+            />
+          )}
 
           {searched && (
             <div>
-              <SearchCharts results={results} query={query} />
-              <KeywordStats results={results} query={query} total={total} />
               <ResultsSection
                 results={results}
                 query={query}

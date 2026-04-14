@@ -17,12 +17,12 @@ const PRO_LIMIT = 100;
 const SEARCH_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const memoryCache = new Map<string, { data: any; expires: number }>();
 
-function getCacheKey(userId: string, query: string, limit: number): string {
-  return `${userId}:${query}:${limit}`;
+function getCacheKey(userId: string, query: string, limit: number, contentType: string = "all", sortBy: string = "relevance"): string {
+  return `${userId}:${query}:${limit}:${contentType}:${sortBy}`;
 }
 
-function getFromCache(userId: string, query: string, limit: number): any | null {
-  const key = getCacheKey(userId, query, limit);
+function getFromCache(userId: string, query: string, limit: number, contentType: string = "all", sortBy: string = "relevance"): any | null {
+  const key = getCacheKey(userId, query, limit, contentType, sortBy);
   const cached = memoryCache.get(key);
   
   if (!cached) return null;
@@ -34,8 +34,8 @@ function getFromCache(userId: string, query: string, limit: number): any | null 
   return cached.data;
 }
 
-function setCache(userId: string, query: string, limit: number, data: any): void {
-  const key = getCacheKey(userId, query, limit);
+function setCache(userId: string, query: string, limit: number, data: any, contentType: string = "all", sortBy: string = "relevance"): void {
+  const key = getCacheKey(userId, query, limit, contentType, sortBy);
   memoryCache.set(key, {
     data,
     expires: Date.now() + SEARCH_CACHE_TTL,
@@ -44,6 +44,42 @@ function setCache(userId: string, query: string, limit: number, data: any): void
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function normalizeContentType(fileType: string): string {
+  if (!fileType) return "image";
+  const normalized = fileType.toLowerCase();
+  if (normalized.includes("photo") || normalized.includes("image")) return "image";
+  if (normalized.includes("video")) return "video";
+  if (normalized.includes("vector")) return "vector";
+  if (normalized.includes("illustration")) return "illustration";
+  if (normalized.includes("template")) return "template";
+  if (normalized.includes("3d")) return "3d";
+  return "image";
+}
+
+function filterByContentType(assets: any[], contentType: string): any[] {
+  if (contentType === "all") return assets;
+  return assets.filter((asset) => {
+    const assetType = normalizeContentType(asset.fileType || "photo");
+    return assetType === contentType;
+  });
+}
+
+function getSortFunction(sortBy: string): (a: any, b: any) => number {
+  switch (sortBy) {
+    case "newest":
+      return (a, b) => new Date(b.uploadedAt || 0).getTime() - new Date(a.uploadedAt || 0).getTime();
+    case "featured":
+      return (a, b) => b.downloads - a.downloads; // Featured = most downloaded
+    case "most-downloaded":
+      return (a, b) => b.downloads - a.downloads;
+    case "undiscovered":
+      return (a, b) => a.downloads - b.downloads; // Least downloads
+    case "relevance":
+    default:
+      return () => 0; // Keep current order (already sorted by relevance)
+  }
 }
 
 function buildSearchUrl(keyword: string, page: number = 1): string {
@@ -188,6 +224,8 @@ function filterByRelevance(items: any[], keyword: string): any[] {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const query = searchParams.get("q")?.trim() || "";
+  const contentType = searchParams.get("contentType")?.trim() || "all";
+  const sortBy = searchParams.get("sortBy")?.trim() || "relevance";
 
   if (!query) return NextResponse.json({ results: [] });
 
@@ -284,9 +322,9 @@ export async function GET(req: NextRequest) {
     }
 
     // Check memory cache dulu sebelum query DB
-    const cachedResult = getFromCache(userId, query, limit);
+    const cachedResult = getFromCache(userId, query, limit, contentType, sortBy);
     if (cachedResult) {
-      console.log(`[Search] Memory cache hit for "${query}"`);
+      console.log(`[Search] Memory cache hit for "${query}" with filters`);
       return NextResponse.json(cachedResult);
     }
 
@@ -357,15 +395,25 @@ export async function GET(req: NextRequest) {
       return b.downloads - a.downloads;
     });
 
+    // Apply content type filter
+    const filteredByType = filterByContentType(prioritySorted, contentType);
+    console.log(`[Search] After content type filter (${contentType}): ${filteredByType.length} assets`);
+
+    // Apply additional sorting based on sortBy parameter
+    if (sortBy && sortBy !== "relevance") {
+      filteredByType.sort(getSortFunction(sortBy));
+      console.log(`[Search] Sorted by: ${sortBy}`);
+    }
+
     // Format results
-    const results = prioritySorted.slice(0, limit).map((a: any) => ({
+    const results = filteredByType.slice(0, limit).map((a: any) => ({
       adobeId: a.assetId,
       title: a.title,
       creatorName: a.contributor || "Unknown",
       creatorId: a.contributorId || "Unknown",
       creator: a.contributor || a.contributorId || "Unknown",
       thumbnail: a.thumbnail,
-      type: a.fileType || "Photo",
+      type: normalizeContentType(a.fileType || "image"),
       category: a.category || "General",
       downloads: a.downloads,
       trend: `+${Math.floor(Math.random() * 30) + 1}%`,
@@ -397,7 +445,7 @@ export async function GET(req: NextRequest) {
     };
 
     // Cache result for 5 minutes in memory
-    setCache(userId, query, limit, response);
+    setCache(userId, query, limit, response, contentType, sortBy);
 
     return NextResponse.json(response);
 

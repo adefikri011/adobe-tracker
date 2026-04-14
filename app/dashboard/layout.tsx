@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import Footer from "../components/landing/Footer";
 
 export default async function DashboardLayout({
   children,
@@ -25,8 +26,11 @@ export default async function DashboardLayout({
   // ✅ If guest user accessing billing/plans, skip prisma queries
   if (!user) {
     return (
-      <div className="min-h-screen">
-        {children}
+      <div className="flex flex-col min-h-screen">
+        <div className="flex-1">
+          {children}
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -54,11 +58,14 @@ export default async function DashboardLayout({
   const userPlan = isExpired ? "free" : profile?.plan || "free";
 
   return (
-    <div className="min-h-screen">
-      {/* Kamu bisa mempassing status 'userPlan' ini ke Navbar atau Sidebar 
-         melalui context atau langsung sebagai props jika children-nya butuh 
-      */}
-      {children}
+    <div className="flex flex-col min-h-screen">
+      {/* Main content */}
+      <div className="flex-1">
+        {children}
+      </div>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
