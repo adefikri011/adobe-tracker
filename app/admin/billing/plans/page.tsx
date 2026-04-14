@@ -25,6 +25,7 @@ const AVAILABLE_FEATURES = [
   "export_csv",
   "performance_analytics",
   "priority_support",
+  "spy_contributor",
 ];
 
 interface EditingPlan extends Plan {

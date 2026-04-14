@@ -7,6 +7,7 @@ import { SearchBar } from "./_components/SearchBar";
 import { PopularSearches } from "./_components/PopularSearches";
 import { ResultsSection } from "./_components/ResultsSection";
 import { PaymentModal } from "./_components/PaymentModal";
+import { SpyContributorModal } from "./_components/SpyContributorModal";
 import { Asset } from "./_components/ResultCard";
 import QuotaExceededModal from "../components/QuotaExceededModal";
 
@@ -30,6 +31,7 @@ export default function DashboardPage() {
   const [sortBy, setSortBy] = useState("relevance");
   const [contentType, setContentType] = useState("all");
   const [activeTags, setActiveTags] = useState<string[]>([]);
+  const [showSpyContributorModal, setShowSpyContributorModal] = useState(false);
 
   const pendingSearchRef = useRef<string | null>(null);
 
@@ -252,6 +254,11 @@ export default function DashboardPage() {
         />
       )}
 
+      <SpyContributorModal
+        isOpen={showSpyContributorModal}
+        onClose={() => setShowSpyContributorModal(false)}
+      />
+
       <main className="min-h-screen bg-white text-gray-900">
         <Navbar
           isPro={isPro}
@@ -271,11 +278,14 @@ export default function DashboardPage() {
             onContentTypeChange={setContentType}
             activeTags={activeTags}
             onRemoveTag={(tag) => setActiveTags((prev) => prev.filter((t) => t !== tag))}
+            onSpyContributorClick={() => setShowSpyContributorModal(true)}
           />
 
           {!searched && (
             <PopularSearches
               onSearchSelect={(query) => handleSearch(query)}
+              isPro={isPro}
+              onUpgradePro={() => router.push("/dashboard/billing/plans")}
             />
           )}
 

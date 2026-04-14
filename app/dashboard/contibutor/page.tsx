@@ -19,14 +19,17 @@ import {
   Eye,
 } from "lucide-react";
 import { Navbar } from "../_components/Navbar";
+import UpgradeAccessModal from "../../components/UpgradeAccessModal";
 
 export default function ContributorPage() {
   const [searchId, setSearchId] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All");
-  const [isPro, setIsPro] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
   const [planLoading, setPlanLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [userPlan, setUserPlan] = useState<string>("");
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
   // API data states
   const [contributor, setContributor] = useState<any>(null);
@@ -34,16 +37,30 @@ export default function ContributorPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
+  // Check SPY_CONTRIBUTOR feature access
   useEffect(() => {
-    fetch("/api/user/plan")
-      .then((r) => r.json())
-      .then((d) => {
-        const isProPlan =
-          d.isPremium !== undefined ? d.isPremium : d.plan === "pro";
-        setIsPro(isProPlan);
+    const checkAccess = async () => {
+      try {
+        const res = await fetch("/api/user/feature-check");
+        const data = await res.json();
+        const allowed = data.allowed || false;
+        setHasAccess(allowed);
+        setUserPlan(data.plan || "free");
+        
+        // Show modal if user doesn't have access
+        if (!allowed) {
+          setShowUpgradeModal(true);
+        }
+      } catch (err) {
+        console.error("Error checking feature access:", err);
+        setHasAccess(false);
+        setShowUpgradeModal(true);
+      } finally {
         setPlanLoading(false);
-      })
-      .catch(() => setPlanLoading(false));
+      }
+    };
+
+    checkAccess();
   }, []);
 
   const handleSearch = async () => {
@@ -97,9 +114,22 @@ export default function ContributorPage() {
 
   return (
     <>
-      <Navbar isPro={isPro} planLoading={planLoading} />
+      <Navbar isPro={hasAccess} planLoading={planLoading} />
 
       <div className="min-h-screen bg-white">
+        {/* ── MAIN CONTENT ─────────────────────────────────── */}
+        {!planLoading && (
+          <>
+            {/* ── UPGRADE MODAL ─────────────────────────────────── */}
+            <UpgradeAccessModal
+              isOpen={showUpgradeModal}
+              featureName="Spy Contributor"
+              currentPlan={userPlan}
+              onClose={() => setShowUpgradeModal(false)}
+            />
+
+            {hasAccess ? (
+              <>
         {/* ── HERO SEARCH ─────────────────────────────────── */}
         <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
           {/* decorative circles */}
@@ -439,6 +469,12 @@ export default function ContributorPage() {
             </div>
           )}
         </div>
+              </>
+            ) : (
+              <div className="min-h-screen bg-white"></div>
+            )}
+          </>
+        )}
       </div>
     </>
   );

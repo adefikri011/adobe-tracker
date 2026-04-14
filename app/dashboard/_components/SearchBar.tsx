@@ -14,6 +14,7 @@ interface SearchBarProps {
   onContentTypeChange?: (v: string) => void;
   activeTags?: string[];
   onRemoveTag?: (tag: string) => void;
+  onSpyContributorClick?: () => void;
 }
 
 interface RecentSearch {

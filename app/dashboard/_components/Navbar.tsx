@@ -391,7 +391,8 @@ export function Navbar({ isPro, planLoading, onUpgradeClick, onSignOut, userEmai
               }}
             >
               <IconZap />
-              <span className="hidden sm:inline">Upgrade Pro</span>
+              <span className="hidden sm:inline">U
+              pgrade Pro</span>
               <span className="sm:hidden text-xs">Pro</span>
             </button>
           )}

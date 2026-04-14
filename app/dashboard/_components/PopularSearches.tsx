@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 interface PopularSearchesProps {
   onSearchSelect?: (query: string) => void;
   onUpgradePro?: () => void;
+  isPro?: boolean;
 }
 
 interface QuickTip {
@@ -135,7 +136,7 @@ const QUICK_TIPS = [
   { emoji: "⏰", text: "Update content at optimal times for better reach" },
 ];
 
-export function PopularSearches({ onSearchSelect, onUpgradePro }: PopularSearchesProps) {
+export function PopularSearches({ onSearchSelect, onUpgradePro, isPro = false }: PopularSearchesProps) {
   const [quickTips, setQuickTips] = useState<QuickTip[]>(QUICK_TIPS);
   const [tipsLoading, setTipsLoading] = useState(true);
   const [popularSearches, setPopularSearches] = useState<PopularSearch[]>(DEFAULT_POPULAR_SEARCHES);
@@ -200,7 +201,8 @@ export function PopularSearches({ onSearchSelect, onUpgradePro }: PopularSearche
   return (
     <div className="mt-10 sm:mt-14 max-w-4xl mx-auto px-4 sm:px-0 space-y-8">
 
-      {/* ── PRO BANNER ── */}
+      {/* ── PRO BANNER (Only for FREE users) ── */}
+      {!isPro && (
       <div className="relative overflow-hidden rounded-2xl bg-[#0f0f1a] p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
         {/* glow blobs */}
         <div className="pointer-events-none absolute -top-16 -right-16 w-64 h-64 rounded-full bg-orange-500/20 blur-3xl" />
@@ -244,6 +246,7 @@ export function PopularSearches({ onSearchSelect, onUpgradePro }: PopularSearche
           <ArrowRight size={14} />
         </button>
       </div>
+      )}
 
       {/* ── POPULAR SEARCHES ── */}
       <div>

@@ -4,6 +4,7 @@ export const FEATURES = {
   EXPORT_CSV: "export_csv",
   PERFORMANCE_ANALYTICS: "performance_analytics",
   PRIORITY_SUPPORT: "priority_support",
+  SPY_CONTRIBUTOR: "spy_contributor",
 } as const;
 
 export type FeatureName = typeof FEATURES[keyof typeof FEATURES];
@@ -26,6 +27,7 @@ export const PLAN_FEATURES: Record<string, FeatureName[]> = {
     FEATURES.ALL_FEATURES,
     FEATURES.EXPORT_CSV,
     FEATURES.PERFORMANCE_ANALYTICS,
+    FEATURES.SPY_CONTRIBUTOR,
   ],
   
   "pro-3day": [
@@ -33,6 +35,7 @@ export const PLAN_FEATURES: Record<string, FeatureName[]> = {
     FEATURES.ALL_FEATURES,
     FEATURES.EXPORT_CSV,
     FEATURES.PERFORMANCE_ANALYTICS,
+    FEATURES.SPY_CONTRIBUTOR,
   ],
   
   "pro-7day": [
@@ -40,6 +43,7 @@ export const PLAN_FEATURES: Record<string, FeatureName[]> = {
     FEATURES.ALL_FEATURES,
     FEATURES.EXPORT_CSV,
     FEATURES.PERFORMANCE_ANALYTICS,
+    FEATURES.SPY_CONTRIBUTOR,
   ],
   
   // Pro 15 day & 30 day = includes priority support
@@ -49,6 +53,7 @@ export const PLAN_FEATURES: Record<string, FeatureName[]> = {
     FEATURES.EXPORT_CSV,
     FEATURES.PERFORMANCE_ANALYTICS,
     FEATURES.PRIORITY_SUPPORT,
+    FEATURES.SPY_CONTRIBUTOR,
   ],
   
   "pro-30day": [
@@ -57,6 +62,7 @@ export const PLAN_FEATURES: Record<string, FeatureName[]> = {
     FEATURES.EXPORT_CSV,
     FEATURES.PERFORMANCE_ANALYTICS,
     FEATURES.PRIORITY_SUPPORT,
+    FEATURES.SPY_CONTRIBUTOR,
   ],
 };
 
@@ -67,6 +73,7 @@ export const FEATURE_DESCRIPTIONS: Record<FeatureName, string> = {
   [FEATURES.EXPORT_CSV]: "Kemampuan export result ke CSV file",
   [FEATURES.PERFORMANCE_ANALYTICS]: "Dashboard analytics & performance metrics",
   [FEATURES.PRIORITY_SUPPORT]: "Priority customer support",
+  [FEATURES.SPY_CONTRIBUTOR]: "Akses ke fitur Spy Contributor untuk analytics kompetitor",
   
 };
 // HELPER FUNCTIONS
