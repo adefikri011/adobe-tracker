@@ -13,6 +13,7 @@ interface Plan {
   deviceLimit: number;
   suspendDurationMinutes: number;
   dailySearchLimit: number;
+  contributorSearchLimit: number;
   maxSearches: string;
   features: string[];
   isActive: boolean;
@@ -108,6 +109,7 @@ export default function PlansAdminPage() {
       deviceLimit: 1,
       suspendDurationMinutes: 30,
       dailySearchLimit: 5,
+      contributorSearchLimit: 5,
       maxSearches: "unlimited",
       features: [],
       isActive: true,
@@ -148,6 +150,7 @@ export default function PlansAdminPage() {
           deviceLimit: editingPlan.deviceLimit,
           suspendDurationMinutes: editingPlan.suspendDurationMinutes,
           dailySearchLimit: editingPlan.dailySearchLimit,
+          contributorSearchLimit: editingPlan.contributorSearchLimit,
           maxSearches: editingPlan.maxSearches,
           features: editingPlan.features,
           isActive: editingPlan.isActive,
@@ -280,6 +283,7 @@ export default function PlansAdminPage() {
                 <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Duration</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Devices</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Daily Search Limit</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Contributor Search Limit</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Result Limit</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Status</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-slate-900">Actions</th>
@@ -288,7 +292,7 @@ export default function PlansAdminPage() {
             <tbody>
               {plans.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-slate-500">
+                  <td colSpan={9} className="px-6 py-8 text-center text-slate-500">
                     No plans found
                   </td>
                 </tr>
@@ -303,6 +307,7 @@ export default function PlansAdminPage() {
                     <td className="px-6 py-4 text-sm text-slate-600">{plan.durationDays} days</td>
                     <td className="px-6 py-4 text-sm text-slate-600">{plan.deviceLimit}</td>
                     <td className="px-6 py-4 text-sm text-slate-600">{plan.dailySearchLimit} searches</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{plan.contributorSearchLimit} searches</td>
                     <td className="px-6 py-4 text-sm text-slate-600">
                       {plan.maxSearches === "unlimited" ? "∞ Unlimited" : plan.maxSearches}
                     </td>
@@ -459,24 +464,36 @@ export default function PlansAdminPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Result Display Limit</label>
-                    <p className="text-xs text-slate-500 mb-2">How many results shown per search</p>
-                    <select
-                      value={editingPlan.maxSearches}
-                      onChange={(e) => setEditingPlan({ ...editingPlan, maxSearches: e.target.value })}
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Contributor Search Limit</label>
+                    <p className="text-xs text-slate-500 mb-2">How many contributor searches per day</p>
+                    <input
+                      type="number"
+                      value={editingPlan.contributorSearchLimit}
+                      onChange={(e) => setEditingPlan({ ...editingPlan, contributorSearchLimit: parseInt(e.target.value) || 5 })}
+                      min="1"
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    >
-                      {MAX_SEARCH_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt === "unlimited" ? "∞ Unlimited" : opt + " hasil"}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Hidden - Search Result Limit</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Result Display Limit</label>
+                  <p className="text-xs text-slate-500 mb-2">How many results shown per search</p>
+                  <select
+                    value={editingPlan.maxSearches}
+                    onChange={(e) => setEditingPlan({ ...editingPlan, maxSearches: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    {MAX_SEARCH_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt === "unlimited" ? "∞ Unlimited" : opt + " hasil"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Result Display Limit (Alternative)</label>
                   <p className="text-xs text-slate-500 mb-2">Controls how many search results are displayed to users (applies to all plans)</p>
                   <select
                     value={editingPlan.maxSearches}

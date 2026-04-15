@@ -403,7 +403,8 @@ export const ModelName = {
   NotificationPreference: 'NotificationPreference',
   Logo: 'Logo',
   Favicon: 'Favicon',
-  RecentSearch: 'RecentSearch'
+  RecentSearch: 'RecentSearch',
+  ContributorSearchUsage: 'ContributorSearchUsage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "profile" | "searchCache" | "marketInsight" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog" | "syncLog" | "gatewayConfig" | "emailVerification" | "passwordReset" | "activityLog" | "notification" | "notificationPreference" | "logo" | "favicon" | "recentSearch"
+    modelProps: "profile" | "searchCache" | "marketInsight" | "asset" | "userSession" | "plan" | "transaction" | "subscription" | "appSettings" | "loginLog" | "syncLog" | "gatewayConfig" | "emailVerification" | "passwordReset" | "activityLog" | "notification" | "notificationPreference" | "logo" | "favicon" | "recentSearch" | "contributorSearchUsage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1903,6 +1904,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ContributorSearchUsage: {
+      payload: Prisma.$ContributorSearchUsagePayload<ExtArgs>
+      fields: Prisma.ContributorSearchUsageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ContributorSearchUsageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContributorSearchUsagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ContributorSearchUsageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContributorSearchUsagePayload>
+        }
+        findFirst: {
+          args: Prisma.ContributorSearchUsageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContributorSearchUsagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ContributorSearchUsageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContributorSearchUsagePayload>
+        }
+        findMany: {
+          args: Prisma.ContributorSearchUsageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContributorSearchUsagePayload>[]
+        }
+        create: {
+          args: Prisma.ContributorSearchUsageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContributorSearchUsagePayload>
+        }
+        createMany: {
+          args: Prisma.ContributorSearchUsageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ContributorSearchUsageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContributorSearchUsagePayload>[]
+        }
+        delete: {
+          args: Prisma.ContributorSearchUsageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContributorSearchUsagePayload>
+        }
+        update: {
+          args: Prisma.ContributorSearchUsageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContributorSearchUsagePayload>
+        }
+        deleteMany: {
+          args: Prisma.ContributorSearchUsageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ContributorSearchUsageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ContributorSearchUsageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContributorSearchUsagePayload>[]
+        }
+        upsert: {
+          args: Prisma.ContributorSearchUsageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContributorSearchUsagePayload>
+        }
+        aggregate: {
+          args: Prisma.ContributorSearchUsageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateContributorSearchUsage>
+        }
+        groupBy: {
+          args: Prisma.ContributorSearchUsageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContributorSearchUsageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ContributorSearchUsageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContributorSearchUsageCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2029,6 +2104,7 @@ export const PlanScalarFieldEnum = {
   deviceLimit: 'deviceLimit',
   suspendDurationMinutes: 'suspendDurationMinutes',
   dailySearchLimit: 'dailySearchLimit',
+  contributorSearchLimit: 'contributorSearchLimit',
   maxSearches: 'maxSearches',
   features: 'features',
   isActive: 'isActive',
@@ -2238,6 +2314,18 @@ export const RecentSearchScalarFieldEnum = {
 } as const
 
 export type RecentSearchScalarFieldEnum = (typeof RecentSearchScalarFieldEnum)[keyof typeof RecentSearchScalarFieldEnum]
+
+
+export const ContributorSearchUsageScalarFieldEnum = {
+  id: 'id',
+  profileId: 'profileId',
+  date: 'date',
+  count: 'count',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ContributorSearchUsageScalarFieldEnum = (typeof ContributorSearchUsageScalarFieldEnum)[keyof typeof ContributorSearchUsageScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2555,6 +2643,7 @@ export type GlobalOmitConfig = {
   logo?: Prisma.LogoOmit
   favicon?: Prisma.FaviconOmit
   recentSearch?: Prisma.RecentSearchOmit
+  contributorSearchUsage?: Prisma.ContributorSearchUsageOmit
 }
 
 /* Types for Logging */

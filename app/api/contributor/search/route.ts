@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,6 +11,75 @@ export async function GET(req: NextRequest) {
         { error: "Search parameter required" },
         { status: 400 }
       );
+    }
+
+    // Get authenticated user
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // If not authenticated, allow search but don't track usage (public search)
+    let userId: string | null = null;
+    let currentUsage = 0;
+    let dailyLimit = 999; // unlimited for public/free users
+
+    if (user) {
+      userId = user.id;
+
+      // Get user's profile and subscription
+      const profile = await prisma.profile.findUnique({
+        where: { id: userId },
+        include: {
+          subscriptions: {
+            where: { status: "active" },
+            include: { plan: true },
+            orderBy: { startDate: "desc" },
+            take: 1,
+          },
+        },
+      });
+
+      if (profile) {
+        // Get active plan's contributor search limit
+        if (profile.subscriptions.length > 0) {
+          const activePlan = profile.subscriptions[0].plan;
+          dailyLimit = activePlan.contributorSearchLimit;
+        } else {
+          // Free user
+          dailyLimit = 5; // default free limit
+        }
+
+        // Get today's usage
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const todayUsage = await prisma.contributorSearchUsage.findUnique({
+          where: {
+            profileId_date: {
+              profileId: userId,
+              date: today,
+            },
+          },
+        });
+
+        currentUsage = todayUsage?.count || 0;
+
+        // Check if limit exceeded
+        if (currentUsage >= dailyLimit) {
+          const resetTime = new Date(today);
+          resetTime.setDate(resetTime.getDate() + 1);
+          return NextResponse.json(
+            {
+              error: "Daily contributor search limit exceeded",
+              message: `You have reached your daily limit of ${dailyLimit} searches. Your limit will reset tomorrow at ${resetTime.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`,
+              limitExceeded: true,
+              dailyLimit,
+              currentUsage,
+              resetTime: resetTime.toISOString(),
+            },
+            { status: 429 }
+          );
+        }
+      }
     }
 
     const searchLower = searchParam.toLowerCase();
@@ -98,6 +168,36 @@ export async function GET(req: NextRequest) {
       trending: a.downloads > 200,
     }));
 
+    // Track usage for authenticated users
+    if (userId) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      try {
+        await prisma.contributorSearchUsage.upsert({
+          where: {
+            profileId_date: {
+              profileId: userId,
+              date: today,
+            },
+          },
+          update: {
+            count: {
+              increment: 1,
+            },
+          },
+          create: {
+            profileId: userId,
+            date: today,
+            count: 1,
+          },
+        });
+      } catch (error) {
+        console.error("[Failed to track contributor search usage]", error);
+        // Don't fail the search if tracking fails
+      }
+    }
+
     return NextResponse.json({
       contributor: {
         id: contributorId,
@@ -110,6 +210,13 @@ export async function GET(req: NextRequest) {
         weeklyGrowth,
       },
       assets: formattedAssets,
+      ...(userId && {
+        usage: {
+          dailyLimit,
+          currentUsage: currentUsage + 1,
+          remaining: dailyLimit - (currentUsage + 1),
+        },
+      }),
     });
   } catch (error) {
     console.error("[Contributor Search Error]", error);

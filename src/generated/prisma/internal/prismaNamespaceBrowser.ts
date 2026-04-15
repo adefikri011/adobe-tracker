@@ -70,7 +70,8 @@ export const ModelName = {
   NotificationPreference: 'NotificationPreference',
   Logo: 'Logo',
   Favicon: 'Favicon',
-  RecentSearch: 'RecentSearch'
+  RecentSearch: 'RecentSearch',
+  ContributorSearchUsage: 'ContributorSearchUsage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -176,6 +177,7 @@ export const PlanScalarFieldEnum = {
   deviceLimit: 'deviceLimit',
   suspendDurationMinutes: 'suspendDurationMinutes',
   dailySearchLimit: 'dailySearchLimit',
+  contributorSearchLimit: 'contributorSearchLimit',
   maxSearches: 'maxSearches',
   features: 'features',
   isActive: 'isActive',
@@ -385,6 +387,18 @@ export const RecentSearchScalarFieldEnum = {
 } as const
 
 export type RecentSearchScalarFieldEnum = (typeof RecentSearchScalarFieldEnum)[keyof typeof RecentSearchScalarFieldEnum]
+
+
+export const ContributorSearchUsageScalarFieldEnum = {
+  id: 'id',
+  profileId: 'profileId',
+  date: 'date',
+  count: 'count',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ContributorSearchUsageScalarFieldEnum = (typeof ContributorSearchUsageScalarFieldEnum)[keyof typeof ContributorSearchUsageScalarFieldEnum]
 
 
 export const SortOrder = {

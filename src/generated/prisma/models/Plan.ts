@@ -34,6 +34,7 @@ export type PlanAvgAggregateOutputType = {
   deviceLimit: number | null
   suspendDurationMinutes: number | null
   dailySearchLimit: number | null
+  contributorSearchLimit: number | null
 }
 
 export type PlanSumAggregateOutputType = {
@@ -44,6 +45,7 @@ export type PlanSumAggregateOutputType = {
   deviceLimit: number | null
   suspendDurationMinutes: number | null
   dailySearchLimit: number | null
+  contributorSearchLimit: number | null
 }
 
 export type PlanMinAggregateOutputType = {
@@ -58,6 +60,7 @@ export type PlanMinAggregateOutputType = {
   deviceLimit: number | null
   suspendDurationMinutes: number | null
   dailySearchLimit: number | null
+  contributorSearchLimit: number | null
   maxSearches: string | null
   isActive: boolean | null
   createdAt: Date | null
@@ -76,6 +79,7 @@ export type PlanMaxAggregateOutputType = {
   deviceLimit: number | null
   suspendDurationMinutes: number | null
   dailySearchLimit: number | null
+  contributorSearchLimit: number | null
   maxSearches: string | null
   isActive: boolean | null
   createdAt: Date | null
@@ -94,6 +98,7 @@ export type PlanCountAggregateOutputType = {
   deviceLimit: number
   suspendDurationMinutes: number
   dailySearchLimit: number
+  contributorSearchLimit: number
   maxSearches: number
   features: number
   isActive: number
@@ -111,6 +116,7 @@ export type PlanAvgAggregateInputType = {
   deviceLimit?: true
   suspendDurationMinutes?: true
   dailySearchLimit?: true
+  contributorSearchLimit?: true
 }
 
 export type PlanSumAggregateInputType = {
@@ -121,6 +127,7 @@ export type PlanSumAggregateInputType = {
   deviceLimit?: true
   suspendDurationMinutes?: true
   dailySearchLimit?: true
+  contributorSearchLimit?: true
 }
 
 export type PlanMinAggregateInputType = {
@@ -135,6 +142,7 @@ export type PlanMinAggregateInputType = {
   deviceLimit?: true
   suspendDurationMinutes?: true
   dailySearchLimit?: true
+  contributorSearchLimit?: true
   maxSearches?: true
   isActive?: true
   createdAt?: true
@@ -153,6 +161,7 @@ export type PlanMaxAggregateInputType = {
   deviceLimit?: true
   suspendDurationMinutes?: true
   dailySearchLimit?: true
+  contributorSearchLimit?: true
   maxSearches?: true
   isActive?: true
   createdAt?: true
@@ -171,6 +180,7 @@ export type PlanCountAggregateInputType = {
   deviceLimit?: true
   suspendDurationMinutes?: true
   dailySearchLimit?: true
+  contributorSearchLimit?: true
   maxSearches?: true
   features?: true
   isActive?: true
@@ -277,6 +287,7 @@ export type PlanGroupByOutputType = {
   deviceLimit: number
   suspendDurationMinutes: number
   dailySearchLimit: number
+  contributorSearchLimit: number
   maxSearches: string
   features: string[]
   isActive: boolean
@@ -319,6 +330,7 @@ export type PlanWhereInput = {
   deviceLimit?: Prisma.IntFilter<"Plan"> | number
   suspendDurationMinutes?: Prisma.IntFilter<"Plan"> | number
   dailySearchLimit?: Prisma.IntFilter<"Plan"> | number
+  contributorSearchLimit?: Prisma.IntFilter<"Plan"> | number
   maxSearches?: Prisma.StringFilter<"Plan"> | string
   features?: Prisma.StringNullableListFilter<"Plan">
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
@@ -340,6 +352,7 @@ export type PlanOrderByWithRelationInput = {
   deviceLimit?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
   dailySearchLimit?: Prisma.SortOrder
+  contributorSearchLimit?: Prisma.SortOrder
   maxSearches?: Prisma.SortOrder
   features?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -364,6 +377,7 @@ export type PlanWhereUniqueInput = Prisma.AtLeast<{
   deviceLimit?: Prisma.IntFilter<"Plan"> | number
   suspendDurationMinutes?: Prisma.IntFilter<"Plan"> | number
   dailySearchLimit?: Prisma.IntFilter<"Plan"> | number
+  contributorSearchLimit?: Prisma.IntFilter<"Plan"> | number
   maxSearches?: Prisma.StringFilter<"Plan"> | string
   features?: Prisma.StringNullableListFilter<"Plan">
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
@@ -385,6 +399,7 @@ export type PlanOrderByWithAggregationInput = {
   deviceLimit?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
   dailySearchLimit?: Prisma.SortOrder
+  contributorSearchLimit?: Prisma.SortOrder
   maxSearches?: Prisma.SortOrder
   features?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -412,6 +427,7 @@ export type PlanScalarWhereWithAggregatesInput = {
   deviceLimit?: Prisma.IntWithAggregatesFilter<"Plan"> | number
   suspendDurationMinutes?: Prisma.IntWithAggregatesFilter<"Plan"> | number
   dailySearchLimit?: Prisma.IntWithAggregatesFilter<"Plan"> | number
+  contributorSearchLimit?: Prisma.IntWithAggregatesFilter<"Plan"> | number
   maxSearches?: Prisma.StringWithAggregatesFilter<"Plan"> | string
   features?: Prisma.StringNullableListFilter<"Plan">
   isActive?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
@@ -431,6 +447,7 @@ export type PlanCreateInput = {
   deviceLimit?: number
   suspendDurationMinutes?: number
   dailySearchLimit?: number
+  contributorSearchLimit?: number
   maxSearches?: string
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
@@ -452,6 +469,7 @@ export type PlanUncheckedCreateInput = {
   deviceLimit?: number
   suspendDurationMinutes?: number
   dailySearchLimit?: number
+  contributorSearchLimit?: number
   maxSearches?: string
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
@@ -473,6 +491,7 @@ export type PlanUpdateInput = {
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   dailySearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  contributorSearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
   maxSearches?: Prisma.StringFieldUpdateOperationsInput | string
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -494,6 +513,7 @@ export type PlanUncheckedUpdateInput = {
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   dailySearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  contributorSearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
   maxSearches?: Prisma.StringFieldUpdateOperationsInput | string
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -515,6 +535,7 @@ export type PlanCreateManyInput = {
   deviceLimit?: number
   suspendDurationMinutes?: number
   dailySearchLimit?: number
+  contributorSearchLimit?: number
   maxSearches?: string
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
@@ -534,6 +555,7 @@ export type PlanUpdateManyMutationInput = {
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   dailySearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  contributorSearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
   maxSearches?: Prisma.StringFieldUpdateOperationsInput | string
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -553,6 +575,7 @@ export type PlanUncheckedUpdateManyInput = {
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   dailySearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  contributorSearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
   maxSearches?: Prisma.StringFieldUpdateOperationsInput | string
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -572,6 +595,7 @@ export type PlanCountOrderByAggregateInput = {
   deviceLimit?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
   dailySearchLimit?: Prisma.SortOrder
+  contributorSearchLimit?: Prisma.SortOrder
   maxSearches?: Prisma.SortOrder
   features?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -587,6 +611,7 @@ export type PlanAvgOrderByAggregateInput = {
   deviceLimit?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
   dailySearchLimit?: Prisma.SortOrder
+  contributorSearchLimit?: Prisma.SortOrder
 }
 
 export type PlanMaxOrderByAggregateInput = {
@@ -601,6 +626,7 @@ export type PlanMaxOrderByAggregateInput = {
   deviceLimit?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
   dailySearchLimit?: Prisma.SortOrder
+  contributorSearchLimit?: Prisma.SortOrder
   maxSearches?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -619,6 +645,7 @@ export type PlanMinOrderByAggregateInput = {
   deviceLimit?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
   dailySearchLimit?: Prisma.SortOrder
+  contributorSearchLimit?: Prisma.SortOrder
   maxSearches?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -633,6 +660,7 @@ export type PlanSumOrderByAggregateInput = {
   deviceLimit?: Prisma.SortOrder
   suspendDurationMinutes?: Prisma.SortOrder
   dailySearchLimit?: Prisma.SortOrder
+  contributorSearchLimit?: Prisma.SortOrder
 }
 
 export type PlanScalarRelationFilter = {
@@ -693,6 +721,7 @@ export type PlanCreateWithoutTransactionsInput = {
   deviceLimit?: number
   suspendDurationMinutes?: number
   dailySearchLimit?: number
+  contributorSearchLimit?: number
   maxSearches?: string
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
@@ -713,6 +742,7 @@ export type PlanUncheckedCreateWithoutTransactionsInput = {
   deviceLimit?: number
   suspendDurationMinutes?: number
   dailySearchLimit?: number
+  contributorSearchLimit?: number
   maxSearches?: string
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
@@ -749,6 +779,7 @@ export type PlanUpdateWithoutTransactionsInput = {
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   dailySearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  contributorSearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
   maxSearches?: Prisma.StringFieldUpdateOperationsInput | string
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -769,6 +800,7 @@ export type PlanUncheckedUpdateWithoutTransactionsInput = {
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   dailySearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  contributorSearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
   maxSearches?: Prisma.StringFieldUpdateOperationsInput | string
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -789,6 +821,7 @@ export type PlanCreateWithoutSubscriptionsInput = {
   deviceLimit?: number
   suspendDurationMinutes?: number
   dailySearchLimit?: number
+  contributorSearchLimit?: number
   maxSearches?: string
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
@@ -809,6 +842,7 @@ export type PlanUncheckedCreateWithoutSubscriptionsInput = {
   deviceLimit?: number
   suspendDurationMinutes?: number
   dailySearchLimit?: number
+  contributorSearchLimit?: number
   maxSearches?: string
   features?: Prisma.PlanCreatefeaturesInput | string[]
   isActive?: boolean
@@ -845,6 +879,7 @@ export type PlanUpdateWithoutSubscriptionsInput = {
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   dailySearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  contributorSearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
   maxSearches?: Prisma.StringFieldUpdateOperationsInput | string
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -865,6 +900,7 @@ export type PlanUncheckedUpdateWithoutSubscriptionsInput = {
   deviceLimit?: Prisma.IntFieldUpdateOperationsInput | number
   suspendDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   dailySearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
+  contributorSearchLimit?: Prisma.IntFieldUpdateOperationsInput | number
   maxSearches?: Prisma.StringFieldUpdateOperationsInput | string
   features?: Prisma.PlanUpdatefeaturesInput | string[]
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -925,6 +961,7 @@ export type PlanSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   deviceLimit?: boolean
   suspendDurationMinutes?: boolean
   dailySearchLimit?: boolean
+  contributorSearchLimit?: boolean
   maxSearches?: boolean
   features?: boolean
   isActive?: boolean
@@ -947,6 +984,7 @@ export type PlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   deviceLimit?: boolean
   suspendDurationMinutes?: boolean
   dailySearchLimit?: boolean
+  contributorSearchLimit?: boolean
   maxSearches?: boolean
   features?: boolean
   isActive?: boolean
@@ -966,6 +1004,7 @@ export type PlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   deviceLimit?: boolean
   suspendDurationMinutes?: boolean
   dailySearchLimit?: boolean
+  contributorSearchLimit?: boolean
   maxSearches?: boolean
   features?: boolean
   isActive?: boolean
@@ -985,6 +1024,7 @@ export type PlanSelectScalar = {
   deviceLimit?: boolean
   suspendDurationMinutes?: boolean
   dailySearchLimit?: boolean
+  contributorSearchLimit?: boolean
   maxSearches?: boolean
   features?: boolean
   isActive?: boolean
@@ -992,7 +1032,7 @@ export type PlanSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "price" | "finalPrice" | "discount" | "durationDays" | "deviceLimit" | "suspendDurationMinutes" | "dailySearchLimit" | "maxSearches" | "features" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "price" | "finalPrice" | "discount" | "durationDays" | "deviceLimit" | "suspendDurationMinutes" | "dailySearchLimit" | "contributorSearchLimit" | "maxSearches" | "features" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
 export type PlanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subscriptions?: boolean | Prisma.Plan$subscriptionsArgs<ExtArgs>
   transactions?: boolean | Prisma.Plan$transactionsArgs<ExtArgs>
@@ -1019,6 +1059,7 @@ export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     deviceLimit: number
     suspendDurationMinutes: number
     dailySearchLimit: number
+    contributorSearchLimit: number
     maxSearches: string
     features: string[]
     isActive: boolean
@@ -1460,6 +1501,7 @@ export interface PlanFieldRefs {
   readonly deviceLimit: Prisma.FieldRef<"Plan", 'Int'>
   readonly suspendDurationMinutes: Prisma.FieldRef<"Plan", 'Int'>
   readonly dailySearchLimit: Prisma.FieldRef<"Plan", 'Int'>
+  readonly contributorSearchLimit: Prisma.FieldRef<"Plan", 'Int'>
   readonly maxSearches: Prisma.FieldRef<"Plan", 'String'>
   readonly features: Prisma.FieldRef<"Plan", 'String[]'>
   readonly isActive: Prisma.FieldRef<"Plan", 'Boolean'>

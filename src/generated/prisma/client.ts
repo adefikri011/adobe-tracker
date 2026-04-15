@@ -141,3 +141,8 @@ export type Favicon = Prisma.FaviconModel
  * 
  */
 export type RecentSearch = Prisma.RecentSearchModel
+/**
+ * Model ContributorSearchUsage
+ * 
+ */
+export type ContributorSearchUsage = Prisma.ContributorSearchUsageModel

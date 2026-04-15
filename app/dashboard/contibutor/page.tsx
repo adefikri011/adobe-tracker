@@ -17,6 +17,9 @@ import {
   ArrowUpRight,
   Clock,
   Eye,
+  AlertCircle,
+  X,
+  Zap,
 } from "lucide-react";
 import { Navbar } from "../_components/Navbar";
 import UpgradeAccessModal from "../../components/UpgradeAccessModal";
@@ -36,6 +39,13 @@ export default function ContributorPage() {
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [limitExceeded, setLimitExceeded] = useState<{
+    message: string;
+    dailyLimit: number;
+    currentUsage: number;
+    resetTime: string;
+  } | null>(null);
+  const [showLimitModal, setShowLimitModal] = useState(false);
 
   // Check SPY_CONTRIBUTOR feature access
   useEffect(() => {
@@ -68,14 +78,27 @@ export default function ContributorPage() {
     
     setLoading(true);
     setError("");
+    setLimitExceeded(null);
     
     try {
       const response = await fetch(`/api/contributor/search?search=${encodeURIComponent(searchId)}`);
       const data = await response.json();
       
       if (!response.ok) {
-        setError(data.error || "Contributor not found");
-        setShowResults(false);
+        // Handle limit exceeded (429)
+        if (response.status === 429 && data.limitExceeded) {
+          setLimitExceeded({
+            message: data.message,
+            dailyLimit: data.dailyLimit,
+            currentUsage: data.currentUsage,
+            resetTime: data.resetTime,
+          });
+          setShowLimitModal(true);
+          setShowResults(false);
+        } else {
+          setError(data.error || "Contributor not found");
+          setShowResults(false);
+        }
         return;
       }
       
@@ -101,6 +124,7 @@ export default function ContributorPage() {
     setContributor(null);
     setAssets([]);
     setError("");
+    setLimitExceeded(null);
   };
 
   const filteredAssets =
@@ -127,6 +151,74 @@ export default function ContributorPage() {
               currentPlan={userPlan}
               onClose={() => setShowUpgradeModal(false)}
             />
+
+            {/* ── LIMIT EXCEEDED MODAL ─────────────────────────────────── */}
+            {showLimitModal && limitExceeded && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-in fade-in zoom-in-95">
+                  <div className="px-6 py-4 border-b border-orange-100 bg-orange-50/50">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+                        <Zap className="text-orange-600" size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-orange-900 text-lg">Daily Limit Reached</h3>
+                        <p className="text-orange-700 text-sm mt-1">{limitExceeded.message}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="px-6 py-4 bg-slate-50 space-y-3">
+                    <div className="p-3 bg-white rounded-lg border border-orange-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-slate-600 font-semibold">Today's Searches</span>
+                        <span className="text-sm font-bold text-orange-600">{limitExceeded.currentUsage} / {limitExceeded.dailyLimit}</span>
+                      </div>
+                      <div className="w-full bg-slate-200 rounded-full h-2">
+                        <div 
+                          className="bg-orange-500 h-2 rounded-full" 
+                          style={{width: `${Math.min(100, (limitExceeded.currentUsage / limitExceeded.dailyLimit) * 100)}%`}}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-white rounded-lg border border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-600 font-semibold flex items-center gap-2">
+                          <Clock size={14} />
+                          Resets at
+                        </span>
+                        <span className="text-sm font-bold text-slate-900">
+                          {new Date(limitExceeded.resetTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-600 text-center">
+                      Your daily contributor search limit will reset tomorrow. Please try again then!
+                    </p>
+                  </div>
+
+                  <div className="px-6 py-4 flex gap-3 border-t border-slate-200">
+                    <button
+                      onClick={() => setShowLimitModal(false)}
+                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowLimitModal(false);
+                        setSearchId("");
+                      }}
+                      className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition"
+                    >
+                      Clear Search
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {hasAccess ? (
               <>
@@ -206,6 +298,30 @@ export default function ContributorPage() {
 
         {/* ── MAIN CONTENT ─────────────────────────────────── */}
         <div className="max-w-6xl mx-auto px-6 py-10">
+          
+          {/* ── LIMIT EXCEEDED BANNER ─────────────────────────────────── */}
+          {limitExceeded && (
+            <div className="mb-6 p-4 rounded-xl border border-orange-200 bg-orange-50 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Zap className="text-orange-600" size={18} />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-orange-900 mb-1">Daily Limit Reached</h4>
+                <p className="text-sm text-orange-700 mb-2">{limitExceeded.message}</p>
+                <div className="flex items-center justify-between text-xs text-orange-600 font-medium">
+                  <span>{limitExceeded.currentUsage} of {limitExceeded.dailyLimit} searches used</span>
+                  <span>Resets at {new Date(limitExceeded.resetTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setLimitExceeded(null)}
+                className="p-1 text-orange-600 hover:bg-orange-100 rounded transition flex-shrink-0"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          )}
+
           {!showResults ? (
             /* ── EMPTY STATE ── */
             <div className="text-center py-24">
@@ -224,6 +340,37 @@ export default function ContributorPage() {
             <div className="flex flex-col items-center justify-center py-24">
               <div className="w-16 h-16 rounded-full border-4 border-slate-200 border-t-orange-500 animate-spin" />
               <p className="mt-6 text-slate-600 font-medium">Searching for contributor...</p>
+            </div>
+          ) : limitExceeded ? (
+            /* LIMIT EXCEEDED STATE */
+            <div className="max-w-md mx-auto py-16">
+              <div className="p-6 rounded-xl border border-orange-200 bg-orange-50">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+                    <AlertCircle className="text-orange-600" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-orange-900 mb-1">Daily Limit Reached</h3>
+                    <p className="text-orange-700 text-sm">{limitExceeded.message}</p>
+                  </div>
+                </div>
+                <div className="mt-4 p-3 bg-white rounded-lg border border-orange-100 text-xs text-slate-600 space-y-1">
+                  <div className="flex justify-between">
+                    <span>Today's Searches:</span>
+                    <span className="font-semibold text-slate-900">{limitExceeded.currentUsage} / {limitExceeded.dailyLimit}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Resets at:</span>
+                    <span className="font-semibold text-slate-900">{new Date(limitExceeded.resetTime).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleClear}
+                  className="w-full mt-4 px-4 py-2 rounded-lg bg-orange-600 text-white text-sm font-semibold hover:bg-orange-700 transition"
+                >
+                  Try Again Tomorrow
+                </button>
+              </div>
             </div>
           ) : error ? (
             /* ERROR STATE */
