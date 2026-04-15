@@ -54,22 +54,21 @@ export default function Footer() {
   const productLinks = [
     { label: "Features", href: "#features" },
     { label: "Statistics", href: "#stats" },
-    { label: "Pricing", href: "/pricing" },
+    { label: "Pricing", href: "/dashboard/billing/plans" },
     { label: "Dashboard", href: "/dashboard" },
   ];
 
   const companyLinks = [
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
-    { label: "Blog", href: "#" },
-    { label: "Contact", href: "#" },
+    { label: "Contact", href: "/contact" },
   ];
 
   const legalLinks = [
-    { label: "Privacy", href: "#" },
-    { label: "Terms", href: "#" },
-    { label: "Cookies", href: "#" },
-    { label: "License", href: "#" },
+    { label: "Privacy", href: "/privacy" },
+    { label: "Terms", href: "/terms" },
+    { label: "Cookies", href: "/cookies" },
+    { label: "License", href: "/license" },
   ];
 
   return (
@@ -150,7 +149,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-white/25 text-[11px] font-medium text-center sm:text-left">
-            © {currentYear} TrackStock. All rights reserved. Built for Adobe Stock Contributors.
+            © {currentYear} MetricStock. All rights reserved. Built for Adobe Stock Contributors.
           </p>
 
           {/* Social icons */}

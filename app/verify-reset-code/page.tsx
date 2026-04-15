@@ -137,11 +137,17 @@ export default function VerifyResetCodePage() {
       <motion.div initial="hidden" animate="show" className="w-full max-w-md relative z-10" suppressHydrationWarning>
         {/* Header */}
         <motion.div variants={fadeUp} custom={0} className="text-center mb-2.5" suppressHydrationWarning>
-          <Link href="/" className="inline-flex justify-center mb-6 group">
+          <Link href="/" className="inline-flex justify-center mb-10 group w-full">
             {logoUrl ? (
-              <img src={logoUrl} alt="TrackStock Logo" className="h-12 w-12 object-contain" />
+              <img
+                src={logoUrl}
+                className="h-15 w-auto object-contain"
+                alt="Logo"
+              />
             ) : (
-              <TrackStockLogo />
+              <div className="h-32 w-32">
+                <TrackStockLogo />
+              </div>
             )}
           </Link>
           <h1 className="text-3xl md:text-4xl font-[900] tracking-tight text-slate-900 mb-0.5">
@@ -187,13 +193,12 @@ export default function VerifyResetCodePage() {
             </div>
 
             {/* Timer */}
-            <div className={`text-center text-sm font-semibold p-3 rounded-xl ${
-              isExpired 
-                ? "bg-red-50 text-red-600" 
-                : timeLeft < 300 
-                  ? "bg-yellow-50 text-yellow-600" 
+            <div className={`text-center text-sm font-semibold p-3 rounded-xl ${isExpired
+                ? "bg-red-50 text-red-600"
+                : timeLeft < 300
+                  ? "bg-yellow-50 text-yellow-600"
                   : "bg-blue-50 text-blue-600"
-            }`}>
+              }`}>
               {isExpired ? (
                 <span>⏰ Code has expired. Please request a new one.</span>
               ) : (

@@ -108,15 +108,19 @@ export default function ForgotPasswordPage() {
             custom={0}
             className="text-center mb-4" // Sedikit menambah margin bottom
           >
-            <Link href="/" className="inline-flex justify-center mb-8 group"> {/* Margin diperbesar dari mb-6 ke mb-8 */}
-              {logoUrl ? (
-                // Ukuran diperbesar dari h-12 ke h-20
-                <img src={logoUrl} alt="TrackStock Logo" className="h-12 w-12 object-contain" />
-              ) : (
-                <TrackStockLogo />
-              )}
-            </Link>
-
+            <Link href="/" className="inline-flex justify-center mb-10 group w-full">
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                className="h-15 w-auto object-contain" 
+                alt="Logo"
+              />
+            ) : (
+              <div className="h-32 w-32">
+                <TrackStockLogo /> 
+              </div>
+            )}
+          </Link>
             {/* Ukuran diperbesar dari text-3xl ke text-5xl */}
             <h1 className="text-5xl font-[900] text-slate-900 mb-3">
               Check Your Email
@@ -178,16 +182,16 @@ export default function ForgotPasswordPage() {
       <motion.div initial="hidden" animate="show" className="w-full max-w-md relative z-10" suppressHydrationWarning>
         {/* Header */}
         <motion.div variants={fadeUp} custom={0} className="text-center mb-2.5" suppressHydrationWarning>
-          <Link href="/" className="inline-flex justify-center mb-6 group w-full">
+          <Link href="/" className="inline-flex justify-center mb-10 group w-full">
             {logoUrl ? (
               <img
                 src={logoUrl}
-                className="h-24 w-24 object-contain" // Ubah h-12 ke h-24 (96px)
+                className="h-15 w-auto object-contain" 
                 alt="Logo"
               />
             ) : (
-              <div className="h-24 w-24"> {/* Bungkus dengan div ukuran tetap */}
-                <TrackStockLogo />
+              <div className="h-32 w-32">
+                <TrackStockLogo /> 
               </div>
             )}
           </Link>

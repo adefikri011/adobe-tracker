@@ -23,7 +23,7 @@ const fadeUp = {
 export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Get params safely
   const [mounted, setMounted] = useState(false);
   const [email, setEmail] = useState("");
@@ -42,12 +42,12 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const emailParam = searchParams?.get("email");
     const codeParam = searchParams?.get("code");
-    
+
     if (emailParam && codeParam) {
       setEmail(emailParam);
       setCode(codeParam);
     }
-    
+
     setMounted(true);
   }, [searchParams]);
   const [logoSize, setLogoSize] = useState("h-12 w-12");
@@ -178,9 +178,16 @@ export default function ResetPasswordPage() {
             <div className="flex justify-center mb-6">
               <Link href="/" className="inline-flex justify-center group">
                 {logoUrl ? (
-                  <img src={logoUrl} alt="TrackStock Logo" className="h-12 w-12 object-contain" />
+                  <img
+                    src={logoUrl}
+                    alt="TrackStock Logo"
+                    className="h-20 w-auto object-contain" // h-12 diganti ke h-20, w-12 diganti w-auto agar tidak gepeng
+                  />
                 ) : (
-                  <TrackStockLogo />
+                  /* Bungkus komponen logo dengan div berukuran tetap agar bisa dikontrol */
+                  <div className="h-20 w-20 flex items-center justify-center">
+                    <TrackStockLogo />
+                  </div>
                 )}
               </Link>
             </div>
@@ -214,11 +221,18 @@ export default function ResetPasswordPage() {
       <motion.div initial="hidden" animate="show" className="w-full max-w-md relative z-10" suppressHydrationWarning>
         {/* Header */}
         <motion.div variants={fadeUp} custom={0} className="text-center mb-2.5" suppressHydrationWarning>
-          <Link href="/" className="inline-flex justify-center mb-6 group">
+          <Link href="/" className="inline-flex justify-center group">
             {logoUrl ? (
-              <img src={logoUrl} alt="TrackStock Logo" className="h-12 w-12 object-contain" />
+              <img
+                src={logoUrl}
+                alt="TrackStock Logo"
+                className="h-20 w-auto object-contain" // h-12 diganti ke h-20, w-12 diganti w-auto agar tidak gepeng
+              />
             ) : (
-              <TrackStockLogo />
+              /* Bungkus komponen logo dengan div berukuran tetap agar bisa dikontrol */
+              <div className="h-20 w-20 flex items-center justify-center">
+                <TrackStockLogo />
+              </div>
             )}
           </Link>
           <h1 className="text-3xl md:text-4xl font-[900] tracking-tight text-slate-900 mb-0.5">
@@ -264,13 +278,12 @@ export default function ResetPasswordPage() {
                   <div className="flex items-center gap-2 mb-2">
                     <div className="flex-1 h-1 bg-slate-200 rounded-full overflow-hidden">
                       <div
-                        className={`h-full transition-all ${
-                          password.length >= 8
-                            ? "w-full bg-green-500"
-                            : password.length >= 6
-                              ? "w-2/3 bg-yellow-500"
-                              : "w-1/3 bg-red-500"
-                        }`}
+                        className={`h-full transition-all ${password.length >= 8
+                          ? "w-full bg-green-500"
+                          : password.length >= 6
+                            ? "w-2/3 bg-yellow-500"
+                            : "w-1/3 bg-red-500"
+                          }`}
                       />
                     </div>
                   </div>
@@ -285,26 +298,26 @@ export default function ResetPasswordPage() {
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-10 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                  {confirmPassword && (
-                    <p className={`text-xs mt-1 ${password === confirmPassword ? "text-green-500" : "text-red-500"}`}>
-                      {password === confirmPassword ? "✓ Passwords match" : "✗ Passwords do not match"}
-                    </p>
-                  )}
-                </motion.div>
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-10 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {confirmPassword && (
+                <p className={`text-xs mt-1 ${password === confirmPassword ? "text-green-500" : "text-red-500"}`}>
+                  {password === confirmPassword ? "✓ Passwords match" : "✗ Passwords do not match"}
+                </p>
+              )}
+            </motion.div>
           </div>
 
           {/* Submit Button */}
