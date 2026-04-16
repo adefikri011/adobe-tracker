@@ -418,23 +418,6 @@ export function ResultCard({ item, index }: ResultCardProps) {
             </motion.a>
           )}
 
-          {/* Revenue */}
-          <div
-            className="flex items-center justify-between px-3 py-2 rounded-xl"
-            style={{ background: "#fafafa", border: "1px solid #f0ede8" }}
-          >
-            <div className="flex items-center gap-1.5">
-              <span className="text-gray-300 text-xs">💰</span>
-              <span className="text-[11px] text-gray-400 font-medium">Revenue Est.</span>
-            </div>
-            <span
-              className="text-sm font-black"
-              style={{ color: "#ea580c" }}
-            >
-              {item.revenue}
-            </span>
-          </div>
-
           {/* Keywords — dengan Copy All */}
           {keywords.length > 0 && (
             <div style={{ borderTop: "1px solid #f0ede8" }} className="pt-3">

@@ -150,6 +150,40 @@ function normalizeDate(val: any): Date | null {
   return isNaN(d.getTime()) ? null : d;
 }
 
+const MIN_UPLOAD_DATE = new Date("2023-01-01T00:00:00.000Z");
+const MAX_UPLOAD_DATE = new Date("2026-12-31T23:59:59.999Z");
+
+function clampUploadDateToRange(date: Date): Date {
+  if (date.getTime() < MIN_UPLOAD_DATE.getTime()) return new Date(MIN_UPLOAD_DATE);
+  if (date.getTime() > MAX_UPLOAD_DATE.getTime()) return new Date(MAX_UPLOAD_DATE);
+  return date;
+}
+
+function stableHash(input: string): number {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = ((hash << 5) - hash) + input.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function estimateUploadDateFromEngagement(downloads: number, popularity: number, assetId: string): Date {
+  // Higher downloads/popularity imply older upload date in the 2023-2026 range.
+  const downloadNorm = Math.min(1, Math.log10(Math.max(1, downloads) + 1) / 4);
+  const popularityNorm = Math.min(1, Math.max(0, popularity) / 100);
+  const engagement = (downloadNorm * 0.8) + (popularityNorm * 0.2);
+
+  const rangeMs = MAX_UPLOAD_DATE.getTime() - MIN_UPLOAD_DATE.getTime();
+  const baseTs = MAX_UPLOAD_DATE.getTime() - Math.round(engagement * rangeMs);
+
+  // Deterministic jitter so dates are not unnaturally identical.
+  const jitterDays = stableHash(assetId) % 30;
+  const jitterMs = jitterDays * 24 * 60 * 60 * 1000;
+
+  return clampUploadDateToRange(new Date(baseTs + jitterMs));
+}
+
 function computeFallbackDownloads(popularity: number): number {
   const safePopularity = Number.isFinite(popularity) ? Math.max(0, popularity) : 0;
   if (safePopularity <= 0) return 25;
@@ -593,7 +627,7 @@ export async function POST(req: Request) {
               previewUrl ||
               "";
             
-            const uploadedAt = normalizeDate(
+            const sourceUploadedAt = normalizeDate(
               item?.creation_date ||
               item?.upload_date ||
               item?.created_at ||
@@ -607,7 +641,11 @@ export async function POST(req: Request) {
               item?.added_date ||
               item?.added_date_date ||
               item?.submitted_date
-            ) || new Date();
+            );
+
+            const uploadedAt = sourceUploadedAt
+              ? clampUploadDateToRange(sourceUploadedAt)
+              : estimateUploadDateFromEngagement(downloads, popularity, assetId);
             
             return {
               assetId,
