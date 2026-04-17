@@ -60,9 +60,11 @@ export default function ApiIntegrationPage() {
   const [redirectCountdown, setRedirectCountdown] = useState(5);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Fetch database stats on mount and after sync
+
+  // Fetch database stats & Apify budget on mount and after sync
   const fetchStats = async () => {
     try {
+      // Fetch DB stats
       const res = await fetch("/api/admin/api-stats", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
@@ -72,6 +74,17 @@ export default function ApiIntegrationPage() {
       }
     } catch (error) {
       console.error("Failed to fetch stats:", error);
+    }
+    try {
+      // Fetch Apify budget
+      const res = await fetch("/api/admin/apify-budget", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setApifyUsage({ current: data.usage ?? 0, limit: data.limit ?? 5.0 });
+        setEstimatedCost(data.usage ?? 0);
+      }
+    } catch (error) {
+      console.error("Failed to fetch Apify budget:", error);
     }
   };
 
@@ -603,12 +616,13 @@ export default function ApiIntegrationPage() {
                 </div>
               </div>
               
-              {/* Apify Usage - dengan progress bar yang lebih detail */}
+
+              {/* Apify Usage - dengan progress bar yang lebih detail dan real-time */}
               <div className="space-y-3 border-t border-slate-700 pt-6">
                 <div className="flex justify-between items-end">
                   <span className="text-[10px] text-slate-400 font-bold uppercase">Apify Budget</span>
                   <span className="text-lg font-black text-orange-400">
-                    ${estimatedCost.toFixed(2)}
+                    ${apifyUsage.current?.toFixed(2)}
                   </span>
                 </div>
                 <div className="space-y-1.5">
@@ -616,18 +630,18 @@ export default function ApiIntegrationPage() {
                     <div
                       className="h-full bg-gradient-to-r from-orange-400 via-orange-500 to-red-500 rounded-full transition-all duration-500"
                       style={{
-                        width: `${Math.min(100, (estimatedCost / apifyUsage.limit) * 100)}%`,
+                        width: `${Math.min(100, (apifyUsage.current / apifyUsage.limit) * 100)}%`,
                       }}
                     />
                   </div>
                   <div className="flex justify-between items-center">
                     <p className="text-[10px] text-slate-400">
                       {apifyUsage.limit > 0
-                        ? `${Math.round((estimatedCost / apifyUsage.limit) * 100)}% of $${apifyUsage.limit.toFixed(2)}`
+                        ? `${Math.round((apifyUsage.current / apifyUsage.limit) * 100)}% of $${apifyUsage.limit.toFixed(2)}`
                         : "Budget unknown"}
                     </p>
                     <p className="text-[10px] text-slate-500">
-                      ${(apifyUsage.limit - estimatedCost).toFixed(2)} left
+                      ${(apifyUsage.limit - apifyUsage.current).toFixed(2)} left
                     </p>
                   </div>
                 </div>

@@ -315,6 +315,7 @@ export async function POST(req: Request) {
   const limitParam = url.searchParams.get("limit");
   const queryParam = url.searchParams.get("query"); // e.g., "all" or "business,cars,bike,paper,technology"
   const keywordsParam = url.searchParams.get("keywords"); // Alternative: pass keywords separately
+  const categoryParam = url.searchParams.get("category"); // NEW: category-based sync
   const clearDuplicates = url.searchParams.get("clearDuplicates") === "true"; // Force remove old items first
   const force = url.searchParams.get("force") === "true"; // Force insert without duplicate check
   const clear = url.searchParams.get("clear") === "true"; // Clear ALL user items before sync
@@ -326,19 +327,26 @@ export async function POST(req: Request) {
   // 1. "all" = search without specific query
   // 2. "business,cars,bike" = multiple keywords
   // 3. Single keyword = "business"
+  // 4. categoryParam + keyword/query = kombinasi kategori + keyword
   let keywords: string[] = [];
-  if (queryParam === "all" || !queryParam) {
-    keywords = [""]; // Empty means "all assets"
-  } else if (keywordsParam) {
-    keywords = keywordsParam
-      .split(",")
-      .map((k) => k.trim())
-      .filter((k) => k.length > 0);
-  } else if (queryParam) {
-    keywords = queryParam
-      .split(",")
-      .map((k) => k.trim())
-      .filter((k) => k.length > 0);
+  const categories = categoryParam
+    ? categoryParam.split(",").map((k) => k.trim()).filter((k) => k.length > 0)
+    : [];
+  const baseKeywords = keywordsParam
+    ? keywordsParam.split(",").map((k) => k.trim()).filter((k) => k.length > 0)
+    : queryParam && queryParam !== "all"
+      ? queryParam.split(",").map((k) => k.trim()).filter((k) => k.length > 0)
+      : [];
+
+  if (categories.length > 0 && baseKeywords.length > 0) {
+    // Kombinasi kategori + keyword
+    keywords = categories.flatMap((cat) => baseKeywords.map((kw) => `${cat} ${kw}`));
+  } else if (categories.length > 0) {
+    keywords = categories;
+  } else if (baseKeywords.length > 0) {
+    keywords = baseKeywords;
+  } else if (queryParam === "all" || !queryParam) {
+    keywords = [""];
   }
 
   // Fallback: if no keywords, search all
@@ -438,7 +446,7 @@ export async function POST(req: Request) {
           console.log(`[Sync] Expected: ~${PAGES_PER_KEYWORD * 10 * keywords.length} items before dedup (if Apify returns full pages)`);
 
           // Loop through each keyword
-          for (let keywordIdx = 0; keywordIdx < keywords.length; keywordIdx++) {
+          outer: for (let keywordIdx = 0; keywordIdx < keywords.length; keywordIdx++) {
             const searchQuery = keywords[keywordIdx] || "stock";
             const keywordStart = Date.now();
             let emptyPageStreak = 0;
@@ -452,115 +460,124 @@ export async function POST(req: Request) {
             });
 
             for (let page = 1; page <= PAGES_PER_KEYWORD; page++) {
+              // Jika sudah cukup data, break semua loop
+              if (allRawItems.length >= LIMIT) {
+                console.log(`[Sync] Sudah terkumpul ${allRawItems.length} data, stop scraping lebih awal.`);
+                break outer;
+              }
+
               const pageUrl = buildPageUrl(creatorId, page, searchQuery);
               console.log(`[Sync] Keyword ${keywordIdx + 1}/${keywords.length} - Page ${page}/${PAGES_PER_KEYWORD} URL: ${pageUrl}`);
 
-            sseEvent(controller, encoder, {
-              type: "page_start",
-              keywordIndex: keywordIdx + 1,
-              totalKeywords: keywords.length,
-              keyword: searchQuery === "stock" ? "(all)" : searchQuery,
-              page,
-              totalPages: PAGES_PER_KEYWORD,
-              totalCollected: allRawItems.length,
-              message: `Keyword ${keywordIdx + 1}/${keywords.length} - Scraping halaman ${page}/${PAGES_PER_KEYWORD}...`,
-              elapsedMs: Date.now() - startTime,
-            });
+              sseEvent(controller, encoder, {
+                type: "page_start",
+                keywordIndex: keywordIdx + 1,
+                totalKeywords: keywords.length,
+                keyword: searchQuery === "stock" ? "(all)" : searchQuery,
+                page,
+                totalPages: PAGES_PER_KEYWORD,
+                totalCollected: allRawItems.length,
+                message: `Keyword ${keywordIdx + 1}/${keywords.length} - Scraping halaman ${page}/${PAGES_PER_KEYWORD}...`,
+                elapsedMs: Date.now() - startTime,
+              });
 
-            let pageItems: any[] = [];
-            try {
-              console.log(`[Sync] Calling Apify for keyword ${keywordIdx + 1}, page ${page}...`);
-              pageItems = await runApifyAndGetItems(actorId, token, pageUrl);
-              
-              // Retry sekali untuk page kosong (Apify kadang flaky/intermittent)
-              if (pageItems.length === 0) {
-                console.warn(`[Sync] Empty page detected on page ${page}, retrying once...`);
-                await sleep(1200);
+              let pageItems: any[] = [];
+              try {
+                console.log(`[Sync] Calling Apify for keyword ${keywordIdx + 1}, page ${page}...`);
                 pageItems = await runApifyAndGetItems(actorId, token, pageUrl);
-              }
 
-              console.log(`[Sync] Keyword ${keywordIdx + 1}, Page ${page} returned ${pageItems.length} items`);
-            } catch (e: any) {
-              console.error(`[Sync] Keyword ${keywordIdx + 1}, Page ${page} ERROR:`, e.message);
-              sseEvent(controller, encoder, {
-                type: "page_error",
-                keywordIndex: keywordIdx + 1,
-                keyword: searchQuery === "stock" ? "(all)" : searchQuery,
-                page,
-                message: `Keyword ${keywordIdx + 1} - Halaman ${page} error: ${e.message}`,
-              });
-              break;
-            }
+                // Retry sekali untuk page kosong (Apify kadang flaky/intermittent)
+                if (pageItems.length === 0) {
+                  console.warn(`[Sync] Empty page detected on page ${page}, retrying once...`);
+                  await sleep(1200);
+                  pageItems = await runApifyAndGetItems(actorId, token, pageUrl);
+                }
 
-            if (pageItems.length === 0) {
-              emptyPageStreak += 1;
-              sseEvent(controller, encoder, {
-                type: "page_empty",
-                keywordIndex: keywordIdx + 1,
-                keyword: searchQuery === "stock" ? "(all)" : searchQuery,
-                page,
-                message: `Keyword ${keywordIdx + 1} - Halaman ${page} kosong (${emptyPageStreak}/3).`,
-              });
-              if (emptyPageStreak >= 3) {
-                console.warn(`[Sync] Stopping keyword ${searchQuery} after ${emptyPageStreak} consecutive empty pages`);
+                console.log(`[Sync] Keyword ${keywordIdx + 1}, Page ${page} returned ${pageItems.length} items`);
+              } catch (e: any) {
+                console.error(`[Sync] Keyword ${keywordIdx + 1}, Page ${page} ERROR:`, e.message);
+                sseEvent(controller, encoder, {
+                  type: "page_error",
+                  keywordIndex: keywordIdx + 1,
+                  keyword: searchQuery === "stock" ? "(all)" : searchQuery,
+                  page,
+                  message: `Keyword ${keywordIdx + 1} - Halaman ${page} error: ${e.message}`,
+                });
                 break;
               }
-              continue;
+
+              if (pageItems.length === 0) {
+                emptyPageStreak += 1;
+                sseEvent(controller, encoder, {
+                  type: "page_empty",
+                  keywordIndex: keywordIdx + 1,
+                  keyword: searchQuery === "stock" ? "(all)" : searchQuery,
+                  page,
+                  message: `Keyword ${keywordIdx + 1} - Halaman ${page} kosong (${emptyPageStreak}/3).`,
+                });
+                if (emptyPageStreak >= 3) {
+                  console.warn(`[Sync] Stopping keyword ${searchQuery} after ${emptyPageStreak} consecutive empty pages`);
+                  break;
+                }
+                continue;
+              }
+
+              emptyPageStreak = 0;
+
+              let newItemsCount = 0;
+              for (const item of pageItems) {
+                const rawId = String(item?.content_id || item?.id || item?.assetId || "").trim();
+                if (rawId && seenIds.has(rawId)) continue;
+                if (rawId) seenIds.add(rawId);
+                allRawItems.push(item);
+                newItemsCount++;
+                // Jika sudah cukup data, break semua loop
+                if (allRawItems.length >= LIMIT) {
+                  console.log(`[Sync] Sudah terkumpul ${allRawItems.length} data, stop scraping lebih awal.`);
+                  break outer;
+                }
+              }
+
+              const elapsedMs = Date.now() - startTime;
+              const avgMsPerPage = elapsedMs / ((keywordIdx * PAGES_PER_KEYWORD) + page);
+              const remainingPages = (keywords.length - keywordIdx - 1) * PAGES_PER_KEYWORD + (PAGES_PER_KEYWORD - page);
+              const estimatedRemainingMs = newItemsCount === 0 ? 0 : avgMsPerPage * remainingPages;
+
+              sseEvent(controller, encoder, {
+                type: "page_done",
+                keywordIndex: keywordIdx + 1,
+                totalKeywords: keywords.length,
+                keyword: searchQuery === "stock" ? "(all)" : searchQuery,
+                page,
+                totalPages: PAGES_PER_KEYWORD,
+                pageItems: pageItems.length,
+                newItems: newItemsCount,
+                totalCollected: allRawItems.length,
+                elapsedMs,
+                estimatedRemainingMs,
+                message: `Keyword ${keywordIdx + 1}/${keywords.length} - Halaman ${page} selesai: ${newItemsCount} item baru`,
+              });
             }
 
-            emptyPageStreak = 0;
+            const keywordElapsed = Date.now() - keywordStart;
+            const itemsFromThisKeyword = [...allRawItems].filter(item => {
+              // This is just for logging, count items added in this iteration
+              return true; // Rough count
+            }).length;
 
-            let newItemsCount = 0;
-            for (const item of pageItems) {
-              const rawId = String(item?.content_id || item?.id || item?.assetId || "").trim();
-              if (rawId && seenIds.has(rawId)) continue;
-              if (rawId) seenIds.add(rawId);
-              allRawItems.push(item);
-              newItemsCount++;
-            }
-
-            const elapsedMs = Date.now() - startTime;
-            const avgMsPerPage = elapsedMs / ((keywordIdx * PAGES_PER_KEYWORD) + page);
-            const remainingPages = (keywords.length - keywordIdx - 1) * PAGES_PER_KEYWORD + (PAGES_PER_KEYWORD - page);
-            const estimatedRemainingMs = avgMsPerPage * remainingPages;
+            console.log(`[Sync] Keyword ${keywordIdx + 1}/${keywords.length} ("${searchQuery === "stock" ? "all" : searchQuery}") completed. Total items so far: ${allRawItems.length}`);
 
             sseEvent(controller, encoder, {
-              type: "page_done",
+              type: "keyword_done",
               keywordIndex: keywordIdx + 1,
               totalKeywords: keywords.length,
               keyword: searchQuery === "stock" ? "(all)" : searchQuery,
-              page,
-              totalPages: PAGES_PER_KEYWORD,
-              pageItems: pageItems.length,
-              newItems: newItemsCount,
               totalCollected: allRawItems.length,
-              elapsedMs,
-              estimatedRemainingMs: newItemsCount === 0 ? 0 : estimatedRemainingMs,
-              message: `Keyword ${keywordIdx + 1}/${keywords.length} - Halaman ${page} selesai: ${newItemsCount} item baru`,
+              elapsedMs: keywordElapsed,
+              message: `Keyword ${keywordIdx + 1}/${keywords.length} selesai. Total items collected: ${allRawItems.length}`,
             });
-
-            // Lanjut terus selama masih ada data / belum streak kosong 3x
           }
 
-          const keywordElapsed = Date.now() - keywordStart;
-          const itemsFromThisKeyword = [...allRawItems].filter(item => {
-            // This is just for logging, count items added in this iteration
-            return true; // Rough count
-          }).length;
-          
-          console.log(`[Sync] Keyword ${keywordIdx + 1}/${keywords.length} ("${searchQuery === "stock" ? "all" : searchQuery}") completed. Total items so far: ${allRawItems.length}`);
-          
-          sseEvent(controller, encoder, {
-            type: "keyword_done",
-            keywordIndex: keywordIdx + 1,
-            totalKeywords: keywords.length,
-            keyword: searchQuery === "stock" ? "(all)" : searchQuery,
-            totalCollected: allRawItems.length,
-            elapsedMs: keywordElapsed,
-            message: `Keyword ${keywordIdx + 1}/${keywords.length} selesai. Total items collected: ${allRawItems.length}`,
-          });
-          }
-        
           console.log(`[Sync] ✅ All keywords done. Total raw items collected: ${allRawItems.length}`);
         } // End of else block for non-test mode
 
