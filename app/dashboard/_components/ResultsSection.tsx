@@ -34,8 +34,26 @@ export function ResultsSection({
     ? results
     : results.filter((r) => r.type.toLowerCase() === activeFilter.toLowerCase());
 
-  const visibleResults = isPro ? filtered : filtered.slice(0, 6);
-  const lockedResults = isPro ? [] : filtered.slice(6);
+  // Sort by uploadDate (tahun paling baru dulu)
+  function parseDate(str?: string) {
+    if (!str) return new Date(0);
+    // format: dd/mm/yyyy
+    const parts = str.split("/");
+    if (parts.length === 3) {
+      return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+    }
+    // fallback ke Date biasa
+    return new Date(str);
+  }
+
+  const sortedFiltered = filtered.slice().sort((a, b) => {
+    const dateA = parseDate(a.uploadDate);
+    const dateB = parseDate(b.uploadDate);
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  const visibleResults = isPro ? sortedFiltered : sortedFiltered.slice(0, 6);
+  const lockedResults = isPro ? [] : sortedFiltered.slice(6);
 
   return (
     <div className="space-y-6">
