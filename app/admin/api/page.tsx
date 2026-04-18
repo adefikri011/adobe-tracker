@@ -520,11 +520,11 @@ export default function ApiIntegrationPage() {
                       </label>
                       <input
                         type="number"
-                        min="10"
-                        max="1000"
-                        step="10"
                         value={syncLimit}
-                        onChange={(e) => setSyncLimit(Math.max(10, Math.min(1000, parseInt(e.target.value) || 1000)))}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSyncLimit(val === "" ? 10 : Number(val));
+                        }}
                         className="px-4 py-3 border-2 border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all"
                         disabled={isSyncing}
                       />
@@ -569,7 +569,7 @@ export default function ApiIntegrationPage() {
               <div className="p-5 bg-white rounded-2xl border-2 border-slate-100 hover:border-slate-200 transition">
                 <p className="text-[9px] font-black text-slate-400 uppercase mb-3">🤖 Apify Agent</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700 font-mono bg-slate-100 px-2.5 py-1 rounded-lg">cOsM6h...SG1E</span>
+                          totalPages: Math.ceil(limit / 10),
                   <div className="flex items-center gap-1.5 px-2 py-1 bg-green-50 rounded-lg">
                     <CheckCircle2 size={12} className="text-green-600" />
                     <span className="text-[9px] font-bold text-green-700">Active</span>
@@ -595,7 +595,7 @@ export default function ApiIntegrationPage() {
           {/* Database Stats - lebih modern */}
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden border border-slate-700">
             <div className="absolute top-4 right-4 opacity-5">
-              <Database size={100} />
+                          totalPages: Math.ceil(limit / 10),
             </div>
             <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8 relative z-10">
               📊 Database Stats
