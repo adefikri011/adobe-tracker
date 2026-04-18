@@ -105,7 +105,7 @@ export default function DashboardShell({ statsData, children }: Props) {
   const resolvedValues: Record<string, { value: string; change: string }> = {
     earning: { 
       value: `$${(dashStats.totalEarning || 0).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })}`, 
-      change: "From transactions & assets" 
+      change: "From transactions" 
     },
     downloads: { 
       value: (dashStats.totalDownloads || 0).toLocaleString(), 

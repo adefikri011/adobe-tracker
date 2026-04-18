@@ -31,7 +31,7 @@ import {
   Receipt,
   Landmark,
   Lock,
-  Trash2
+  Trash2,
 } from "lucide-react";
 import { useSidebar } from "@/components/admin/SidebarContext";
 
@@ -48,6 +48,8 @@ const navGroups = [
     group: "Overview",
     items: [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+      { label: "Assets", href: "/admin/assets", icon: ImageIcon },
+
     ],
   },
   // {

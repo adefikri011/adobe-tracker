@@ -21,17 +21,20 @@ export async function GET() {
       },
     });
 
-    // Get ALL transactions (not filtered by status) to sum amounts
+    // Get only successful transactions to sum amounts
     const allTransactionsData = await prisma.transaction.aggregate({
       _sum: {
         amount: true,
       },
+      where: {
+        status: 'success',
+      },
     });
 
-    // Combine both sources of revenue
+    // Only use transaction amount for total earning
     const assetEarnings = assetEarningsData._sum?.earnings || 0;
     const transactionAmount = allTransactionsData._sum?.amount || 0;
-    const totalEarning = assetEarnings + transactionAmount;
+    const totalEarning = transactionAmount;
 
     console.log('Dashboard Stats:', {
       totalAssets,
